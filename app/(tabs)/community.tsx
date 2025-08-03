@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+    Alert,
     Dimensions,
     RefreshControl,
     ScrollView,
@@ -71,7 +72,7 @@ const ForumPost: React.FC<ForumPostProps> = ({ post }) => {
     <TouchableCard
       variant="outlined"
       padding="md"
-      onPress={() => router.push(`/community/posts/${post.id}`)}
+      onPress={() => Alert.alert('Post Details', `View post: ${post.title}`)}
       style={styles.forumPost}
     >
       {/* Category Badge */}
@@ -387,25 +388,25 @@ export default function CommunityScreen() {
       title: 'Start Discussion',
       icon: 'plus.bubble',
       color: theme.colors.primary,
-      onPress: () => router.push('/community/new-post'),
+      onPress: () => Alert.alert('Start Discussion', 'Discussion creation feature coming soon!'),
     },
     {
       title: 'Create Study Group',
       icon: 'person.2.badge.plus',
       color: theme.colors.secondary,
-      onPress: () => router.push('/community/create-group'),
+      onPress: () => Alert.alert('Create Study Group', 'Study group creation feature coming soon!'),
     },
     {
       title: 'Find Mentors',
       icon: 'person.badge.plus',
       color: '#8B5CF6',
-      onPress: () => router.push('/community/mentors'),
+      onPress: () => Alert.alert('Find Mentors', 'Mentor finding feature coming soon!'),
     },
     {
       title: 'Live Events',
       icon: 'calendar.badge.plus',
       color: '#10B981',
-      onPress: () => router.push('/community/events'),
+      onPress: () => Alert.alert('Live Events', 'Live events feature coming soon!'),
     },
   ];
 
@@ -542,7 +543,7 @@ export default function CommunityScreen() {
             <TouchableOpacity
               key={index}
               style={[styles.topicTag, { backgroundColor: theme.colors.backgroundSecondary }]}
-              onPress={() => router.push(`/community/topics/${topic.replace('#', '')}`)}
+              onPress={() => Alert.alert('Topic Discussion', `View ${topic} discussions coming soon!`)}
             >
               <Text variant="caption" color="primary" weight="medium">
                 {topic}
@@ -570,7 +571,7 @@ export default function CommunityScreen() {
           <Button
             variant="outline"
             size="sm"
-            onPress={() => router.push('/community/guidelines')}
+            onPress={() => Alert.alert('Community Guidelines', 'Guidelines page coming soon!')}
             style={styles.guidelinesButton}
           >
             Read Full Guidelines

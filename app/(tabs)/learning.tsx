@@ -1,12 +1,12 @@
-import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+    Alert,
     Dimensions,
     RefreshControl,
     ScrollView,
     StyleSheet,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 
 import { Button } from '@/components/ui/Button.fixed';
@@ -40,7 +40,7 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ course }) => {
     <TouchableCard
       variant="outlined"
       padding="md"
-      onPress={() => router.push(`/courses/${course.id}`)}
+      onPress={() => Alert.alert('Course Details', `Continue learning: ${course.title}`)}
       style={styles.progressCard}
     >
       <View style={styles.courseContent}>
@@ -307,28 +307,28 @@ export default function LearningScreen() {
       subtitle: 'Discover new learning opportunities',
       icon: 'magnifyingglass',
       color: theme.colors.primary,
-      onPress: () => router.push('/(tabs)/explore'),
+      onPress: () => Alert.alert('Navigation', 'Exploring courses...'),
     },
     {
       title: 'Live Classes',
       subtitle: 'Join interactive sessions',
       icon: 'video.fill',
       color: theme.colors.secondary,
-      onPress: () => router.push('/classes/live'),
+      onPress: () => Alert.alert('Live Classes', 'Joining live classes...'),
     },
     {
       title: 'Study Groups',
       subtitle: 'Learn with other students',
       icon: 'person.3.fill',
       color: '#8B5CF6',
-      onPress: () => router.push('/study-groups'),
+      onPress: () => Alert.alert('Study Groups', 'Study groups feature coming soon!'),
     },
     {
       title: 'Certificates',
       subtitle: 'View your achievements',
       icon: 'doc.badge.plus',
       color: '#10B981',
-      onPress: () => router.push('/certificates'),
+      onPress: () => Alert.alert('Certificates', 'Certificates feature coming soon!'),
     },
   ];
 
@@ -352,7 +352,7 @@ export default function LearningScreen() {
         </View>
         
         <TouchableOpacity
-          onPress={() => router.push('/profile')}
+          onPress={() => Alert.alert('Profile', 'Viewing profile...')}
           style={[styles.avatarButton, { backgroundColor: theme.colors.primary }]}
         >
           <Text variant="body1" color="white" weight="bold">
@@ -487,7 +487,7 @@ export default function LearningScreen() {
                 <Button
                   variant="primary"
                   size="lg"
-                  onPress={() => router.push('/(tabs)/explore')}
+                  onPress={() => Alert.alert('Navigation', 'Exploring more courses...')}
                   style={styles.emptyStateButton}
                 >
                   Explore Courses
@@ -508,7 +508,7 @@ export default function LearningScreen() {
             <Button
               variant="ghost"
               size="sm"
-              onPress={() => router.push('/achievements')}
+              onPress={() => Alert.alert('Achievements', 'Full achievements page coming soon!')}
             >
               View All
             </Button>

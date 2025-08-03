@@ -6,7 +6,7 @@ import {
     RefreshControl,
     ScrollView,
     StyleSheet,
-    View,
+    View
 } from 'react-native';
 
 import { Button } from '@/components/ui/Button.fixed';

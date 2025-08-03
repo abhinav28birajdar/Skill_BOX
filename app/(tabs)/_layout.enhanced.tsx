@@ -1,6 +1,6 @@
 import { Tabs, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
-import { Platform, View } from 'react-native';
+import { Alert, Platform, View } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -17,7 +17,9 @@ export default function TabLayout() {
   // Redirect to auth if not authenticated
   useEffect(() => {
     if (!loading && !session) {
-      router.replace('/(auth)/sign-in');
+      Alert.alert('Authentication Required', 'Please sign in to continue', [
+        { text: 'OK', onPress: () => console.log('Sign in required') }
+      ]);
     }
   }, [session, loading]);
 

@@ -166,7 +166,7 @@ export default function ForgotPasswordScreen() {
               </ThemedText>
               <Button
                 variant="ghost"
-                onPress={() => router.replace('/(auth)/sign-in.enhanced')}
+                onPress={() => Alert.alert('Navigation', 'Redirecting to Sign In...')}
                 style={styles.signInLink}
               >
                 <ThemedText style={{ color: theme.colors.primary }}>

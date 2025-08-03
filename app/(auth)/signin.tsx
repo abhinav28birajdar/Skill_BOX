@@ -1,7 +1,6 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/contexts/AuthContext';
-import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import {
   Alert,
@@ -34,7 +33,7 @@ export default function SignInScreen() {
     if (error) {
       Alert.alert('Sign In Failed', error);
     } else {
-      router.replace('/(tabs)');
+      Alert.alert('Success', 'Sign in successful! Redirecting...');
     }
   };
 
@@ -90,11 +89,9 @@ export default function SignInScreen() {
 
             <View style={styles.linkContainer}>
               <Text style={styles.linkText}>Don't have an account? </Text>
-              <Link href="/(auth)/signup" asChild>
-                <TouchableOpacity>
-                  <Text style={styles.link}>Sign Up</Text>
-                </TouchableOpacity>
-              </Link>
+              <TouchableOpacity onPress={() => Alert.alert('Navigation', 'Redirecting to Sign Up...')}>
+                <Text style={styles.link}>Sign Up</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </ThemedView>

@@ -4,19 +4,19 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { LearningContent, Skill, User } from '@/types/database';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Dimensions,
-  FlatList,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    FlatList,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -85,23 +85,23 @@ export default function HomeScreen() {
   const handleSearch = () => {
     if (searchQuery.trim()) {
       // Navigate to explore with search query
-      router.push('/(tabs)/explore');
+      Alert.alert('Search', `Searching for: ${searchQuery.trim()}`);
     }
   };
 
   const handleSkillPress = (skill: Skill) => {
     // Navigate to explore with skill filter
-    router.push('/(tabs)/explore');
+    Alert.alert('Skill Selected', `Exploring ${skill.name}`);
   };
 
   const handleCreatorPress = (creator: User) => {
     // For now, navigate to explore - we'll create creator profile pages later
-    router.push('/(tabs)/explore');
+    Alert.alert('Creator Selected', `Viewing ${creator.display_name || creator.email}`);
   };
 
   const handleContentPress = (content: LearningContent) => {
     // For now, navigate to explore - we'll create content detail pages later
-    router.push('/(tabs)/explore');
+    Alert.alert('Content Selected', `Viewing ${content.title}`);
   };
 
   const renderSkillCard = ({ item }: { item: Skill }) => (
@@ -216,14 +216,14 @@ export default function HomeScreen() {
             <View style={styles.authButtons}>
               <TouchableOpacity
                 style={styles.primaryButton}
-                onPress={() => router.push('/(auth)/signup')}
+                onPress={() => Alert.alert('Navigation', 'Redirecting to Sign Up...')}
               >
                 <Text style={styles.primaryButtonText}>Start Learning Today</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={styles.secondaryButton}
-                onPress={() => router.push('/(auth)/signin')}
+                onPress={() => Alert.alert('Navigation', 'Redirecting to Sign In...')}
               >
                 <Text style={styles.secondaryButtonText}>Sign In</Text>
               </TouchableOpacity>
@@ -249,7 +249,7 @@ export default function HomeScreen() {
               
               <TouchableOpacity 
                 style={styles.viewAllButton}
-                onPress={() => router.push('/(tabs)/explore')}
+                onPress={() => Alert.alert('Navigation', 'Exploring all skills...')}
               >
                 <Text style={styles.viewAllButtonText}>Explore All Skills →</Text>
               </TouchableOpacity>
