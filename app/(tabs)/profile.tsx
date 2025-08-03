@@ -248,14 +248,14 @@ export default function ProfileScreen() {
 
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => router.push('/saved-content')}
+            onPress={() => Alert.alert('Saved Content', 'Saved content feature coming soon!')}
           >
             <Text style={styles.actionButtonText}>💾 Saved Content</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => router.push('/demo-requests')}
+            onPress={() => Alert.alert('Demo Requests', 'Demo requests feature coming soon!')}
           >
             <Text style={styles.actionButtonText}>📅 My Demo Requests</Text>
           </TouchableOpacity>

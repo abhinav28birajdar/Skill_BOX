@@ -3,9 +3,9 @@ import { ThemedView } from '@/components/ThemedView';
 import { supabase } from '@/lib/supabase';
 import { LearningContent, Skill, User } from '@/types/database';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
+    Alert,
     Dimensions,
     FlatList,
     ScrollView,
@@ -13,7 +13,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -135,7 +135,7 @@ export default function ExploreScreen() {
   const renderSkillItem = ({ item }: { item: Skill }) => (
     <TouchableOpacity
       style={styles.skillItem}
-      onPress={() => router.push(`/skills/${item.slug}`)}
+      onPress={() => Alert.alert('Skill Details', `View details for: ${item.name}`)}
     >
       {item.image_url ? (
         <Image source={{ uri: item.image_url }} style={styles.skillImage} />
@@ -158,7 +158,7 @@ export default function ExploreScreen() {
   const renderCreatorItem = ({ item }: { item: User }) => (
     <TouchableOpacity
       style={styles.creatorItem}
-      onPress={() => router.push(`/creator/${item.username}`)}
+      onPress={() => Alert.alert('Creator Profile', `View profile for: ${item.full_name || item.username}`)}
     >
       {item.profile_image_url ? (
         <Image source={{ uri: item.profile_image_url }} style={styles.creatorImage} />
@@ -183,7 +183,7 @@ export default function ExploreScreen() {
   const renderContentItem = ({ item }: { item: LearningContent }) => (
     <TouchableOpacity
       style={styles.contentItem}
-      onPress={() => router.push(`/content/${item.id}`)}
+      onPress={() => Alert.alert('Content Details', `View content: ${item.title}`)}
     >
       {item.thumbnail_url ? (
         <Image source={{ uri: item.thumbnail_url }} style={styles.contentThumbnail} />

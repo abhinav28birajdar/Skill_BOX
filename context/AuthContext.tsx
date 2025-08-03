@@ -7,7 +7,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string, username: string, fullName?: string) => Promise<{ error?: string }>;
+  signUp: (email: string, password: string, username?: string) => Promise<{ error?: string }>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<{ error?: string }>;
@@ -67,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, username: string, fullName?: string) => {
+  const signUp = async (email: string, password: string, username?: string) => {
     try {
       setLoading(true);
       
@@ -87,8 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
         options: {
           data: {
-            username,
-            full_name: fullName,
+            username: username || email.split('@')[0],
           },
         },
       });
@@ -104,8 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .insert({
             id: data.user.id,
             email: data.user.email!,
-            username,
-            full_name: fullName,
+            username: username || email.split('@')[0],
             role: 'learner',
             creator_status: 'not_creator',
           });

@@ -4,15 +4,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function SignInScreen() {
@@ -179,5 +179,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-
-export default SignInScreen;

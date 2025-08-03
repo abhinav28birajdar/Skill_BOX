@@ -1,6 +1,6 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -59,7 +59,7 @@ export default function SignUpScreen() {
     if (!validateForm()) return;
 
     setLoading(true);
-    const { error } = await signUp(email, password, username, fullName);
+    const { error } = await signUp(email, password, username);
     setLoading(false);
 
     if (error) {
