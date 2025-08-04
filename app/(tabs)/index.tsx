@@ -96,7 +96,7 @@ export default function HomeScreen() {
 
   const handleCreatorPress = (creator: User) => {
     // For now, navigate to explore - we'll create creator profile pages later
-    Alert.alert('Creator Selected', `Viewing ${creator.display_name || creator.email}`);
+    Alert.alert('Creator Selected', `Viewing ${(creator as any).display_name || creator.email}`);
   };
 
   const handleContentPress = (content: LearningContent) => {

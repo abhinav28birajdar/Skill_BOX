@@ -118,7 +118,7 @@ export const Input: React.FC<InputProps> = ({
     (rightIcon || isPassword) && styles.inputWithRightIcon,
     fullWidth && styles.fullWidth,
     style,
-  ].filter(Boolean);
+  ].filter(Boolean) as any;
 
   const containerStyles = [
     styles.container,

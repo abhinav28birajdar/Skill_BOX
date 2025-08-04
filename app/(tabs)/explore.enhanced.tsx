@@ -54,18 +54,17 @@ const FilterChip: React.FC<FilterChipProps> = ({ label, selected, onPress }) => 
 };
 
 interface ContentItemProps {
-  item: LearningContent | Class | Course;
-  type: 'content' | 'class' | 'course';
+  item: any;
   onPress: () => void;
 }
 
-const ContentItem: React.FC<ContentItemProps> = ({ item, type, onPress }) => {
+const ContentItem: React.FC<ContentItemProps> = ({ item, onPress }) => {
   const { theme } = useTheme();
   
   const getTypeIcon = () => {
-    switch (type) {
+    switch (item.type) {
       case 'content':
-        return (item as LearningContent).content_type === 'video' ? 'play.circle.fill' : 'doc.circle.fill';
+        return item.content_type === 'video' ? 'play.circle.fill' : 'doc.circle.fill';
       case 'class':
         return 'video.badge.plus';
       case 'course':
@@ -76,13 +75,13 @@ const ContentItem: React.FC<ContentItemProps> = ({ item, type, onPress }) => {
   };
 
   const getTypeLabel = () => {
-    switch (type) {
+    switch (item.type) {
       case 'content':
-        return (item as LearningContent).content_type?.toUpperCase();
+        return (item as any).content_type?.toUpperCase();
       case 'class':
-        return `${(item as Class).duration_minutes}min CLASS`;
+        return `${(item as any).duration_minutes}min CLASS`;
       case 'course':
-        return `${(item as Course).total_lessons || 0} LESSONS`;
+        return `${(item as any).total_lessons || 0} LESSONS`;
       default:
         return 'CONTENT';
     }
@@ -139,12 +138,12 @@ const ContentItem: React.FC<ContentItemProps> = ({ item, type, onPress }) => {
         
         <View style={styles.itemFooter}>
           <Text variant="caption" color="textSecondary">
-            {item.views_count || 0} views
+            {(item as any).views_count || 0} views
           </Text>
           
           <View style={styles.skillLevel}>
             <Text variant="caption" color="textSecondary">
-              {'skill_level' in item ? item.skill_level : 'beginner'}
+              {(item as any).skill_level || 'beginner'}
             </Text>
           </View>
         </View>
@@ -386,7 +385,6 @@ export default function ExploreScreen() {
         renderItem={({ item }) => (
           <ContentItem
             item={item}
-            type={item.type}
             onPress={() => {/* Navigate to item */}}
           />
         )}
@@ -405,8 +403,7 @@ export default function ExploreScreen() {
             data={content}
             renderItem={({ item }) => (
               <ContentItem
-                item={item}
-                type="content"
+                item={{ ...item, type: 'content' as const }}
                 onPress={() => {/* Navigate to content */}}
               />
             )}
@@ -421,8 +418,7 @@ export default function ExploreScreen() {
             data={classes}
             renderItem={({ item }) => (
               <ContentItem
-                item={item}
-                type="class"
+                item={{ ...item, type: 'class' }}
                 onPress={() => {/* Navigate to class */}}
               />
             )}
@@ -437,8 +433,7 @@ export default function ExploreScreen() {
             data={courses}
             renderItem={({ item }) => (
               <ContentItem
-                item={item}
-                type="course"
+                item={{ ...item, type: 'course' }}
                 onPress={() => {/* Navigate to course */}}
               />
             )}

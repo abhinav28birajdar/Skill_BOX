@@ -537,14 +537,15 @@ export class CourseService {
       const { data: lesson } = await supabase
         .from('lessons')
         .select(`
-          module:modules(course_id)
+          module_id,
+          modules!inner(course_id)
         `)
         .eq('id', lessonId)
         .single();
 
-      if (!lesson?.module?.course_id) return;
+      if (!lesson?.modules || !Array.isArray(lesson.modules) || lesson.modules.length === 0) return;
 
-      const courseId = lesson.module.course_id;
+      const courseId = lesson.modules[0].course_id;
 
       // Calculate progress percentage
       const { data: courseProgress } = await supabase.rpc('calculate_course_progress', {
@@ -587,12 +588,26 @@ export class CourseService {
         .eq('course_id', courseId)
         .single();
 
+      // Get all module IDs for this course
+      const { data: modules } = await supabase
+        .from('modules')
+        .select('id')
+        .eq('course_id', courseId);
+
+      const moduleIds = modules?.map(m => m.id) || [];
+
       const { data: totalLessons } = await supabase
         .from('lessons')
         .select('id', { count: 'exact' })
-        .in('module_id',
-          supabase.from('modules').select('id').eq('course_id', courseId)
-        );
+        .in('module_id', moduleIds);
+
+      // Get all lesson IDs for these modules
+      const { data: lessons } = await supabase
+        .from('lessons')
+        .select('id')
+        .in('module_id', moduleIds);
+
+      const lessonIds = lessons?.map(l => l.id) || [];
 
       const { data: completedLessons } = await supabase
         .from('user_progress')
@@ -600,27 +615,13 @@ export class CourseService {
         .eq('user_id', userId)
         .eq('entity_type', 'lesson')
         .eq('progress_status', 'completed')
-        .in('entity_id',
-          supabase
-            .from('lessons')
-            .select('id')
-            .in('module_id',
-              supabase.from('modules').select('id').eq('course_id', courseId)
-            )
-        );
+        .in('entity_id', lessonIds);
 
       const { data: lastAccessed } = await supabase
         .from('user_progress')
         .select('last_accessed_at')
         .eq('user_id', userId)
-        .in('entity_id',
-          supabase
-            .from('lessons')
-            .select('id')
-            .in('module_id',
-              supabase.from('modules').select('id').eq('course_id', courseId)
-            )
-        )
+        .in('entity_id', lessonIds)
         .order('last_accessed_at', { ascending: false })
         .limit(1)
         .single();
