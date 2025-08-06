@@ -1,6 +1,6 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext.enhanced';
 import { useState } from 'react';
 import {
     Alert,
@@ -58,11 +58,15 @@ export default function SignUpScreen() {
     if (!validateForm()) return;
 
     setLoading(true);
-    const { error } = await signUp(email, password, username);
+    const { error } = await signUp(email, password, {
+      username,
+      full_name: fullName || username,
+      role: 'student'
+    });
     setLoading(false);
 
     if (error) {
-      Alert.alert('Sign Up Failed', error);
+      Alert.alert('Sign Up Failed', error.message || 'An error occurred');
     } else {
       Alert.alert(
         'Success',

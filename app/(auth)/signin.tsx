@@ -1,17 +1,17 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext.enhanced';
 import { useState } from 'react';
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 export default function SignInScreen() {
@@ -31,7 +31,7 @@ export default function SignInScreen() {
     setLoading(false);
 
     if (error) {
-      Alert.alert('Sign In Failed', error);
+      Alert.alert('Sign In Failed', error.message || 'An error occurred');
     } else {
       Alert.alert('Success', 'Sign in successful! Redirecting...');
     }

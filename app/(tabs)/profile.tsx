@@ -1,6 +1,6 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext.enhanced';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -200,11 +200,11 @@ export default function ProfileScreen() {
               <View style={styles.roleSection}>
                 <View style={[styles.roleBadge, 
                   user.role === 'creator' && styles.creatorBadge,
-                  user.role === 'admin' && styles.adminBadge
+                  user.role === 'admin_super' && styles.adminBadge
                 ]}>
                   <Text style={[styles.roleText,
                     user.role === 'creator' && styles.creatorText,
-                    user.role === 'admin' && styles.adminText
+                    user.role === 'admin_super' && styles.adminText
                   ]}>
                     {user.role === 'learner' ? '🎓 Learner' : 
                      user.role === 'creator' ? '🎨 Creator' : 

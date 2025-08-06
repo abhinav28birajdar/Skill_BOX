@@ -5,28 +5,25 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import '../global.css';
 
-import { AuthProvider } from '@/context/AuthContext.enhanced';
+import { AuthProvider, useAuth } from '@/context/AuthContext.enhanced';
 import { ThemeProvider as EnhancedThemeProvider } from '@/context/ThemeContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-export default function RootLayout() {
+function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  const { user, loading } = useAuth();
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
+  if (loading) {
+    return null; // You can add a loading screen here
   }
 
   return (
-    <EnhancedThemeProvider>
-      <AuthProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <Stack>
+        {user ? (
+          // Authenticated routes
+          <>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(creator)" options={{ headerShown: false }} />
             <Stack.Screen name="(admin)" options={{ headerShown: false }} />
             <Stack.Screen name="skills/[id]" options={{ headerShown: false }} />
@@ -35,10 +32,37 @@ export default function RootLayout() {
             <Stack.Screen name="classes/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="courses/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="community" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
+            <Stack.Screen name="profile/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="messages" options={{ headerShown: false }} />
+            <Stack.Screen name="notifications" options={{ headerShown: false }} />
+            <Stack.Screen name="support" options={{ headerShown: false }} />
+            <Stack.Screen name="feedback" options={{ headerShown: false }} />
+          </>
+        ) : (
+          // Public/Auth routes
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        )}
+        <Stack.Screen name="+not-found" options={{ headerShown: false }} />
+      </Stack>
+      <StatusBar style="auto" />
+    </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  const colorScheme = useColorScheme();
+  const [loaded] = useFonts({
+    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+  });
+
+  if (!loaded) {
+    return null;
+  }
+
+  return (
+    <EnhancedThemeProvider>
+      <AuthProvider>
+        <RootLayoutNav />
       </AuthProvider>
     </EnhancedThemeProvider>
   );
