@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { PaginatedResponse, TeacherApplication, User } from '../types/database';
+import { PaginatedResponse, TeacherApplication, User } from '../types/database.enhanced';
 
 export class UserService {
   // User Profile Management

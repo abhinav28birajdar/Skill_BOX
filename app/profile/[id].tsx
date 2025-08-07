@@ -6,15 +6,15 @@ import { User } from '@/types/database.enhanced';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -312,6 +312,24 @@ const styles = StyleSheet.create({
   },
   role_creator: {
     backgroundColor: '#FF9800',
+  },
+  role_learner: {
+    backgroundColor: '#673AB7',
+  },
+  role_teacher_approved: {
+    backgroundColor: '#2196F3',
+  },
+  role_teacher_pending: {
+    backgroundColor: '#FFC107',
+  },
+  role_admin_content: {
+    backgroundColor: '#9C27B0',
+  },
+  role_admin_teacher_ops: {
+    backgroundColor: '#E91E63',
+  },
+  role_admin_super: {
+    backgroundColor: '#F44336',
   },
   role_admin: {
     backgroundColor: '#9C27B0',

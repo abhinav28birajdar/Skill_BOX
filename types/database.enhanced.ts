@@ -1,5 +1,5 @@
 // Enhanced Database Types for SkillBox Platform
-export type UserRole = 'student' | 'creator' | 'learner' | 'teacher_approved' | 'admin_content' | 'admin_teacher_ops' | 'admin_super';
+export type UserRole = 'student' | 'creator' | 'learner' | 'teacher_approved' | 'teacher_pending' | 'admin_content' | 'admin_teacher_ops' | 'admin_super';
 
 export type TeacherApplicationStatus = 'pending_review' | 'approved' | 'rejected';
 
@@ -12,6 +12,36 @@ export type ClassType = 'one_on_one' | 'group' | 'workshop' | 'event' | 'masterc
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert' | 'master';
 
 export type NotificationType = 'new_message' | 'class_reminder' | 'booking_update' | 'content_status_update' | 'review_received' | 'assignment_graded' | 'admin_announcement' | 'follow_update' | 'new_feature';
+
+// Additional types for services
+export interface PaginatedResponse<T> {
+  data: T[];
+  count: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+  has_next: boolean;
+  has_previous: boolean;
+}
+
+export interface TeacherApplication {
+  id: string;
+  user_id: string;
+  status: TeacherApplicationStatus;
+  application_data: {
+    teaching_experience: string;
+    subjects_to_teach: string[];
+    motivation: string;
+    portfolio_links?: string[];
+    certifications?: string[];
+  };
+  submitted_at: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
+  review_notes?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface Database {
   public: {
