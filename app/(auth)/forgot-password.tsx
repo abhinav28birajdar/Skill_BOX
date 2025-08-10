@@ -1,8 +1,8 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Button } from '@/components/ui/Button.enhanced';
+import { Button } from '@/components/ui/Button';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { Input } from '@/components/ui/Input.enhanced';
+import { Input } from '@/components/ui/Input';
 import { useTheme } from '@/context/ThemeContext';
 import { router } from 'expo-router';
 import { useState } from 'react';

@@ -1,10 +1,13 @@
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Button } from '@/components/ui/Button';
+import { Loading } from '@/components/ui/Loading';
 import { useAuth } from '@/context/AuthContext.enhanced';
+import { useTheme } from '@/context/ThemeContext';
+import { UserRole } from '@/types/database.enhanced';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
     Alert,
+    Image,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -23,6 +26,7 @@ export default function SignUpScreen() {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
+  const { theme } = useTheme();
 
   const validateForm = () => {
     if (!email || !password || !username) {
@@ -62,7 +66,7 @@ export default function SignUpScreen() {
     const { error } = await signUp(email, password, {
       username,
       full_name: fullName || username,
-      role: 'student'
+      role: 'student' as UserRole
     });
     setLoading(false);
 
@@ -71,107 +75,159 @@ export default function SignUpScreen() {
     } else {
       Alert.alert(
         'Success',
-        'Account created successfully! Please check your email to verify your account.',
+        'We\'ve sent a verification link to your email address. Please check your inbox and click the link to complete your registration.',
         [
           {
             text: 'OK',
-            onPress: () => Alert.alert('Navigation', 'Redirecting to Sign In...'),
+            onPress: () => router.replace('/(auth)/sign-in'),
           },
         ]
       );
     }
   };
 
+  const handleSignIn = () => {
+    router.replace('/(auth)/sign-in');
+  };
+
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[
+        styles.container, 
+        { backgroundColor: theme.colors.background }
+      ]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <ThemedView style={styles.content}>
+        <View style={styles.content}>
           <View style={styles.header}>
-            <ThemedText type="title" style={styles.title}>
+            <Image 
+              source={require('../../assets/images/icon.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <Text style={[styles.title, { color: theme.colors.text }]}>
               Join SkillBox
-            </ThemedText>
-            <ThemedText type="subtitle" style={styles.subtitle}>
+            </Text>
+            <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
               Create your account to start learning
-            </ThemedText>
+            </Text>
           </View>
 
           <View style={styles.form}>
-            <Text style={styles.label}>Email *</Text>
+            <Text style={[styles.label, { color: theme.colors.text }]}>Email *</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input, 
+                { 
+                  backgroundColor: theme.colors.backgroundSecondary,
+                  color: theme.colors.text,
+                  borderColor: theme.colors.border
+                }
+              ]}
               value={email}
               onChangeText={setEmail}
               placeholder="Enter your email"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.colors.textTertiary}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
             />
 
-            <Text style={styles.label}>Username *</Text>
+            <Text style={[styles.label, { color: theme.colors.text }]}>Username *</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input, 
+                { 
+                  backgroundColor: theme.colors.backgroundSecondary,
+                  color: theme.colors.text,
+                  borderColor: theme.colors.border
+                }
+              ]}
               value={username}
               onChangeText={setUsername}
               placeholder="Choose a username"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.colors.textTertiary}
               autoCapitalize="none"
               autoCorrect={false}
             />
 
-            <Text style={styles.label}>Full Name</Text>
+            <Text style={[styles.label, { color: theme.colors.text }]}>Full Name</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input, 
+                { 
+                  backgroundColor: theme.colors.backgroundSecondary,
+                  color: theme.colors.text,
+                  borderColor: theme.colors.border
+                }
+              ]}
               value={fullName}
               onChangeText={setFullName}
               placeholder="Enter your full name"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.colors.textTertiary}
               autoCapitalize="words"
             />
 
-            <Text style={styles.label}>Password *</Text>
+            <Text style={[styles.label, { color: theme.colors.text }]}>Password *</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input, 
+                { 
+                  backgroundColor: theme.colors.backgroundSecondary,
+                  color: theme.colors.text,
+                  borderColor: theme.colors.border
+                }
+              ]}
               value={password}
               onChangeText={setPassword}
               placeholder="Create a password"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.colors.textTertiary}
               secureTextEntry
               autoCapitalize="none"
             />
 
-            <Text style={styles.label}>Confirm Password *</Text>
+            <Text style={[styles.label, { color: theme.colors.text }]}>Confirm Password *</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input, 
+                { 
+                  backgroundColor: theme.colors.backgroundSecondary,
+                  color: theme.colors.text,
+                  borderColor: theme.colors.border
+                }
+              ]}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="Confirm your password"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.colors.textTertiary}
               secureTextEntry
               autoCapitalize="none"
             />
 
-            <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleSignUp}
-              disabled={loading}
-            >
-              <Text style={styles.buttonText}>
-                {loading ? 'Creating Account...' : 'Sign Up'}
+            <Button
+              title="Sign Up" 
+              onPress={handleSignUp} 
+              style={{ marginTop: 20 }}
+            />
+          </View>
+
+          {/* Sign In Link */}
+          <View style={styles.signInContainer}>
+            <Text style={[styles.signInText, { color: theme.colors.textSecondary }]}>
+              Already have an account?{' '}
+            </Text>
+            <TouchableOpacity onPress={handleSignIn}>
+              <Text style={[styles.signInLink, { color: theme.colors.primary }]}>
+                Sign In
               </Text>
             </TouchableOpacity>
-
-            <View style={styles.linkContainer}>
-              <Text style={styles.linkText}>Already have an account? </Text>
-              <TouchableOpacity onPress={() => router.replace('/(auth)/signin')}>
-                <Text style={styles.link}>Sign In</Text>
-              </TouchableOpacity>
-            </View>
           </View>
-        </ThemedView>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -194,16 +250,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 40,
   },
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
+  },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
-    textAlign: 'center',
     marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
-    opacity: 0.7,
+    marginBottom: 24,
   },
   form: {
     width: '100%',
@@ -212,44 +273,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 8,
-    color: '#333',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 16,
     fontSize: 16,
-    marginBottom: 20,
-    backgroundColor: '#fff',
+    marginBottom: 16,
   },
-  button: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  linkContainer: {
+  signInContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 32,
   },
-  linkText: {
+  signInText: {
     fontSize: 16,
-    color: '#666',
   },
-  link: {
+  signInLink: {
     fontSize: 16,
-    color: '#007AFF',
     fontWeight: '600',
   },
 });

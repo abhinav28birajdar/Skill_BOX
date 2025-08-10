@@ -1,7 +1,7 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Button } from '@/components/ui/Button.enhanced';
-import { Card } from '@/components/ui/Card.enhanced';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useTheme } from '@/context/ThemeContext';
 import { router } from 'expo-router';

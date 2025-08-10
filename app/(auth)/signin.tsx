@@ -1,6 +1,7 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/context/AuthContext.enhanced';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import {
     Alert,
@@ -89,7 +90,7 @@ export default function SignInScreen() {
 
             <View style={styles.linkContainer}>
               <Text style={styles.linkText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={() => Alert.alert('Navigation', 'Redirecting to Sign Up...')}>
+              <TouchableOpacity onPress={() => router.replace('/(auth)/signup')}>
                 <Text style={styles.link}>Sign Up</Text>
               </TouchableOpacity>
             </View>

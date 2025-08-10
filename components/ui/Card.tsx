@@ -1,46 +1,98 @@
-import { cardVariants, useTheme } from '@/constants/Theme';
+import { useTheme } from '@/context/ThemeContext';
 import React from 'react';
 import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    TouchableOpacityProps,
     View,
-    ViewStyle,
+    ViewProps,
+    ViewStyle
 } from 'react-native';
 
-interface CardProps {
+export interface CardProps extends ViewProps {
   children: React.ReactNode;
-  variant?: 'default' | 'elevated' | 'outline';
-  style?: ViewStyle | ViewStyle[];
-  onPress?: TouchableOpacityProps['onPress'];
+  variant?: 'default' | 'elevated' | 'outline' | 'filled';
+  padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  onPress?: () => void;
   disabled?: boolean;
+  touchable?: boolean;
 }
 
 export function Card({
   children,
-  variant = 'default',
-  style,
+  variant = 'elevated',
+  padding = 'md',
   onPress,
   disabled = false,
+  touchable = false,
+  style,
   ...props
 }: CardProps) {
-  const theme = useTheme();
+  const { theme } = useTheme();
   
-  const variantStyles = cardVariants[variant](theme);
+  const getVariantStyle = (): ViewStyle => {
+    switch (variant) {
+      case 'elevated':
+        return {
+          backgroundColor: theme.colors.card,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 3.84,
+          elevation: 5,
+        };
+      case 'outline':
+        return {
+          backgroundColor: theme.colors.card,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+        };
+      case 'filled':
+        return {
+          backgroundColor: theme.colors.cardSecondary,
+        };
+      case 'default':
+      default:
+        return {
+          backgroundColor: theme.colors.card,
+        };
+    }
+  };
+
+  const getPaddingStyle = (): ViewStyle => {
+    switch (padding) {
+      case 'none':
+        return {};
+      case 'sm':
+        return { padding: theme.spacing.sm };
+      case 'md':
+        return { padding: theme.spacing.md };
+      case 'lg':
+        return { padding: theme.spacing.lg };
+      case 'xl':
+        return { padding: theme.spacing.xl };
+      default:
+        return {};
+    }
+  };
   
   const cardStyle = [
-    variantStyles,
+    styles.card,
+    getVariantStyle(),
+    getPaddingStyle(),
     style,
   ];
 
-  if (onPress) {
+  if (onPress || touchable) {
     return (
       <TouchableOpacity
         style={cardStyle}
         onPress={onPress}
         disabled={disabled}
-        activeOpacity={0.8}
+        activeOpacity={0.7}
         {...props}
       >
         {children}
@@ -85,7 +137,7 @@ export function ContentCard({
   style,
   ...props
 }: ContentCardProps) {
-  const theme = useTheme();
+  const { theme } = useTheme();
 
   const cardStyle = StyleSheet.flatten([{ width: 280 }, style]);
 
@@ -95,16 +147,16 @@ export function ContentCard({
       {imageUrl && (
         <View style={{
           height: 160,
-          backgroundColor: theme.colors.backgroundSecondary,
-          borderRadius: theme.borderRadius.md,
-          marginBottom: theme.spacing.md,
+          backgroundColor: theme.colors.cardSecondary,
+          borderRadius: 12,
+          marginBottom: 16,
           position: 'relative',
         }}>
           {/* Placeholder for image - you'd use Image component here */}
           <View style={{
             position: 'absolute',
-            top: theme.spacing.sm,
-            right: theme.spacing.sm,
+            top: 8,
+            right: 8,
             zIndex: 1,
           }}>
             <TouchableOpacity
@@ -127,16 +179,16 @@ export function ContentCard({
           {duration && (
             <View style={{
               position: 'absolute',
-              bottom: theme.spacing.sm,
-              left: theme.spacing.sm,
+              bottom: 8,
+              left: 8,
               backgroundColor: 'rgba(0,0,0,0.7)',
-              paddingHorizontal: theme.spacing.sm,
-              paddingVertical: theme.spacing.xs,
-              borderRadius: theme.borderRadius.sm,
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+              borderRadius: 6,
             }}>
               <Text style={{
                 color: 'white',
-                fontSize: theme.typography.fontSize.xs,
+                fontSize: 12,
                 fontWeight: '500',
               }}>
                 {duration}
@@ -153,14 +205,14 @@ export function ContentCard({
           <View style={{
             alignSelf: 'flex-start',
             backgroundColor: theme.colors.primary,
-            paddingHorizontal: theme.spacing.sm,
-            paddingVertical: theme.spacing.xs,
-            borderRadius: theme.borderRadius.full,
-            marginBottom: theme.spacing.sm,
+            paddingHorizontal: 8,
+            paddingVertical: 4,
+            borderRadius: 999,
+            marginBottom: 8,
           }}>
             <Text style={{
               color: 'white',
-              fontSize: theme.typography.fontSize.xs,
+              fontSize: 12,
               fontWeight: '500',
               textTransform: 'uppercase',
             }}>
@@ -173,10 +225,10 @@ export function ContentCard({
         <Text 
           numberOfLines={2}
           style={{
-            fontSize: theme.typography.fontSize.lg,
+            fontSize: 18,
             fontWeight: '600',
             color: theme.colors.text,
-            marginBottom: theme.spacing.sm,
+            marginBottom: 8,
           }}
         >
           {title}
@@ -187,10 +239,10 @@ export function ContentCard({
           <Text 
             numberOfLines={3}
             style={{
-              fontSize: theme.typography.fontSize.sm,
+              fontSize: 14,
               color: theme.colors.textSecondary,
               lineHeight: 20,
-              marginBottom: theme.spacing.md,
+              marginBottom: 16,
             }}
           >
             {description}
@@ -200,9 +252,9 @@ export function ContentCard({
         {/* Instructor */}
         {instructor && (
           <Text style={{
-            fontSize: theme.typography.fontSize.sm,
-            color: theme.colors.textTertiary,
-            marginBottom: theme.spacing.sm,
+            fontSize: 14,
+            color: theme.colors.textSecondary,
+            marginBottom: 8,
           }}>
             By {instructor}
           </Text>
@@ -221,7 +273,7 @@ export function ContentCard({
             }}>
               <Text style={{ color: '#FFD700', marginRight: 4 }}>⭐</Text>
               <Text style={{
-                fontSize: theme.typography.fontSize.sm,
+                fontSize: 14,
                 fontWeight: '500',
                 color: theme.colors.text,
               }}>
@@ -232,7 +284,7 @@ export function ContentCard({
 
           {price !== undefined && (
             <Text style={{
-              fontSize: theme.typography.fontSize.lg,
+              fontSize: 18,
               fontWeight: '700',
               color: theme.colors.primary,
             }}>
@@ -273,7 +325,7 @@ export function TeacherCard({
   style,
   ...props
 }: TeacherCardProps) {
-  const theme = useTheme();
+  const { theme } = useTheme();
   
   const cardStyle = StyleSheet.flatten([{ width: 280 }, style]);
 
@@ -283,15 +335,15 @@ export function TeacherCard({
       <View style={{
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: theme.spacing.md,
+        marginBottom: 16,
       }}>
         {/* Profile Image */}
         <View style={{
           width: 60,
           height: 60,
           borderRadius: 30,
-          backgroundColor: theme.colors.backgroundSecondary,
-          marginRight: theme.spacing.md,
+          backgroundColor: theme.colors.cardSecondary,
+          marginRight: 16,
           alignItems: 'center',
           justifyContent: 'center',
         }}>
@@ -301,7 +353,7 @@ export function TeacherCard({
         {/* Name and Rating */}
         <View style={{ flex: 1 }}>
           <Text style={{
-            fontSize: theme.typography.fontSize.lg,
+            fontSize: 18,
             fontWeight: '600',
             color: theme.colors.text,
             marginBottom: 4,
@@ -316,7 +368,7 @@ export function TeacherCard({
             }}>
               <Text style={{ color: '#FFD700', marginRight: 4 }}>⭐</Text>
               <Text style={{
-                fontSize: theme.typography.fontSize.sm,
+                fontSize: 14,
                 color: theme.colors.textSecondary,
               }}>
                 {rating.toFixed(1)}
@@ -330,17 +382,17 @@ export function TeacherCard({
           <TouchableOpacity
             onPress={onFollowPress}
             style={{
-              backgroundColor: isFollowing ? theme.colors.backgroundSecondary : theme.colors.primary,
-              paddingHorizontal: theme.spacing.md,
-              paddingVertical: theme.spacing.sm,
-              borderRadius: theme.borderRadius.md,
+              backgroundColor: isFollowing ? theme.colors.cardSecondary : theme.colors.primary,
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderRadius: 12,
               borderWidth: isFollowing ? 1 : 0,
               borderColor: theme.colors.border,
             }}
           >
             <Text style={{
               color: isFollowing ? theme.colors.text : 'white',
-              fontSize: theme.typography.fontSize.sm,
+              fontSize: 14,
               fontWeight: '500',
             }}>
               {isFollowing ? 'Following' : 'Follow'}
@@ -354,10 +406,10 @@ export function TeacherCard({
         <Text 
           numberOfLines={3}
           style={{
-            fontSize: theme.typography.fontSize.sm,
+            fontSize: 14,
             color: theme.colors.textSecondary,
             lineHeight: 20,
-            marginBottom: theme.spacing.md,
+            marginBottom: 16,
           }}
         >
           {bio}
@@ -368,23 +420,23 @@ export function TeacherCard({
       <View style={{
         flexDirection: 'row',
         justifyContent: 'space-around',
-        marginBottom: theme.spacing.md,
-        paddingVertical: theme.spacing.sm,
-        backgroundColor: theme.colors.backgroundSecondary,
-        borderRadius: theme.borderRadius.md,
+        marginBottom: 16,
+        paddingVertical: 8,
+        backgroundColor: theme.colors.cardSecondary,
+        borderRadius: 12,
       }}>
         {studentsCount !== undefined && (
           <View style={{ alignItems: 'center' }}>
             <Text style={{
-              fontSize: theme.typography.fontSize.lg,
+              fontSize: 18,
               fontWeight: '700',
               color: theme.colors.text,
             }}>
               {studentsCount}
             </Text>
             <Text style={{
-              fontSize: theme.typography.fontSize.xs,
-              color: theme.colors.textTertiary,
+              fontSize: 12,
+              color: theme.colors.textSecondary,
             }}>
               Students
             </Text>
@@ -394,15 +446,15 @@ export function TeacherCard({
         {coursesCount !== undefined && (
           <View style={{ alignItems: 'center' }}>
             <Text style={{
-              fontSize: theme.typography.fontSize.lg,
+              fontSize: 18,
               fontWeight: '700',
               color: theme.colors.text,
             }}>
               {coursesCount}
             </Text>
             <Text style={{
-              fontSize: theme.typography.fontSize.xs,
-              color: theme.colors.textTertiary,
+              fontSize: 12,
+              color: theme.colors.textSecondary,
             }}>
               Courses
             </Text>
@@ -415,20 +467,20 @@ export function TeacherCard({
         <View style={{
           flexDirection: 'row',
           flexWrap: 'wrap',
-          gap: theme.spacing.xs,
+          gap: 4,
         }}>
           {skills.slice(0, 3).map((skill, index) => (
             <View
               key={index}
               style={{
                 backgroundColor: theme.colors.primary + '20',
-                paddingHorizontal: theme.spacing.sm,
-                paddingVertical: theme.spacing.xs,
-                borderRadius: theme.borderRadius.sm,
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                borderRadius: 6,
               }}
             >
               <Text style={{
-                fontSize: theme.typography.fontSize.xs,
+                fontSize: 12,
                 color: theme.colors.primary,
                 fontWeight: '500',
               }}>
@@ -438,14 +490,14 @@ export function TeacherCard({
           ))}
           {skills.length > 3 && (
             <View style={{
-              backgroundColor: theme.colors.backgroundSecondary,
-              paddingHorizontal: theme.spacing.sm,
-              paddingVertical: theme.spacing.xs,
-              borderRadius: theme.borderRadius.sm,
+              backgroundColor: theme.colors.cardSecondary,
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+              borderRadius: 6,
             }}>
               <Text style={{
-                fontSize: theme.typography.fontSize.xs,
-                color: theme.colors.textTertiary,
+                fontSize: 12,
+                color: theme.colors.textSecondary,
                 fontWeight: '500',
               }}>
                 +{skills.length - 3}
@@ -457,3 +509,10 @@ export function TeacherCard({
     </Card>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 12,
+    marginVertical: 4,
+  },
+});

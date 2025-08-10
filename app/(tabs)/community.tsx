@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 
 import { Button } from '@/components/ui/Button.fixed';
-import { Card, TouchableCard } from '@/components/ui/Card.enhanced';
+import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { Text } from '@/components/ui/Text.enhanced';
+import { Text } from '@/components/ui/Text';
 import { useAuth } from '@/context/AuthContext.enhanced';
 import { useTheme } from '@/context/ThemeContext';
 
@@ -69,8 +69,8 @@ const ForumPost: React.FC<ForumPostProps> = ({ post }) => {
   };
 
   return (
-    <TouchableCard
-      variant="outlined"
+    <Card
+      variant="outline"
       padding="md"
       onPress={() => Alert.alert('Post Details', `View post: ${post.title}`)}
       style={styles.forumPost}
@@ -155,7 +155,7 @@ const ForumPost: React.FC<ForumPostProps> = ({ post }) => {
           </Text>
         </View>
       </View>
-    </TouchableCard>
+    </Card>
   );
 };
 
@@ -192,7 +192,7 @@ const StudyGroupCard: React.FC<StudyGroupProps> = ({ group }) => {
   };
 
   return (
-    <Card variant="outlined" padding="md" style={styles.studyGroupCard}>
+    <Card variant="outline" padding="md" style={styles.studyGroupCard}>
       <View style={styles.studyGroupHeader}>
         <View style={styles.studyGroupInfo}>
           <Text variant="body1" weight="semibold" numberOfLines={1}>
@@ -257,8 +257,8 @@ const QuickAction: React.FC<QuickActionProps> = ({ title, icon, color, onPress }
   const { theme } = useTheme();
   
   return (
-    <TouchableCard
-      variant="outlined"
+    <Card
+      variant="outline"
       padding="md"
       onPress={onPress}
       style={styles.quickAction}
@@ -270,7 +270,7 @@ const QuickAction: React.FC<QuickActionProps> = ({ title, icon, color, onPress }
       <Text variant="caption" weight="medium" numberOfLines={2} style={styles.quickActionTitle}>
         {title}
       </Text>
-    </TouchableCard>
+    </Card>
   );
 };
 
@@ -423,7 +423,7 @@ export default function CommunityScreen() {
       case 'events':
         return (
           <View style={styles.tabContent}>
-            <Card variant="outlined" padding="xl" style={styles.emptyState}>
+            <Card variant="outline" padding="xl" style={styles.emptyState}>
               <View style={styles.emptyStateContent}>
                 <View style={[styles.emptyStateIcon, { backgroundColor: theme.colors.backgroundSecondary }]}>
                   <IconSymbol name="calendar" size={48} color={theme.colors.textSecondary} />
@@ -555,7 +555,7 @@ export default function CommunityScreen() {
 
       {/* Community Guidelines */}
       <View style={styles.section}>
-        <Card variant="outlined" padding="lg" style={styles.guidelinesCard}>
+        <Card variant="outline" padding="lg" style={styles.guidelinesCard}>
           <View style={styles.guidelinesHeader}>
             <IconSymbol name="info.circle.fill" size={24} color={theme.colors.primary} />
             <Text variant="body1" weight="semibold">

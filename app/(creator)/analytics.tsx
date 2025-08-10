@@ -8,9 +8,9 @@ import {
 } from 'react-native';
 
 import { Button } from '@/components/ui/Button.fixed';
-import { Card } from '@/components/ui/Card.enhanced';
+import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { Text } from '@/components/ui/Text.enhanced';
+import { Text } from '@/components/ui/Text';
 import { useAuth } from '@/context/AuthContext.enhanced';
 import { useTheme } from '@/context/ThemeContext';
 
