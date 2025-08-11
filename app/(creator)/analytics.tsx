@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/Button.fixed';
 import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Text } from '@/components/ui/Text';
-import { useAuth } from '@/context/AuthContext.enhanced';
+import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 
 const { width } = Dimensions.get('window');
@@ -60,7 +60,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   };
 
   return (
-    <Card variant="outlined" padding="lg" style={styles.metricCard}>
+    <Card variant="outline" padding="lg" style={styles.metricCard}>
       <View style={styles.metricHeader}>
         <View style={[styles.metricIcon, { backgroundColor: `${color}20` }]}>
           <IconSymbol name={icon} size={24} color={color} />
@@ -108,7 +108,7 @@ const SimpleChart: React.FC<ChartCardProps> = ({ title, subtitle, data, labels, 
   const normalizedData = data.map(value => (value / maxValue) * 100);
 
   return (
-    <Card variant="outlined" padding="lg" style={styles.chartCard}>
+    <Card variant="outline" padding="lg" style={styles.chartCard}>
       <View style={styles.chartHeader}>
         <View>
           <Text variant="h6" weight="semibold">
@@ -382,7 +382,7 @@ export default function CreatorAnalyticsScreen() {
         </Text>
         
         {topCourses.map((course, index) => (
-          <Card key={course.id} variant="outlined" padding="lg" style={styles.courseItem}>
+          <Card key={course.id} variant="outline" padding="lg" style={styles.courseItem}>
             <View style={styles.courseHeader}>
               <View style={styles.courseRank}>
                 <Text variant="h6" weight="bold" color="primary">
@@ -425,7 +425,7 @@ export default function CreatorAnalyticsScreen() {
           Insights & Recommendations
         </Text>
         
-        <Card variant="outlined" padding="lg" style={styles.insightCard}>
+        <Card variant="outline" padding="lg" style={styles.insightCard}>
           <View style={styles.insightItem}>
             <View style={[styles.insightIcon, { backgroundColor: '#10B98120' }]}>
               <IconSymbol name="lightbulb.fill" size={20} color="#10B981" />

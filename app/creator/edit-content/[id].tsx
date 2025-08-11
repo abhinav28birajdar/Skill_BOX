@@ -451,7 +451,7 @@ export default function EditContentScreen() {
   );
 }
 
-const getStatusColor = (status: string) => {
+const getStatusColor = (status?: string) => {
   switch (status) {
     case 'approved':
       return '#4CAF50';
@@ -466,7 +466,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const getStatusText = (status: string) => {
+const getStatusText = (status?: string) => {
   switch (status) {
     case 'approved':
       return '✅ Live';
@@ -477,7 +477,7 @@ const getStatusText = (status: string) => {
     case 'draft':
       return '📝 Draft';
     default:
-      return status;
+      return status || 'Unknown';
   }
 };
 

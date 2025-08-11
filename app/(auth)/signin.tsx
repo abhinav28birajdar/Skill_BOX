@@ -1,18 +1,18 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useAuth } from '@/context/AuthContext.enhanced';
+import { useAuth } from '@/context/AuthContext';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function SignInScreen() {
@@ -28,11 +28,11 @@ export default function SignInScreen() {
     }
 
     setLoading(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn({ email, password });
     setLoading(false);
 
     if (error) {
-      Alert.alert('Sign In Failed', error.message || 'An error occurred');
+      Alert.alert('Sign In Failed', error || 'An error occurred');
     } else {
       Alert.alert('Success', 'Sign in successful! Redirecting...');
     }

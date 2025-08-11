@@ -924,7 +924,6 @@ export interface LearningPath {
   updated_at: string;
   total_courses?: number;
 }
-}
 
 export interface SearchFilters {
   category?: string;

@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
 
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
-import { useAuth } from '@/context/AuthContext.enhanced';
+import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 
 export default function CreatorTabLayout() {

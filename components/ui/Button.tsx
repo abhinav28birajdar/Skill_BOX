@@ -145,13 +145,13 @@ export const Button: React.FC<ButtonProps> = ({
   const getFontSize = (): number => {
     switch (size) {
       case 'sm':
-        return theme.fontSizes.sm;
+        return theme.typography.fontSize.sm;
       case 'lg':
-        return theme.fontSizes.lg;
+        return theme.typography.fontSize.lg;
       case 'xl':
-        return theme.fontSizes.xl;
+        return theme.typography.fontSize.xl;
       default:
-        return theme.fontSizes.base;
+        return theme.typography.fontSize.base;
     }
   };
 

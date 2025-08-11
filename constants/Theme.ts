@@ -20,6 +20,7 @@ export const lightTheme = {
     
     // Text colors
     text: '#000000',
+    textPrimary: '#000000',
     textSecondary: '#6D6D80',
     textTertiary: '#8E8E93',
     textDisabled: '#C7C7CC',
@@ -28,7 +29,16 @@ export const lightTheme = {
     border: '#E5E5EA',
     borderSecondary: '#F2F2F7',
     
+    // Card colors
+    card: '#FFFFFF',
+    cardSecondary: '#F8F8F8',
+    
+    // Rating colors
+    star: '#FFD700',
+    starEmpty: '#E5E5EA',
+    
     // Other colors
+    accent: '#8b5cf6', // Purple accent
     shadow: 'rgba(0, 0, 0, 0.1)',
     overlay: 'rgba(0, 0, 0, 0.5)',
     disabled: '#F2F2F7',
@@ -47,11 +57,15 @@ export const lightTheme = {
     fontSize: {
       xs: 12,
       sm: 14,
+      md: 16,
       base: 16,
       lg: 18,
       xl: 20,
+      xxl: 24,
       '2xl': 24,
+      xxxl: 30,
       '3xl': 30,
+      display: 36,
       '4xl': 36,
     },
     
@@ -60,11 +74,15 @@ export const lightTheme = {
       xs: 16,
       sm: 20,
       base: 24,
+      md: 24,
       lg: 28,
       xl: 32,
       '2xl': 36,
+      xxl: 36,
       '3xl': 42,
+      xxxl: 42,
       '4xl': 48,
+      display: 48,
     },
     
     // Font weights
@@ -149,6 +167,7 @@ export const darkTheme: typeof lightTheme = {
     
     // Text colors
     text: '#FFFFFF',
+    textPrimary: '#FFFFFF',
     textSecondary: '#98989D',
     textTertiary: '#6D6D80',
     textDisabled: '#48484A',
@@ -157,7 +176,16 @@ export const darkTheme: typeof lightTheme = {
     border: '#38383A',
     borderSecondary: '#2C2C2E',
     
+    // Card colors
+    card: '#1C1C1E',
+    cardSecondary: '#2C2C2E',
+    
+    // Rating colors
+    star: '#FFD700',
+    starEmpty: '#48484A',
+    
     // Other colors
+    accent: '#9d6dfa', // Purple accent (slightly lighter for dark mode)
     shadow: 'rgba(0, 0, 0, 0.3)',
     overlay: 'rgba(0, 0, 0, 0.7)',
     disabled: '#2C2C2E',
@@ -353,4 +381,10 @@ export const cardVariants = {
     borderWidth: 1,
     borderColor: theme.colors.border,
   }),
+};
+
+// Export themes object
+export const themes = {
+  light: lightTheme,
+  dark: darkTheme,
 };

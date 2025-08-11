@@ -1,9 +1,9 @@
 import { useTheme } from '@/context/ThemeContext';
 import React from 'react';
 import {
-    Text as RNText,
-    TextProps as RNTextProps,
-    TextStyle
+  Text as RNText,
+  TextProps as RNTextProps,
+  TextStyle
 } from 'react-native';
 
 export interface TextProps extends RNTextProps {
@@ -29,65 +29,65 @@ export const Text: React.FC<TextProps> = ({
     switch (variant) {
       case 'h1':
         return {
-          fontSize: theme.fontSizes['5xl'],
+          fontSize: theme.typography.fontSize['4xl'],
           fontWeight: '700',
-          lineHeight: theme.fontSizes['5xl'] * 1.2,
+          lineHeight: theme.typography.lineHeight['4xl'],
         };
       case 'h2':
         return {
-          fontSize: theme.fontSizes['4xl'],
+          fontSize: theme.typography.fontSize['3xl'],
           fontWeight: '600',
-          lineHeight: theme.fontSizes['4xl'] * 1.2,
+          lineHeight: theme.typography.lineHeight['3xl'],
         };
       case 'h3':
         return {
-          fontSize: theme.fontSizes['3xl'],
+          fontSize: theme.typography.fontSize['2xl'],
           fontWeight: '600',
-          lineHeight: theme.fontSizes['3xl'] * 1.3,
+          lineHeight: theme.typography.lineHeight['2xl'],
         };
       case 'h4':
         return {
-          fontSize: theme.fontSizes['2xl'],
+          fontSize: theme.typography.fontSize.xl,
           fontWeight: '600',
-          lineHeight: theme.fontSizes['2xl'] * 1.3,
+          lineHeight: theme.typography.lineHeight.xl,
         };
       case 'h5':
         return {
-          fontSize: theme.fontSizes.xl,
+          fontSize: theme.typography.fontSize.lg,
           fontWeight: '600',
-          lineHeight: theme.fontSizes.xl * 1.4,
+          lineHeight: theme.typography.lineHeight.lg,
         };
       case 'h6':
         return {
-          fontSize: theme.fontSizes.lg,
+          fontSize: theme.typography.fontSize.base,
           fontWeight: '600',
-          lineHeight: theme.fontSizes.lg * 1.4,
+          lineHeight: theme.typography.lineHeight.base,
         };
       case 'body1':
         return {
-          fontSize: theme.fontSizes.base,
-          lineHeight: theme.fontSizes.base * 1.5,
+          fontSize: theme.typography.fontSize.base,
+          lineHeight: theme.typography.lineHeight.base,
         };
       case 'body2':
         return {
-          fontSize: theme.fontSizes.sm,
-          lineHeight: theme.fontSizes.sm * 1.5,
+          fontSize: theme.typography.fontSize.sm,
+          lineHeight: theme.typography.lineHeight.sm,
         };
       case 'caption':
         return {
-          fontSize: theme.fontSizes.xs,
-          lineHeight: theme.fontSizes.xs * 1.4,
+          fontSize: theme.typography.fontSize.xs,
+          lineHeight: theme.typography.lineHeight.xs,
         };
       case 'overline':
         return {
-          fontSize: theme.fontSizes.xs,
+          fontSize: theme.typography.fontSize.xs,
           fontWeight: '500',
           textTransform: 'uppercase',
           letterSpacing: 0.5,
         };
       case 'button':
         return {
-          fontSize: theme.fontSizes.base,
+          fontSize: theme.typography.fontSize.base,
           fontWeight: '600',
           textTransform: 'uppercase',
           letterSpacing: 0.5,

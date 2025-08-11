@@ -1,16 +1,17 @@
 import { supabase } from '@/lib/supabase';
-import { User } from '@/types/database';
+import { SignInData, SignUpData, User, UserProfileUpdate } from '@/types/database';
 import { Session } from '@supabase/supabase-js';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
   session: Session | null;
   user: User | null;
+  isCreator: boolean;
   loading: boolean;
-  signUp: (email: string, password: string, username?: string) => Promise<{ error?: string }>;
-  signIn: (email: string, password: string) => Promise<{ error?: string }>;
+  signUp: (data: SignUpData) => Promise<{ error?: string }>;
+  signIn: (data: SignInData) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
-  updateProfile: (updates: Partial<User>) => Promise<{ error?: string }>;
+  updateProfile: (updates: UserProfileUpdate) => Promise<{ error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Auth state changed: INITIAL_SESSION', session?.user?.id);
       setSession(session);
       if (session?.user) {
         fetchUserProfile(session.user.id);
@@ -35,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
       setSession(session);
       if (session?.user) {
         await fetchUserProfile(session.user.id);
@@ -57,6 +60,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('Error fetching user profile:', error);
+        if (error.code === 'PGRST116') {
+          // User profile doesn't exist, this is normal for new users
+          setUser(null);
+        }
       } else {
         setUser(data);
       }
@@ -67,19 +74,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, username?: string) => {
+  const signUp = async ({ email, password, username, full_name }: SignUpData) => {
     try {
       setLoading(true);
       
-      // Check if username is available
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('username')
-        .eq('username', username)
-        .single();
+      // Check if username is available (if provided)
+      if (username) {
+        const { data: existingUser } = await supabase
+          .from('users')
+          .select('username')
+          .eq('username', username)
+          .maybeSingle();
 
-      if (existingUser) {
-        return { error: 'Username is already taken' };
+        if (existingUser) {
+          return { error: 'Username is already taken' };
+        }
       }
 
       const { data, error } = await supabase.auth.signUp({
@@ -88,6 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         options: {
           data: {
             username: username || email.split('@')[0],
+            full_name: full_name || '',
           },
         },
       });
@@ -96,24 +106,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: error.message };
       }
 
-      // Create user profile
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('users')
-          .insert({
-            id: data.user.id,
-            email: data.user.email!,
-            username: username || email.split('@')[0],
-            role: 'learner',
-            creator_status: 'not_creator',
-          });
-
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-          return { error: 'Failed to create user profile' };
-        }
-      }
-
+      // The user profile creation will be handled by a database trigger
+      // or we'll create it on the first sign-in
       return {};
     } catch (error) {
       console.error('Sign up error:', error);
@@ -123,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async ({ email, password }: SignInData) => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signInWithPassword({
@@ -155,7 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateProfile = async (updates: Partial<User>) => {
+  const updateProfile = async (updates: UserProfileUpdate) => {
     try {
       if (!user) return { error: 'No user logged in' };
 
@@ -177,9 +171,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Check if the user is a creator
+  const isCreator = user?.role === 'creator' || user?.role === 'teacher';
+  
   const value: AuthContextType = {
     session,
     user,
+    isCreator,
     loading,
     signUp,
     signIn,

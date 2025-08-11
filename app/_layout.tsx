@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import '../global.css';
 
-import { AuthProvider, useAuth } from '@/context/AuthContext.enhanced';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ThemeProvider as EnhancedThemeProvider } from '@/context/ThemeContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 

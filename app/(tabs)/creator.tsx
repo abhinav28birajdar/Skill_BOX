@@ -1,6 +1,6 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useAuth } from '@/context/AuthContext.enhanced';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { LearningContent } from '@/types/database';
 import { Image } from 'expo-image';
@@ -109,7 +109,8 @@ export default function CreatorScreen() {
     );
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | undefined) => {
+    if (!status) return '#9E9E9E';
     switch (status) {
       case 'approved':
         return '#4CAF50';
@@ -124,7 +125,8 @@ export default function CreatorScreen() {
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: string | undefined) => {
+    if (!status) return 'Unknown';
     switch (status) {
       case 'approved':
         return '✅ Live';

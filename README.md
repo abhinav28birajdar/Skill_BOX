@@ -1,147 +1,270 @@
-# 📚 SkillBox - Learning Platform
+# SkillBox - The Omni-Learner AI Ecosystem
 
-<div align="center">
-  <img src="./assets/images/icon.png" alt="SkillBox Logo" width="120" height="120">
-  
-  **Empowering Learning Through Technology**
-  
-  [![React Native](https://img.shields.io/badge/React%20Native-0.73-blue.svg)](https://reactnative.dev/)
-  [![Expo](https://img.shields.io/badge/Expo-50.0-black.svg)](https://expo.dev/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
-  [![Supabase](https://img.shields.io/badge/Supabase-2.0-green.svg)](https://supabase.com/)
-</div>
+## Recent Updates (August 12, 2025)
 
-## 🌟 About SkillBox
+- Fixed all TypeScript errors in the codebase
+- Enhanced TouchableCard component with proper theme integration and padding props
+- Added missing color properties to Theme.ts (accent, textPrimary, card, cardSecondary, star, starEmpty)
+- Updated Button and Text components to use correct theme properties
+- Added missing properties to database types (NotificationType, Class, SignUpData, etc.)
+- Fixed SearchBar component to use "outline" instead of "outlined" variant
+- Fixed all imports and interfaces for proper type checking
+- Fixed role properties in authentication and profile components
 
-SkillBox is a comprehensive learning platform that connects learners with expert creators, offering a diverse range of educational content including video tutorials, live classes, structured courses, and interactive learning experiences. Our platform empowers both learners to acquire new skills and creators to share their expertise with a global audience.
+For a complete summary of all fixes, see [FIXES_SUMMARY.md](./FIXES_SUMMARY.md)
 
-## ✨ Key Features
+![SkillBox Logo](assets/images/icon.png)
 
-### 🎓 For Learners
-- **Diverse Learning Content**: Access thousands of video tutorials, articles, and interactive courses
-- **Live Classes**: Participate in real-time interactive sessions with expert instructors
-- **Structured Learning Paths**: Follow curated courses designed for progressive skill development
-- **Gamified Experience**: Earn points, badges, and achievements to stay motivated
-- **Progress Tracking**: Monitor your learning journey with detailed analytics
-- **Community Engagement**: Connect with fellow learners and creators
-- **Personalized Recommendations**: Discover content tailored to your interests and goals
+A comprehensive learning platform built with React Native, Expo, and Supabase that combines traditional education with cutting-edge AI, AR/VR, and real-time features.
 
-### 👨‍🏫 For Creators
-- **Content Creation Tools**: Upload videos, create articles, and build comprehensive courses
-- **Live Class Hosting**: Schedule and conduct interactive live sessions
-- **Creator Dashboard**: Comprehensive analytics and earning insights
-- **Flexible Monetization**: Set your own pricing for premium content
-- **Community Building**: Engage with your audience through comments and discussions
-- **Verification System**: Build credibility with our creator verification program
+## 🚀 Features
 
-### 🎯 Core Capabilities
-- **Multi-format Learning**: Support for videos, articles, courses, and live classes
-- **Advanced Search**: Find content by skills, difficulty level, creator, and more
-- **Social Learning**: Follow creators, bookmark content, and share knowledge
-- **Achievement System**: Gamified learning with points, streaks, and badges
-- **Notification System**: Stay updated on new content, classes, and community activity
-- **Support & Feedback**: Comprehensive help system with multiple support channels
+### Core Learning Platform
+- **Multi-format Content**: Videos, documents, interactive quizzes, AR/VR experiences
+- **Live Classes**: Real-time one-on-one and group learning sessions
+- **Course Management**: Structured learning paths with modules and lessons
+- **Progress Tracking**: Detailed analytics and completion tracking
+- **Skill-based Learning**: Organized by skills and difficulty levels
 
-## 🚀 Technology Stack
+### Advanced Features
+- **AI-Powered Recommendations**: Personalized content suggestions
+- **Real-time Chat & Notifications**: Instant messaging and updates
+- **Social Learning**: Follow creators, comments, reviews, and community features
+- **Teacher Tools**: Content creation, analytics, and student management
+- **Multi-language Support**: International content and interface
+- **Offline Support**: Download content for offline viewing
+
+### UI/UX Excellence
+- **Modern Design**: Clean, responsive interface with dark/light themes
+- **Native Performance**: Optimized for both iOS and Android
+- **Accessibility**: Full screen reader and accessibility support
+- **Smooth Animations**: Fluid transitions and micro-interactions
+
+## 🛠 Tech Stack
 
 ### Frontend
-- **React Native** with Expo for cross-platform mobile development
-- **TypeScript** for type-safe development
-- **Expo Router** for navigation and routing
-- **React Native Reanimated** for smooth animations
-- **Expo Image** for optimized image handling
+- **React Native 0.79.2** - Cross-platform mobile development
+- **Expo SDK 53** - Development platform and tools
+- **TypeScript** - Type-safe development
+- **Expo Router** - File-based routing system
+- **React Navigation** - Navigation library
+- **Reanimated 3** - High-performance animations
+- **TailwindCSS** - Utility-first styling
+- **React Query** - Data fetching and caching
 
 ### Backend & Database
-- **Supabase** for backend-as-a-service
-- **PostgreSQL** as the primary database
-- **Row Level Security (RLS)** for data protection
-- **Real-time subscriptions** for live features
+- **Supabase** - Backend-as-a-Service
+- **PostgreSQL** - Relational database
+- **Row Level Security** - Data protection
+- **Real-time Subscriptions** - Live updates
+- **Authentication** - Built-in auth system
+- **File Storage** - Media and document storage
 
-### Key Libraries
-- **@expo/vector-icons** for comprehensive icon support
-- **React Native Gesture Handler** for touch interactions
-- **Expo AV** for media playback
-- **React Hook Form** for form management
+### Additional Libraries
+- **React Hook Form** - Form handling
+- **Zustand** - State management
+- **React Native Paper** - UI components
+- **React Native Video** - Video playback
+- **Three.js** - 3D graphics (for AR/VR)
+- **React Native SVG** - Vector graphics
 
-## 📱 Getting Started
+## 📱 Installation
 
-1. **Install dependencies**
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Expo CLI (`npm install -g @expo/cli`)
+- iOS Simulator (Mac) or Android Studio
+- Supabase account
+
+### Quick Start
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/skillbox.git
+   cd skillbox
+   ```
+
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-2. **Set up environment variables**
+3. **Set up environment variables**
    ```bash
    cp .env.example .env
-   # Add your Supabase URL and keys
+   ```
+   Update `.env` with your Supabase credentials:
+   ```env
+   EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
+   EXPO_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
    ```
 
-3. **Run database migrations**
+4. **Set up the database**
+   - Create a new Supabase project
+   - Run the SQL script from `database/consolidated_schema.sql` in your Supabase SQL editor
+   - Enable the required extensions (uuid-ossp, pgcrypto, pg_trgm, etc.)
+
+5. **Start the development server**
    ```bash
-   # Import the schema.sql file into your Supabase project
+   npm start
    ```
 
-4. **Start the development server**
+6. **Run on device/simulator**
+   - Press `i` for iOS Simulator
+   - Press `a` for Android Emulator
+   - Use Expo Go app to scan QR code for physical device
+
+## 🗄️ Database Setup
+
+### Automatic Setup
+The database is automatically configured when you run the consolidated schema. The setup includes:
+
+- **User Management**: Authentication, profiles, and permissions
+- **Content System**: Learning materials, courses, and modules
+- **Social Features**: Comments, reviews, and following
+- **Progress Tracking**: User progress and analytics
+- **Real-time Features**: Chat, notifications, and live updates
+
+### Manual Setup Steps
+1. Create a Supabase project at [supabase.com](https://supabase.com)
+2. Navigate to the SQL Editor in your Supabase dashboard
+3. Copy and paste the contents of `database/consolidated_schema.sql`
+4. Execute the SQL script
+5. Verify tables are created in the Table Editor
+
+### Environment Configuration
+Update your `.env` file with the database credentials from Supabase:
+- Project URL (EXPO_PUBLIC_SUPABASE_URL)
+- Anonymous key (EXPO_PUBLIC_SUPABASE_ANON_KEY)
+- Service role key (SUPABASE_SERVICE_ROLE_KEY)
+
+## 🏗️ Project Structure
+
+```
+SkillBox/
+├── app/                          # App router pages
+│   ├── (auth)/                   # Authentication screens
+│   ├── (tabs)/                   # Main tab navigation
+│   ├── (creator)/                # Creator dashboard
+│   ├── courses/                  # Course pages
+│   ├── classes/                  # Live class pages
+│   └── _layout.tsx               # Root layout
+├── components/                   # Reusable components
+│   ├── ui/                       # UI component library
+│   └── demos/                    # Demo components
+├── context/                      # React contexts
+├── hooks/                        # Custom hooks
+├── lib/                          # Utility libraries
+├── services/                     # API services
+├── types/                        # TypeScript definitions
+├── constants/                    # App constants
+├── assets/                       # Static assets
+├── database/                     # Database schema
+└── docs/                         # Documentation
+```
+
+## 🎯 Key Components
+
+### Authentication System
+- Secure user registration and login
+- Profile management and verification
+- Role-based access control (Student, Teacher, Admin)
+
+### Content Management
+- Multi-format content support
+- Skill-based categorization
+- Version control and publishing workflow
+
+### Learning Experience
+- Adaptive learning paths
+- Progress tracking and analytics
+- Interactive quizzes and assessments
+
+### Teacher Tools
+- Content creation and editing
+- Student management
+- Performance analytics
+
+## 🔧 Development
+
+### Available Scripts
+- `npm start` - Start development server
+- `npm run android` - Run on Android
+- `npm run ios` - Run on iOS
+- `npm run web` - Run on web
+- `npm run lint` - Lint code
+- `npm run type-check` - TypeScript checking
+- `npm test` - Run tests
+
+### Code Style
+- TypeScript for type safety
+- ESLint for code quality
+- Prettier for formatting
+- Consistent naming conventions
+
+### Testing
+- Jest for unit testing
+- React Native Testing Library
+- End-to-end testing setup
+
+## 🚀 Deployment
+
+### Mobile Apps
+1. **iOS App Store**
    ```bash
-   npx expo start
+   expo build:ios
    ```
 
-## 📱 Supported Platforms
+2. **Google Play Store**
+   ```bash
+   expo build:android
+   ```
 
-- **iOS** (iPhone and iPad)
-- **Android** (Phones and Tablets)
-- **Web** (Progressive Web App)
+### Web Application
+```bash
+expo export -p web
+```
 
-## 🎨 User Experience
+## 🤝 Contributing
 
-SkillBox features a modern, intuitive interface designed for seamless learning:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-- **Dark/Light Theme Support**: Comfortable viewing in any environment
-- **Responsive Design**: Optimized for all screen sizes and orientations
-- **Accessibility**: Built with accessibility best practices
-- **Smooth Animations**: Fluid transitions and micro-interactions
-- **Offline Capabilities**: Download content for offline learning
+### Development Guidelines
+- Follow TypeScript best practices
+- Write comprehensive tests
+- Update documentation
+- Follow the existing code style
 
-## 🔐 Security & Privacy
+## 📄 License
 
-- **End-to-End Encryption**: Secure data transmission
-- **Privacy Controls**: Granular privacy settings for users
-- **Secure Authentication**: Multi-factor authentication support
-- **Data Protection**: GDPR and privacy regulation compliant
-- **Content Moderation**: AI-powered content review system
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📊 Database Schema
+## 🆘 Support
 
-The complete database schema is available in `/database/schema.sql` and includes:
+### Common Issues
 
-- **User Management**: Complete user profiles and authentication
-- **Content System**: Videos, articles, courses, and live classes
-- **Learning Tracking**: Progress monitoring and analytics
-- **Social Features**: Following, comments, and community
-- **Gamification**: Achievements, points, and streaks
-- **Payment System**: Transactions and creator earnings
-- **Support System**: Tickets, feedback, and help
+**Build Errors**: Clear cache with `npx expo start --clear`
+**Database Connection**: Verify environment variables and Supabase settings
+**Authentication Issues**: Check Supabase auth configuration
 
-## 🌍 Global Reach
+### Getting Help
+- Check the [Issues](https://github.com/your-username/skillbox/issues) page
+- Join our [Discord Community](https://discord.gg/skillbox)
+- Email support: support@skillbox.com
 
-- **Multi-language Support**: Interface available in multiple languages
-- **Currency Support**: Multiple payment currencies
-- **Regional Content**: Localized content recommendations
-- **Time Zone Aware**: Smart scheduling for global live classes
+## 🎉 Acknowledgments
 
-## 📞 Support
-
-Need help? We're here for you:
-
-- **In-App Support**: Access help directly from the application
-- **Knowledge Base**: Comprehensive documentation and FAQs
-- **Community Forums**: Connect with other users
-- **Direct Support**: Contact our support team for personalized assistance
-
-## 🎯 Mission Statement
-
-Our mission is to democratize education by making high-quality learning accessible to everyone, everywhere. We believe that knowledge should have no boundaries, and we're committed to building tools that empower both learners and educators to achieve their full potential.
+- Expo team for the amazing development platform
+- Supabase for the backend infrastructure
+- React Native community for excellent libraries
+- All contributors and testers
 
 ---
 
-**Join thousands of learners and creators on SkillBox - where knowledge meets opportunity!**
+**Built with ❤️ by the SkillBox Development Team**

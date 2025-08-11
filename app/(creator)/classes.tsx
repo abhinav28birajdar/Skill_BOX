@@ -1,3 +1,4 @@
+import TouchableCard from '@/components/common/TouchableCard';
 import React, { useState } from 'react';
 import {
     Alert,
@@ -13,7 +14,7 @@ import { Button } from '@/components/ui/Button.fixed';
 import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Text } from '@/components/ui/Text';
-import { useAuth } from '@/context/AuthContext.enhanced';
+import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 
 const { width } = Dimensions.get('window');
@@ -135,7 +136,7 @@ const LiveClassCard: React.FC<LiveClassProps> = ({ liveClass }) => {
 
   return (
     <TouchableCard
-      variant="outlined"
+      variant="outline"
       padding="lg"
       onPress={() => Alert.alert('Class Details', `View details for: ${liveClass.title}`)}
       style={styles.classCard}
@@ -241,7 +242,7 @@ interface QuickStatsProps {
 
 const QuickStats: React.FC<QuickStatsProps> = ({ title, value, icon, color }) => {
   return (
-    <Card variant="outlined" padding="md" style={styles.statCard}>
+    <Card variant="outline" padding="md" style={styles.statCard}>
       <View style={[styles.statIcon, { backgroundColor: `${color}20` }]}>
         <IconSymbol name={icon} size={20} color={color} />
       </View>
@@ -424,7 +425,7 @@ export default function CreatorClassesScreen() {
         
         <View style={styles.quickActionsGrid}>
           <TouchableCard
-            variant="outlined"
+            variant="outline"
             padding="md"
             onPress={() => Alert.alert('Schedule Class', 'Class scheduling feature coming soon!')}
             style={styles.quickAction}
@@ -441,7 +442,7 @@ export default function CreatorClassesScreen() {
           </TouchableCard>
           
           <TouchableCard
-            variant="outlined"
+            variant="outline"
             padding="md"
             onPress={() => Alert.alert('Instant Class', 'Instant class feature coming soon!')}
             style={styles.quickAction}
@@ -458,7 +459,7 @@ export default function CreatorClassesScreen() {
           </TouchableCard>
           
           <TouchableCard
-            variant="outlined"
+            variant="outline"
             padding="md"
             onPress={() => Alert.alert('Class Templates', 'Class templates feature coming soon!')}
             style={styles.quickAction}
@@ -475,7 +476,7 @@ export default function CreatorClassesScreen() {
           </TouchableCard>
           
           <TouchableCard
-            variant="outlined"
+            variant="outline"
             padding="md"
             onPress={() => Alert.alert('Class Analytics', 'Class analytics feature coming soon!')}
             style={styles.quickAction}
@@ -534,7 +535,7 @@ export default function CreatorClassesScreen() {
             <LiveClassCard key={liveClass.id} liveClass={liveClass} />
           ))
         ) : (
-          <Card variant="outlined" padding="xl" style={styles.emptyState}>
+          <Card variant="outline" padding="xl" style={styles.emptyState}>
             <View style={styles.emptyStateContent}>
               <View style={[styles.emptyStateIcon, { backgroundColor: theme.colors.backgroundSecondary }]}>
                 <IconSymbol name="video" size={48} color={theme.colors.textSecondary} />
@@ -568,7 +569,7 @@ export default function CreatorClassesScreen() {
 
       {/* Live Class Tips */}
       <View style={styles.section}>
-        <Card variant="outlined" padding="lg" style={styles.tipsCard}>
+        <Card variant="outline" padding="lg" style={styles.tipsCard}>
           <View style={styles.tipsHeader}>
             <IconSymbol name="lightbulb.fill" size={24} color="#F59E0B" />
             <Text variant="h6" weight="semibold">

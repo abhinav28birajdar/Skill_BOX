@@ -12,7 +12,7 @@ import {
 
 interface SearchBarProps extends Omit<TextInputProps, 'style'> {
   style?: ViewStyle;
-  variant?: 'default' | 'outlined' | 'filled';
+  variant?: 'default' | 'outline' | 'filled';
   size?: 'sm' | 'md' | 'lg';
   showSearchIcon?: boolean;
   showClearButton?: boolean;
@@ -126,7 +126,7 @@ export function SearchBar({
       borderWidth: 1,
       borderColor: theme.colors.border,
     },
-    outlined: {
+    outline: {
       backgroundColor: 'transparent',
       borderWidth: 2,
       borderColor: theme.colors.border,

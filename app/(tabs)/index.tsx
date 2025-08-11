@@ -1,8 +1,8 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useAuth } from '@/context/AuthContext.enhanced';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { LearningContent, Skill, User } from '@/types/database.enhanced';
+import { LearningContent, Skill, User } from '@/types/database';
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import {

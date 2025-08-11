@@ -1,3 +1,4 @@
+import TouchableCard from '@/components/common/TouchableCard';
 import React, { useState } from 'react';
 import {
     Alert,
@@ -13,7 +14,7 @@ import { Button } from '@/components/ui/Button.fixed';
 import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Text } from '@/components/ui/Text';
-import { useAuth } from '@/context/AuthContext.enhanced';
+import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 
 const { width } = Dimensions.get('window');
@@ -75,7 +76,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
 
   return (
     <TouchableCard
-      variant="outlined"
+      variant="outline"
       padding="md"
       onPress={() => {
         // TODO: Navigate to course details
@@ -292,7 +293,7 @@ export default function CreatorCoursesScreen() {
 
       {/* Summary Stats */}
       <View style={styles.statsContainer}>
-        <Card variant="outlined" padding="md" style={styles.statCard}>
+        <Card variant="outline" padding="md" style={styles.statCard}>
           <Text variant="h5" weight="bold">
             {courses.filter(c => c.status === 'published').length}
           </Text>
@@ -301,7 +302,7 @@ export default function CreatorCoursesScreen() {
           </Text>
         </Card>
         
-        <Card variant="outlined" padding="md" style={styles.statCard}>
+        <Card variant="outline" padding="md" style={styles.statCard}>
           <Text variant="h5" weight="bold">
             {totalStudents}
           </Text>
@@ -310,7 +311,7 @@ export default function CreatorCoursesScreen() {
           </Text>
         </Card>
         
-        <Card variant="outlined" padding="md" style={styles.statCard}>
+        <Card variant="outline" padding="md" style={styles.statCard}>
           <Text variant="h5" weight="bold">
             ${totalEarnings.toFixed(0)}
           </Text>
@@ -361,7 +362,7 @@ export default function CreatorCoursesScreen() {
             <CourseCard key={course.id} course={course} />
           ))
         ) : (
-          <Card variant="outlined" padding="xl" style={styles.emptyState}>
+          <Card variant="outline" padding="xl" style={styles.emptyState}>
             <View style={styles.emptyStateContent}>
               <View style={[styles.emptyStateIcon, { backgroundColor: theme.colors.backgroundSecondary }]}>
                 <IconSymbol name="play.rectangle" size={48} color={theme.colors.textSecondary} />

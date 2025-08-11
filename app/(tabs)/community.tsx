@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/Button.fixed';
 import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Text } from '@/components/ui/Text';
-import { useAuth } from '@/context/AuthContext.enhanced';
+import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 
 const { width } = Dimensions.get('window');

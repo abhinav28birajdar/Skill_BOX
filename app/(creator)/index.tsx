@@ -1,3 +1,4 @@
+import TouchableCard from '@/components/common/TouchableCard';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -13,7 +14,7 @@ import { Button } from '@/components/ui/Button.fixed';
 import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Text } from '@/components/ui/Text';
-import { useAuth } from '@/context/AuthContext.enhanced';
+import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 
 const { width } = Dimensions.get('window');
@@ -53,7 +54,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, change, trend, icon, 
   };
 
   return (
-    <Card variant="outlined" padding="md" style={styles.statCard}>
+    <Card variant="outline" padding="md" style={styles.statCard}>
       <View style={styles.statHeader}>
         <View style={[styles.statIcon, { backgroundColor: `${color}20` }]}>
           <IconSymbol name={icon} size={20} color={color} />
@@ -92,7 +93,7 @@ const QuickAction: React.FC<QuickActionProps> = ({ title, subtitle, icon, color,
   
   return (
     <TouchableCard
-      variant="outlined"
+      variant="outline"
       padding="md"
       onPress={onPress}
       style={styles.quickAction}
@@ -378,7 +379,7 @@ export default function CreatorDashboardScreen() {
           </Button>
         </View>
         
-        <Card variant="outlined" padding="lg" style={styles.insightsCard}>
+        <Card variant="outline" padding="lg" style={styles.insightsCard}>
           <View style={styles.insightItem}>
             <IconSymbol name="chart.line.uptrend.xyaxis" size={20} color="#10B981" />
             <View style={styles.insightContent}>
@@ -432,7 +433,7 @@ export default function CreatorDashboardScreen() {
           </Button>
         </View>
         
-        <Card variant="outlined" padding="md">
+        <Card variant="outline" padding="md">
           {recentActivity.map((activity, index) => (
             <React.Fragment key={activity.id}>
               <RecentActivityItem activity={activity} />
@@ -459,7 +460,7 @@ export default function CreatorDashboardScreen() {
         
         <View style={styles.contentCards}>
           <TouchableCard
-            variant="outlined"
+            variant="outline"
             padding="md"
             onPress={() => router.push('./courses')}
             style={styles.contentCard}
@@ -479,7 +480,7 @@ export default function CreatorDashboardScreen() {
           </TouchableCard>
           
           <TouchableCard
-            variant="outlined"
+            variant="outline"
             padding="md"
             onPress={() => router.push('./classes')}
             style={styles.contentCard}

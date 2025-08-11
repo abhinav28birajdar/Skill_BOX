@@ -1,6 +1,6 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useAuth } from '@/context/AuthContext.enhanced';
+import { useAuth } from '@/context/AuthContext';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -59,7 +59,9 @@ export default function SignUpScreen() {
     if (!validateForm()) return;
 
     setLoading(true);
-    const { error } = await signUp(email, password, {
+    const { error } = await signUp({
+      email,
+      password,
       username,
       full_name: fullName || username,
       role: 'student'
@@ -67,7 +69,7 @@ export default function SignUpScreen() {
     setLoading(false);
 
     if (error) {
-      Alert.alert('Sign Up Failed', error.message || 'An error occurred');
+      Alert.alert('Sign Up Failed', error || 'An error occurred');
     } else {
       Alert.alert(
         'Success',

@@ -1,3 +1,4 @@
+import TouchableCard from '@/components/common/TouchableCard';
 import React, { useState } from 'react';
 import {
     Alert,
@@ -13,7 +14,7 @@ import { Button } from '@/components/ui/Button.fixed';
 import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Text } from '@/components/ui/Text';
-import { useAuth } from '@/context/AuthContext.enhanced';
+import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 
 const { width } = Dimensions.get('window');
@@ -38,7 +39,7 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ course }) => {
   
   return (
     <TouchableCard
-      variant="outlined"
+      variant="outline"
       padding="md"
       onPress={() => Alert.alert('Course Details', `Continue learning: ${course.title}`)}
       style={styles.progressCard}
@@ -107,7 +108,7 @@ const AchievementBadge: React.FC<AchievementBadgeProps> = ({ achievement }) => {
   const { theme } = useTheme();
   
   return (
-    <Card variant="outlined" padding="md" style={styles.achievementCard}>
+    <Card variant="outline" padding="md" style={styles.achievementCard}>
       <View style={[styles.achievementIcon, { backgroundColor: `${achievement.color}20` }]}>
         <IconSymbol name={achievement.icon} size={24} color={achievement.color} />
       </View>
@@ -136,7 +137,7 @@ const QuickAction: React.FC<QuickActionProps> = ({ title, subtitle, icon, color,
   
   return (
     <TouchableCard
-      variant="outlined"
+      variant="outline"
       padding="md"
       onPress={onPress}
       style={styles.quickActionCard}
@@ -363,7 +364,7 @@ export default function LearningScreen() {
 
       {/* Learning Stats */}
       <View style={styles.statsContainer}>
-        <Card variant="outlined" padding="md" style={styles.statCard}>
+        <Card variant="outline" padding="md" style={styles.statCard}>
           <Text variant="h5" weight="bold">
             {learningStats.totalCourses}
           </Text>
@@ -372,7 +373,7 @@ export default function LearningScreen() {
           </Text>
         </Card>
         
-        <Card variant="outlined" padding="md" style={styles.statCard}>
+        <Card variant="outline" padding="md" style={styles.statCard}>
           <Text variant="h5" weight="bold">
             {learningStats.completedCourses}
           </Text>
@@ -381,7 +382,7 @@ export default function LearningScreen() {
           </Text>
         </Card>
         
-        <Card variant="outlined" padding="md" style={styles.statCard}>
+        <Card variant="outline" padding="md" style={styles.statCard}>
           <Text variant="h5" weight="bold">
             {learningStats.hoursLearned}h
           </Text>
@@ -390,7 +391,7 @@ export default function LearningScreen() {
           </Text>
         </Card>
         
-        <Card variant="outlined" padding="md" style={styles.statCard}>
+        <Card variant="outline" padding="md" style={styles.statCard}>
           <Text variant="h5" weight="bold">
             {learningStats.currentStreak}
           </Text>
@@ -462,7 +463,7 @@ export default function LearningScreen() {
               <ProgressCard key={course.id} course={course} />
             ))
           ) : (
-            <Card variant="outlined" padding="xl" style={styles.emptyState}>
+            <Card variant="outline" padding="xl" style={styles.emptyState}>
               <View style={styles.emptyStateContent}>
                 <View style={[styles.emptyStateIcon, { backgroundColor: theme.colors.backgroundSecondary }]}>
                   <IconSymbol 
@@ -530,7 +531,7 @@ export default function LearningScreen() {
           Recommended for You
         </Text>
         
-        <Card variant="outlined" padding="lg">
+        <Card variant="outline" padding="lg">
           <View style={styles.recommendationItem}>
             <View style={[styles.recommendationIcon, { backgroundColor: `${theme.colors.primary}20` }]}>
               <IconSymbol name="lightbulb.fill" size={20} color={theme.colors.primary} />
