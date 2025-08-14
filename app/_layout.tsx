@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import '../global.css';
 
+import { AIModelProvider } from '@/context/AIModelContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ThemeProvider as EnhancedThemeProvider } from '@/context/ThemeContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -62,7 +63,9 @@ export default function RootLayout() {
   return (
     <EnhancedThemeProvider>
       <AuthProvider>
-        <RootLayoutNav />
+        <AIModelProvider>
+          <RootLayoutNav />
+        </AIModelProvider>
       </AuthProvider>
     </EnhancedThemeProvider>
   );
