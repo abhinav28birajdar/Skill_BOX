@@ -1,7 +1,5 @@
 import { useAI } from '@/context/AIModelContext';
 import { useTheme } from '@/context/ThemeContext';
-import { Camera } from 'expo-camera';
-import * as FaceDetector from 'expo-face-detector';
 import { useEffect, useRef, useState } from 'react';
 import {
     Animated,
@@ -10,6 +8,22 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+
+// Optional imports - these will be undefined if packages aren't installed
+let Camera: any = null;
+let FaceDetector: any = null;
+
+try {
+  Camera = require('expo-camera').Camera;
+} catch (e) {
+  console.log('expo-camera not available');
+}
+
+try {
+  FaceDetector = require('expo-face-detector');
+} catch (e) {
+  console.log('expo-face-detector not available');
+}
 
 interface BiometricEngagementTrackerProps {
   onEngagementChange?: (data: EngagementData) => void;
@@ -31,6 +45,18 @@ interface EngagementData {
   timestamp: number;
 }
 
+interface FaceFeature {
+  leftEyeOpenProbability?: number;
+  rightEyeOpenProbability?: number;
+  smilingProbability?: number;
+  yawAngle?: number;
+  rollAngle?: number;
+  bounds?: {
+    origin?: { x: number; y: number };
+    size?: { width: number; height: number };
+  };
+}
+
 export function BiometricEngagementTracker({
   onEngagementChange,
   isActive = false,
@@ -42,7 +68,7 @@ export function BiometricEngagementTracker({
   const [isTracking, setIsTracking] = useState(false);
   const [currentEngagement, setCurrentEngagement] = useState<EngagementData | null>(null);
   const [faceDetected, setFaceDetected] = useState(false);
-  const cameraRef = useRef<Camera>(null);
+  const cameraRef = useRef<any>(null);
   const animatedOpacity = useRef(new Animated.Value(0)).current;
   const blinkCounter = useRef(0);
   const lastBlinkTime = useRef(Date.now());
@@ -68,6 +94,11 @@ export function BiometricEngagementTracker({
   }, [isTracking]);
 
   const requestCameraPermission = async () => {
+    if (!Camera) {
+      setHasPermission(false);
+      return;
+    }
+    
     try {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
@@ -89,7 +120,7 @@ export function BiometricEngagementTracker({
     setCurrentEngagement(null);
   };
 
-  const handleFacesDetected = async ({ faces }: { faces: FaceDetector.FaceFeature[] }) => {
+  const handleFacesDetected = async ({ faces }: { faces: FaceFeature[] }) => {
     if (!isTracking || faces.length === 0) {
       setFaceDetected(false);
       return;
@@ -108,7 +139,7 @@ export function BiometricEngagementTracker({
     }
   };
 
-  const calculateEngagement = async (face: FaceDetector.FaceFeature): Promise<EngagementData> => {
+  const calculateEngagement = async (face: FaceFeature): Promise<EngagementData> => {
     const now = Date.now();
     
     // Eye contact detection (looking at camera)
@@ -205,16 +236,16 @@ export function BiometricEngagementTracker({
 
   return (
     <View style={styles.container}>
-      {isTracking && (
+      {isTracking && Camera && (
         <Camera
           ref={cameraRef}
           style={styles.camera}
-          type={Camera.Constants.Type.front}
+          type={Camera.Constants?.Type?.front || 'front'}
           onFacesDetected={handleFacesDetected}
           faceDetectorSettings={{
-            mode: FaceDetector.FaceDetectorMode.fast,
-            detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
-            runClassifications: FaceDetector.FaceDetectorClassifications.all,
+            mode: FaceDetector?.FaceDetectorMode?.fast || 'fast',
+            detectLandmarks: FaceDetector?.FaceDetectorLandmarks?.all || 'all',
+            runClassifications: FaceDetector?.FaceDetectorClassifications?.all || 'all',
             minDetectionInterval: 500,
             tracking: true,
           }}

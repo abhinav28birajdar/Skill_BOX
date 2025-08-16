@@ -3,16 +3,18 @@ import { useEffect, useRef, useState } from 'react';
 import {
     Animated,
     Dimensions,
-    PanGestureHandler,
-    PanGestureHandlerGestureEvent,
-    PinchGestureHandler,
-    PinchGestureHandlerGestureEvent,
-    State,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
+import {
+    PanGestureHandler,
+    PanGestureHandlerGestureEvent,
+    PinchGestureHandler,
+    PinchGestureHandlerGestureEvent,
+    State,
+} from 'react-native-gesture-handler';
 import Svg, {
     Circle,
     Defs,
@@ -64,6 +66,9 @@ export function NeuralSkillMap({
   const [selectedPath, setSelectedPath] = useState<string[]>([]);
   const [highlightedSkill, setHighlightedSkill] = useState<string | null>(null);
   
+  const panAnim = useRef(new Animated.ValueXY()).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  
   const panRef = useRef<PanGestureHandler>(null);
   const pinchRef = useRef<PinchGestureHandler>(null);
   const animatedValues = useRef(new Map<string, Animated.Value>()).current;
@@ -92,10 +97,10 @@ export function NeuralSkillMap({
     }
   }, [skills, animated]);
 
-  const handlePanGestureEvent = Animated.event(
-    [{ nativeEvent: { translationX: 0, translationY: 0 } }],
-    { useNativeDriver: false }
-  );
+  const handlePanGestureEvent = (event: PanGestureHandlerGestureEvent) => {
+    const { translationX, translationY } = event.nativeEvent;
+    panAnim.setValue({ x: translationX, y: translationY });
+  };
 
   const handlePanStateChange = (event: PanGestureHandlerGestureEvent) => {
     if (event.nativeEvent.state === State.END) {
@@ -104,10 +109,9 @@ export function NeuralSkillMap({
     }
   };
 
-  const handlePinchGestureEvent = Animated.event(
-    [{ nativeEvent: { scale: 1 } }],
-    { useNativeDriver: false }
-  );
+  const handlePinchGestureEvent = (event: PinchGestureHandlerGestureEvent) => {
+    scaleAnim.setValue(event.nativeEvent.scale);
+  };
 
   const handlePinchStateChange = (event: PinchGestureHandlerGestureEvent) => {
     if (event.nativeEvent.state === State.END) {
@@ -338,9 +342,9 @@ export function NeuralSkillMap({
                 height={screenHeight * 2}
                 style={{
                   transform: [
-                    { scale },
-                    { translateX },
-                    { translateY },
+                    { scale: Animated.multiply(scaleAnim, scale) },
+                    { translateX: Animated.add(panAnim.x, translateX) },
+                    { translateY: Animated.add(panAnim.y, translateY) },
                   ],
                 }}
               >
