@@ -119,7 +119,7 @@ export const VRLearningEnvironment: React.FC<VRLearningEnvironmentProps> = ({
     
     try {
       const guidancePrompt = `Generate immersive learning guidance for a ${environment.type} environment called "${environment.name}". Include interactive suggestions and exploration tips.`;
-      const guidance = await generateContent(guidancePrompt, 'educational');
+      const guidance = await generateContent(guidancePrompt, 'text');
       setAiGuidanceText(guidance);
     } catch (error) {
       console.error('Error generating AI guidance:', error);

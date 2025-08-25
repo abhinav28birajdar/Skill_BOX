@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 import { BiometricEngagementTracker } from '../biometric/BiometricEngagementTracker';
 import { NeuralSkillMap } from '../visualization/NeuralSkillMap';
-import { ArModelRenderer } from './ArModelRenderer';
-import { HolographicDisplay } from './HolographicDisplay';
-import { VRLearningEnvironment } from './VRLearningEnvironment';
+// import { ArModelRenderer } from './ArModelRenderer';
+// import { HolographicDisplay } from './HolographicDisplay';
+// import { VRLearningEnvironment } from './VRLearningEnvironment';
 
 interface QuantumLearningState {
   currentPhase: 'initialization' | 'assessment' | 'adaptation' | 'immersion' | 'mastery';
@@ -51,6 +51,126 @@ interface QuantumLearningEngineProps {
 }
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  quantumField: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  quantumParticle: {
+    position: 'absolute',
+    width: 3,
+    height: 3,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 1.5,
+  },
+  portalsContainer: {
+    position: 'absolute',
+    top: 100,
+    left: 0,
+    right: 0,
+    height: 60,
+    flexDirection: 'row',
+    zIndex: 10,
+  },
+  dimensionalPortal: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 8,
+  },
+  portalText: {
+    color: '#FFFFFF',
+    fontSize: 8,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  portalStability: {
+    position: 'absolute',
+    bottom: 5,
+    left: 5,
+    right: 5,
+    height: 2,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 1,
+  },
+  environmentContainer: {
+    flex: 1,
+    marginTop: 180,
+    marginBottom: 200,
+  },
+  quantumMetrics: {
+    position: 'absolute',
+    bottom: 120,
+    left: 20,
+    right: 20,
+    padding: 16,
+    borderRadius: 12,
+  },
+  metricsTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+  metricsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 16,
+  },
+  metricItem: {
+    alignItems: 'center',
+  },
+  metricLabel: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  metricValue: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  phaseIndicator: {
+    marginTop: 8,
+  },
+  phaseText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  phaseBar: {
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  phaseProgress: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  environmentSwitcher: {
+    position: 'absolute',
+    bottom: 40,
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    borderRadius: 25,
+    padding: 4,
+  },
+  envButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginHorizontal: 2,
+  },
+  envButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+});
 
 export const QuantumLearningEngine: React.FC<QuantumLearningEngineProps> = ({
   learningObjectives,
@@ -429,70 +549,27 @@ export const QuantumLearningEngine: React.FC<QuantumLearningEngineProps> = ({
       case 'vr':
         return (
           <Animated.View {...commonProps}>
-            <VRLearningEnvironment
-              environment={{
-                id: 'quantum_vr',
-                name: 'Quantum Learning Space',
-                type: 'space',
-                description: 'Immersive quantum learning environment',
-                immersionLevel: quantumState.quantumCoherence,
-                interactiveObjects: learningQuantums.map(q => ({
-                  id: q.id,
-                  name: q.concept,
-                  type: 'hologram',
-                  position: { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100, z: 0 },
-                  scale: q.probability,
-                  rotation: { x: 0, y: 0, z: 0 },
-                  clickable: true,
-                })),
-                lighting: {
-                  ambient: 0.5,
-                  directional: { x: 1, y: 1, z: 1, intensity: 0.8 },
-                  color: '#4CAF50',
-                  shadows: true,
-                },
-              }}
-              enableAIGuidance={isAIEnabled}
-            />
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text>VR Learning Environment - Coming Soon</Text>
+            </View>
           </Animated.View>
         );
         
       case 'ar':
         return (
           <Animated.View {...commonProps}>
-            <ArModelRenderer
-              modelUrl="quantum_learning_model"
-              onModelLoad={() => console.log('AR model loaded')}
-              enableGestures={true}
-              autoRotate={quantumState.learningVelocity > 1.5}
-            />
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text>AR Model Renderer - Coming Soon</Text>
+            </View>
           </Animated.View>
         );
         
       case 'holographic':
         return (
           <Animated.View {...commonProps}>
-            <HolographicDisplay
-              contents={learningQuantums.map(q => ({
-                id: q.id,
-                type: 'text',
-                title: q.concept,
-                content: `Complexity: ${q.complexity.toFixed(1)}`,
-                position: { x: Math.random() * 100 - 50, y: Math.random() * 100 - 50, z: 0 },
-                scale: q.probability,
-                rotation: { x: 0, y: 0, z: 0 },
-                opacity: q.superposition ? 0.7 : 1.0,
-                interactive: true,
-                metadata: {
-                  complexity: q.complexity,
-                  difficulty: q.complexity > 70 ? 'hard' : q.complexity > 40 ? 'medium' : 'easy',
-                  tags: q.dimensions,
-                },
-              }))}
-              enableAI={isAIEnabled}
-              theme="crystalline"
-              autoRotate={quantumState.learningVelocity > 1.2}
-            />
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text>Holographic Display - Coming Soon</Text>
+            </View>
           </Animated.View>
         );
         
@@ -574,123 +651,3 @@ export const QuantumLearningEngine: React.FC<QuantumLearningEngineProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  quantumField: {
-    ...StyleSheet.absoluteFillObject,
-    overflow: 'hidden',
-  },
-  quantumParticle: {
-    position: 'absolute',
-    width: 3,
-    height: 3,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 1.5,
-  },
-  portalsContainer: {
-    position: 'absolute',
-    top: 100,
-    left: 0,
-    right: 0,
-    height: 60,
-    flexDirection: 'row',
-    zIndex: 10,
-  },
-  dimensionalPortal: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 8,
-  },
-  portalText: {
-    color: '#FFFFFF',
-    fontSize: 8,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  portalStability: {
-    position: 'absolute',
-    bottom: 5,
-    left: 5,
-    right: 5,
-    height: 2,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 1,
-  },
-  environmentContainer: {
-    flex: 1,
-    marginTop: 180,
-    marginBottom: 200,
-  },
-  quantumMetrics: {
-    position: 'absolute',
-    bottom: 120,
-    left: 20,
-    right: 20,
-    padding: 16,
-    borderRadius: 12,
-  },
-  metricsTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  metricsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 16,
-  },
-  metricItem: {
-    alignItems: 'center',
-  },
-  metricLabel: {
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  metricValue: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  phaseIndicator: {
-    marginTop: 8,
-  },
-  phaseText: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  phaseBar: {
-    height: 6,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  phaseProgress: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  environmentSwitcher: {
-    position: 'absolute',
-    bottom: 40,
-    left: 20,
-    right: 20,
-    flexDirection: 'row',
-    borderRadius: 25,
-    padding: 4,
-  },
-  envButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 20,
-    alignItems: 'center',
-    marginHorizontal: 2,
-  },
-  envButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-});

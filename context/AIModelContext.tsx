@@ -68,6 +68,8 @@ export function AIModelProvider({ children }: { children: React.ReactNode }) {
   const [isAIEnabled, setIsAIEnabled] = useState(false);
   const [modelLoading, setModelLoading] = useState(false);
   const [currentModel, setCurrentModel] = useState('gpt-3.5-turbo');
+  const [currentCognitiveState, setCurrentCognitiveState] = useState<CognitiveState | null>(null);
+  const [lastBiometricData, setLastBiometricData] = useState<BiometricData | null>(null);
 
   useEffect(() => {
     loadAIPreferences();
@@ -105,7 +107,7 @@ export function AIModelProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const generateContent = async (prompt: string, type: 'text' | 'lesson' | 'quiz'): Promise<string> => {
+  const generateContent = async (prompt: string, type: 'text' | 'lesson' | 'quiz' | '3d' | 'ar' | 'haptic'): Promise<string> => {
     if (!isAIEnabled) {
       throw new Error('AI is not enabled');
     }
@@ -170,15 +172,73 @@ export function AIModelProvider({ children }: { children: React.ReactNode }) {
     };
   };
 
+  const updateBiometricData = (data: BiometricData) => {
+    setLastBiometricData(data);
+    // Update cognitive state based on biometric data
+    setCurrentCognitiveState({
+      cognitiveLoad: data.heartRate ? Math.min(data.heartRate / 100, 1) : 0.5,
+      focusLevel: data.facialExpressions?.attention || 0.5,
+      learningReadiness: data.gsrLevel ? 1 - (data.gsrLevel / 100) : 0.7,
+      emotionalState: data.facialExpressions?.emotion || 'neutral',
+      brainwaveStates: {
+        alpha: data.eegPatterns?.[0] || 0.5,
+        beta: data.eegPatterns?.[1] || 0.5,
+        theta: data.eegPatterns?.[2] || 0.5,
+        delta: data.eegPatterns?.[3] || 0.5,
+      }
+    });
+  };
+
+  const getCognitiveState = (): CognitiveState => {
+    return currentCognitiveState || {
+      cognitiveLoad: 0.5,
+      focusLevel: 0.5,
+      learningReadiness: 0.5,
+      emotionalState: 'neutral',
+      brainwaveStates: {
+        alpha: 0.5,
+        beta: 0.5,
+        theta: 0.5,
+        delta: 0.5,
+      }
+    };
+  };
+
+  const generateHapticPattern = async (emotion: string, intensity: number): Promise<string> => {
+    if (!isAIEnabled) {
+      throw new Error('AI is not enabled');
+    }
+    
+    // Simulate haptic pattern generation
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return `haptic_${emotion}_${intensity}`;
+  };
+
+  const generateImmersiveContent = async (type: '3d' | 'ar' | 'vr', context: any): Promise<string> => {
+    if (!isAIEnabled) {
+      throw new Error('AI is not enabled');
+    }
+    
+    // Simulate immersive content generation
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return `${type}_content_${context.id || 'default'}`;
+  };
+
   const value: AIModelContextType = {
     isAIEnabled,
     modelLoading,
     currentModel,
+    currentCognitiveState,
+    lastBiometricData,
     enableAI,
     disableAI,
     generateContent,
     analyzeEngagement,
     predictLearningPath,
+    updateBiometricData,
+    getCognitiveState,
+    generateHapticPattern,
+    generateImmersiveContent,
   };
 
   return <AIModelContext.Provider value={value}>{children}</AIModelContext.Provider>;

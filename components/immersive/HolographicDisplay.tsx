@@ -225,7 +225,7 @@ export const HolographicDisplay: React.FC<HolographicDisplayProps> = ({
     const transform3D = {
       transform: [
         { perspective: 1000 },
-        { rotateY },
+        { rotateY: rotationY },
         { rotateX: `${content.rotation.x}deg` },
         { rotateZ: `${content.rotation.z}deg` },
         { scale: contentAnim.interpolate({

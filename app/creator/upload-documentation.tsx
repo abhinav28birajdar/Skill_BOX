@@ -230,7 +230,7 @@ export default function UploadDocumentationScreen() {
           <View style={styles.formGroup}>
             <Text style={styles.label}>Title *</Text>
             <TextInput
-              style={[styles.input, errors.title && styles.inputError]}
+              style={[styles.input, errors.title ? styles.inputError : null]}
               value={formData.title}
               onChangeText={(text) => setFormData(prev => ({ ...prev, title: text }))}
               placeholder="Enter documentation title"
@@ -243,7 +243,7 @@ export default function UploadDocumentationScreen() {
           <View style={styles.formGroup}>
             <Text style={styles.label}>Description *</Text>
             <TextInput
-              style={[styles.textArea, errors.description && styles.inputError]}
+              style={[styles.textArea, errors.description ? styles.inputError : null]}
               value={formData.description}
               onChangeText={(text) => setFormData(prev => ({ ...prev, description: text }))}
               placeholder="Describe what learners will learn from this documentation"
@@ -321,7 +321,7 @@ export default function UploadDocumentationScreen() {
               Supported formats: PDF, DOC, DOCX, TXT, MD
             </Text>
             <TouchableOpacity
-              style={[styles.fileButton, errors.document && styles.fileButtonError]}
+              style={[styles.fileButton, errors.document ? styles.fileButtonError : null]}
               onPress={pickDocument}
             >
               <Text style={styles.fileButtonText}>

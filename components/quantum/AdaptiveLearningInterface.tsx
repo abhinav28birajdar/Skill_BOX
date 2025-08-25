@@ -32,13 +32,15 @@ export function AdaptiveLearningInterface({
   
   // Bio-cognitive hooks
   const biometricData = useBioSensors();
+  const cognitiveAnalysis = useCognitiveLoad(biometricData.getCurrentBiometricData());
   const {
-    cognitiveLoad,
-    focusLevel,
-    learningReadiness,
-    adaptationSuggestions,
-    cognitiveHistory
-  } = useCognitiveLoad(biometricData);
+    cognitiveState,
+    getAdaptationSuggestions
+  } = cognitiveAnalysis;
+  
+  const cognitiveLoad = cognitiveState.cognitiveLoad;
+  const focusLevel = cognitiveState.focusLevel;
+  const learningReadiness = cognitiveState.learningReadiness;
   
   const {
     suggestions,
@@ -50,9 +52,8 @@ export function AdaptiveLearningInterface({
     cognitiveLoad,
     focusLevel,
     learningReadiness,
-    emotionalState: biometricData?.emotionalState,
-    attentionLevel: biometricData?.attentionLevel || 0.5,
-    stressLevel: biometricData?.stressLevel || 0.3
+    emotionalState: cognitiveState.emotionalState,
+    brainwaveStates: cognitiveState.brainwaveStates
   });
 
   // UI adaptation states
@@ -151,7 +152,8 @@ export function AdaptiveLearningInterface({
     }).start();
 
     // Pulse attention indicator
-    if (biometricData?.attentionLevel && biometricData.attentionLevel < 0.5) {
+    const currentBiometric = biometricData.getCurrentBiometricData();
+    if (currentBiometric?.facialExpressions?.attention && currentBiometric.facialExpressions.attention < 0.5) {
       Animated.sequence([
         Animated.timing(attentionPulse, {
           toValue: 1.2,
@@ -181,18 +183,18 @@ export function AdaptiveLearningInterface({
   };
 
   const renderCognitiveStatePanel = () => (
-    <View style={[styles.cognitivePanel, { backgroundColor: theme.surface }]}>
-      <Text style={[styles.panelTitle, { color: theme.onSurface }]}>
+    <View style={[styles.cognitivePanel, { backgroundColor: theme.colors.backgroundSecondary }]}>
+      <Text style={[styles.panelTitle, { color: theme.colors.text }]}>
         Cognitive State
       </Text>
       
       <View style={styles.stateIndicators}>
         {/* Cognitive Load */}
         <View style={styles.indicator}>
-          <Text style={[styles.indicatorLabel, { color: theme.onSurface }]}>
+          <Text style={[styles.indicatorLabel, { color: theme.colors.text }]}>
             Cognitive Load
           </Text>
-          <View style={[styles.progressBar, { backgroundColor: theme.outline }]}>
+          <View style={[styles.progressBar, { backgroundColor: theme.colors.border }]}>
             <Animated.View
               style={[
                 styles.progressFill,
@@ -210,10 +212,10 @@ export function AdaptiveLearningInterface({
 
         {/* Focus Level */}
         <View style={styles.indicator}>
-          <Text style={[styles.indicatorLabel, { color: theme.onSurface }]}>
+          <Text style={[styles.indicatorLabel, { color: theme.colors.text }]}>
             Focus Level
           </Text>
-          <View style={[styles.progressBar, { backgroundColor: theme.outline }]}>
+          <View style={[styles.progressBar, { backgroundColor: theme.colors.border }]}>
             <Animated.View
               style={[
                 styles.progressFill,
@@ -228,10 +230,10 @@ export function AdaptiveLearningInterface({
 
         {/* Learning Readiness */}
         <View style={styles.indicator}>
-          <Text style={[styles.indicatorLabel, { color: theme.onSurface }]}>
+          <Text style={[styles.indicatorLabel, { color: theme.colors.text }]}>
             Learning Readiness
           </Text>
-          <View style={[styles.progressBar, { backgroundColor: theme.outline }]}>
+          <View style={[styles.progressBar, { backgroundColor: theme.colors.border }]}>
             <Animated.View
               style={[
                 styles.progressFill,
@@ -246,51 +248,54 @@ export function AdaptiveLearningInterface({
       </View>
 
       {/* Biometric Indicators */}
-      {biometricData && (
-        <View style={styles.biometricIndicators}>
-          <View style={styles.biometricRow}>
-            <Ionicons 
-              name="heart" 
-              size={16} 
-              color={biometricData.heartRate > 100 ? '#ff6b6b' : '#4ecdc4'} 
-            />
-            <Text style={[styles.biometricText, { color: theme.onSurface }]}>
-              {biometricData.heartRate?.toFixed(0) || 'N/A'} BPM
-            </Text>
+      {(() => {
+        const currentBiometric = biometricData.getCurrentBiometricData();
+        return currentBiometric && (
+          <View style={styles.biometricIndicators}>
+            <View style={styles.biometricRow}>
+              <Ionicons 
+                name="heart" 
+                size={16} 
+                color={currentBiometric.heartRate && currentBiometric.heartRate > 100 ? '#ff6b6b' : '#4ecdc4'} 
+              />
+              <Text style={[styles.biometricText, { color: theme.colors.text }]}>
+                {currentBiometric.heartRate?.toFixed(0) || 'N/A'} BPM
+              </Text>
+            </View>
+            
+            <Animated.View 
+              style={[
+                styles.biometricRow,
+                { transform: [{ scale: attentionPulse }] }
+              ]}
+            >
+              <Ionicons 
+                name="eye" 
+                size={16} 
+                color={currentBiometric.facialExpressions?.attention && currentBiometric.facialExpressions.attention > 0.5 ? '#45b7d1' : '#feca57'} 
+              />
+              <Text style={[styles.biometricText, { color: theme.colors.text }]}>
+                {((currentBiometric.facialExpressions?.attention || 0) * 100).toFixed(0)}% Attention
+              </Text>
+            </Animated.View>
           </View>
-          
-          <Animated.View 
-            style={[
-              styles.biometricRow,
-              { transform: [{ scale: attentionPulse }] }
-            ]}
-          >
-            <Ionicons 
-              name="eye" 
-              size={16} 
-              color={biometricData.attentionLevel > 0.5 ? '#45b7d1' : '#feca57'} 
-            />
-            <Text style={[styles.biometricText, { color: theme.onSurface }]}>
-              {((biometricData.attentionLevel || 0) * 100).toFixed(0)}% Attention
-            </Text>
-          </Animated.View>
-        </View>
-      )}
+        );
+      })()}
     </View>
   );
 
   const renderAmbientSuggestions = () => (
-    <View style={[styles.suggestionsPanel, { backgroundColor: theme.surface }]}>
-      <Text style={[styles.panelTitle, { color: theme.onSurface }]}>
+    <View style={[styles.suggestionsPanel, { backgroundColor: theme.colors.backgroundSecondary }]}>
+      <Text style={[styles.panelTitle, { color: theme.colors.text }]}>
         Smart Suggestions
       </Text>
       
       {currentOpportunity && (
         <View style={styles.opportunityCard}>
-          <Text style={[styles.opportunityText, { color: theme.onSurface }]}>
+          <Text style={[styles.opportunityText, { color: theme.colors.text }]}>
             💡 {currentOpportunity.availableTime} minutes available
           </Text>
-          <Text style={[styles.opportunitySubtext, { color: theme.outline }]}>
+          <Text style={[styles.opportunitySubtext, { color: theme.colors.textSecondary }]}>
             {currentOpportunity.optimalContentType} content recommended
           </Text>
         </View>
@@ -303,15 +308,15 @@ export function AdaptiveLearningInterface({
             style={[
               styles.suggestionCard,
               { 
-                backgroundColor: theme.background,
-                borderColor: theme.outline,
+                backgroundColor: theme.colors.background,
+                borderColor: theme.colors.border,
                 marginBottom: 12
               }
             ]}
             onPress={() => handleAcceptSuggestion(suggestion)}
           >
             <View style={styles.suggestionHeader}>
-              <Text style={[styles.suggestionTitle, { color: theme.onSurface }]}>
+              <Text style={[styles.suggestionTitle, { color: theme.colors.text }]}>
                 {suggestion.title}
               </Text>
               <View style={[
@@ -327,12 +332,12 @@ export function AdaptiveLearningInterface({
               </View>
             </View>
             
-            <Text style={[styles.suggestionDescription, { color: theme.outline }]}>
+            <Text style={[styles.suggestionDescription, { color: theme.colors.textSecondary }]}>
               {suggestion.description}
             </Text>
             
             <View style={styles.suggestionFooter}>
-              <Text style={[styles.durationText, { color: theme.outline }]}>
+              <Text style={[styles.durationText, { color: theme.colors.textSecondary }]}>
                 ⏱️ {suggestion.estimatedDuration} min
               </Text>
               
@@ -340,7 +345,7 @@ export function AdaptiveLearningInterface({
                 style={styles.dismissButton}
                 onPress={() => dismissSuggestion(suggestion)}
               >
-                <Ionicons name="close" size={20} color={theme.outline} />
+                <Ionicons name="close" size={20} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             </View>
           </TouchableOpacity>
@@ -355,15 +360,15 @@ export function AdaptiveLearningInterface({
     if (recommendations.length === 0) return null;
 
     return (
-      <View style={[styles.recommendationsPanel, { backgroundColor: theme.surface }]}>
-        <Text style={[styles.panelTitle, { color: theme.onSurface }]}>
+      <View style={[styles.recommendationsPanel, { backgroundColor: theme.colors.backgroundSecondary }]}>
+        <Text style={[styles.panelTitle, { color: theme.colors.text }]}>
           Adaptive Recommendations
         </Text>
         
         {recommendations.map((recommendation, index) => (
           <View key={index} style={styles.recommendationItem}>
             <Ionicons name="bulb" size={16} color="#feca57" />
-            <Text style={[styles.recommendationText, { color: theme.onSurface }]}>
+            <Text style={[styles.recommendationText, { color: theme.colors.text }]}>
               {recommendation}
             </Text>
           </View>
@@ -373,7 +378,7 @@ export function AdaptiveLearningInterface({
   };
 
   const renderModeIndicator = () => (
-    <View style={[styles.modeIndicator, { backgroundColor: theme.surface }]}>
+    <View style={[styles.modeIndicator, { backgroundColor: theme.colors.backgroundSecondary }]}>
       <Ionicons
         name={
           interfaceMode === 'focus' ? 'flash' :
@@ -382,10 +387,10 @@ export function AdaptiveLearningInterface({
         size={20}
         color={
           interfaceMode === 'focus' ? '#45b7d1' :
-          interfaceMode === 'rest' ? '#96ceb4' : theme.primary
+          interfaceMode === 'rest' ? '#96ceb4' : theme.colors.primary
         }
       />
-      <Text style={[styles.modeText, { color: theme.onSurface }]}>
+      <Text style={[styles.modeText, { color: theme.colors.text }]}>
         {interfaceMode.charAt(0).toUpperCase() + interfaceMode.slice(1)} Mode
       </Text>
     </View>
@@ -396,7 +401,7 @@ export function AdaptiveLearningInterface({
       style={[
         styles.container,
         { 
-          backgroundColor: theme.background,
+          backgroundColor: theme.colors.background,
           opacity: adaptiveOpacity,
           transform: [{ scale: focusScale }]
         }
@@ -422,35 +427,38 @@ export function AdaptiveLearningInterface({
         onRequestClose={() => setShowBiometricPanel(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
-            <Text style={[styles.modalTitle, { color: theme.onSurface }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.backgroundSecondary }]}>
+            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
               Detailed Biometric Analysis
             </Text>
             
-            {biometricData && (
-              <View style={styles.detailedBiometrics}>
-                <Text style={[styles.biometricDetail, { color: theme.onSurface }]}>
-                  Heart Rate: {biometricData.heartRate?.toFixed(0)} BPM
-                </Text>
-                <Text style={[styles.biometricDetail, { color: theme.onSurface }]}>
-                  Stress Level: {((biometricData.stressLevel || 0) * 100).toFixed(0)}%
-                </Text>
-                <Text style={[styles.biometricDetail, { color: theme.onSurface }]}>
-                  Attention: {((biometricData.attentionLevel || 0) * 100).toFixed(0)}%
-                </Text>
-                {biometricData.emotionalState && (
-                  <Text style={[styles.biometricDetail, { color: theme.onSurface }]}>
-                    Emotion: {biometricData.emotionalState.primary}
+            {(() => {
+              const currentBiometric = biometricData.getCurrentBiometricData();
+              return currentBiometric && (
+                <View style={styles.detailedBiometrics}>
+                  <Text style={[styles.biometricDetail, { color: theme.colors.text }]}>
+                    Heart Rate: {currentBiometric.heartRate?.toFixed(0) || 'N/A'} BPM
                   </Text>
-                )}
-              </View>
-            )}
+                  <Text style={[styles.biometricDetail, { color: theme.colors.text }]}>
+                    Stress Level: {((currentBiometric.eyeTracking?.pupilDilation || 0) * 100).toFixed(0)}%
+                  </Text>
+                  <Text style={[styles.biometricDetail, { color: theme.colors.text }]}>
+                    Attention: {((currentBiometric.facialExpressions?.attention || 0) * 100).toFixed(0)}%
+                  </Text>
+                  {currentBiometric.facialExpressions?.emotion && (
+                    <Text style={[styles.biometricDetail, { color: theme.colors.text }]}>
+                      Emotion: {currentBiometric.facialExpressions.emotion}
+                    </Text>
+                  )}
+                </View>
+              );
+            })()}
             
             <TouchableOpacity
-              style={[styles.closeButton, { backgroundColor: theme.primary }]}
+              style={[styles.closeButton, { backgroundColor: theme.colors.primary }]}
               onPress={() => setShowBiometricPanel(false)}
             >
-              <Text style={[styles.closeButtonText, { color: theme.onPrimary }]}>
+              <Text style={[styles.closeButtonText, { color: theme.colors.surface }]}>
                 Close
               </Text>
             </TouchableOpacity>
@@ -460,10 +468,10 @@ export function AdaptiveLearningInterface({
       
       {/* Floating Action Button for Biometric Details */}
       <TouchableOpacity
-        style={[styles.fab, { backgroundColor: theme.primary }]}
+        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
         onPress={() => setShowBiometricPanel(true)}
       >
-        <Ionicons name="analytics" size={24} color={theme.onPrimary} />
+        <Ionicons name="analytics" size={24} color={theme.colors.surface} />
       </TouchableOpacity>
     </Animated.View>
   );

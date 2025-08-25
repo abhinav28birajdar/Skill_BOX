@@ -221,7 +221,7 @@ export default function UploadProjectScreen() {
           <View style={styles.formGroup}>
             <Text style={styles.label}>Title *</Text>
             <TextInput
-              style={[styles.input, errors.title && styles.inputError]}
+              style={[styles.input, errors.title ? styles.inputError : null]}
               value={formData.title}
               onChangeText={(text) => setFormData(prev => ({ ...prev, title: text }))}
               placeholder="Enter project title"
@@ -234,7 +234,7 @@ export default function UploadProjectScreen() {
           <View style={styles.formGroup}>
             <Text style={styles.label}>Description *</Text>
             <TextInput
-              style={[styles.textArea, errors.description && styles.inputError]}
+              style={[styles.textArea, errors.description ? styles.inputError : null]}
               value={formData.description}
               onChangeText={(text) => setFormData(prev => ({ ...prev, description: text }))}
               placeholder="Describe the project, what it includes, and what learners will gain from it"
@@ -312,7 +312,7 @@ export default function UploadProjectScreen() {
               Upload a compressed file (ZIP, RAR) containing your project
             </Text>
             <TouchableOpacity
-              style={[styles.fileButton, errors.project && styles.fileButtonError]}
+              style={[styles.fileButton, errors.project ? styles.fileButtonError : null]}
               onPress={pickProject}
             >
               <Text style={styles.fileButtonText}>

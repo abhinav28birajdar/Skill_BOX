@@ -70,8 +70,14 @@ export function BioCognitiveDashboard({
     try {
       // Initialize AI tutor
       const tutorService = new AITutorService();
-      const tutor = new OpenAITutor();
-      await tutor.initialize(user?.id || 'demo');
+      const defaultConfig = {
+        apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY || '',
+        model: 'gpt-3.5-turbo' as const,
+        temperature: 0.7,
+        maxTokens: 1000,
+        systemPrompt: 'You are an AI tutor specializing in bio-cognitive learning. Help students learn efficiently by adapting to their cognitive state and biometric feedback.'
+      };
+      const tutor = new OpenAITutor(defaultConfig);
       setAiTutor(tutor);
 
       // Start biometric tracking
@@ -207,7 +213,7 @@ export function BioCognitiveDashboard({
         onPress={() => setShowDetailedAnalysis(true)}
       >
         <View style={styles.cardHeader}>
-          <Ionicons name="brain" size={24} color={theme.colors.primary} />
+          <Ionicons name="analytics" size={24} color={theme.colors.primary} />
           <Text style={[styles.cardTitle, { color: theme.colors.text }]}>
             Cognitive State
           </Text>
@@ -281,21 +287,21 @@ export function BioCognitiveDashboard({
           <View style={styles.biometricItem}>
             <Ionicons name="eye-outline" size={20} color="#45b7d1" />
             <Text style={[styles.biometricValue, { color: theme.colors.text }]}>
-              {((biometricData.attentionLevel || 0) * 100).toFixed(0)}%
+              {((biometricData.facialExpressions?.attention || 0) * 100).toFixed(0)}%
             </Text>
           </View>
           
           <View style={styles.biometricItem}>
             <Ionicons name="thermometer-outline" size={20} color="#feca57" />
             <Text style={[styles.biometricValue, { color: theme.colors.text }]}>
-              {((biometricData.stressLevel || 0) * 100).toFixed(0)}%
+              {((biometricData.eyeTracking?.pupilDilation || 0) * 100).toFixed(0)}%
             </Text>
           </View>
           
           <View style={styles.biometricItem}>
             <Ionicons name="happy-outline" size={20} color="#96ceb4" />
             <Text style={[styles.biometricValue, { color: theme.colors.text }]}>
-              {biometricData.emotionalState?.primary || 'Unknown'}
+              {biometricData.facialExpressions?.emotion || 'Unknown'}
             </Text>
           </View>
         </View>

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Camera } from 'expo-camera';
+import { Camera, CameraType } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
 import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState } from 'react';
@@ -470,7 +470,7 @@ export function ImmersiveARLearning({
       {/* AR Camera View */}
       <Camera
         style={styles.camera}
-        type={Camera.Constants.Type.back}
+        type={CameraType.back}
         onFacesDetected={handleFacesDetected}
         faceDetectorSettings={{
           mode: FaceDetector.FaceDetectorMode.fast,

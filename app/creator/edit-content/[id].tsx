@@ -320,7 +320,7 @@ export default function EditContentScreen() {
           <View style={styles.formGroup}>
             <Text style={styles.label}>Title *</Text>
             <TextInput
-              style={[styles.input, errors.title && styles.inputError]}
+              style={[styles.input, errors.title ? styles.inputError : null]}
               value={formData.title}
               onChangeText={(text) => setFormData(prev => ({ ...prev, title: text }))}
               placeholder="Enter title"
@@ -333,7 +333,7 @@ export default function EditContentScreen() {
           <View style={styles.formGroup}>
             <Text style={styles.label}>Description *</Text>
             <TextInput
-              style={[styles.textArea, errors.description && styles.inputError]}
+              style={[styles.textArea, errors.description ? styles.inputError : null]}
               value={formData.description}
               onChangeText={(text) => setFormData(prev => ({ ...prev, description: text }))}
               placeholder="Describe your content"

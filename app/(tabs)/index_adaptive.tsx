@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 import { AITutorChat } from '@/components/ai/AITutorChat';
@@ -135,7 +135,19 @@ export default function AdaptiveHomeScreen() {
 
     try {
       // Generate AI-powered learning path
-      const path = await predictLearningPath(user.id, 'general');
+      const defaultCognitiveState = {
+        focusLevel: 0.7,
+        cognitiveLoad: 0.5,
+        emotionalState: 'neutral',
+        brainwaveStates: {
+          alpha: 0.3,
+          beta: 0.4,
+          theta: 0.2,
+          delta: 0.1
+        },
+        learningReadiness: 0.8
+      };
+      const path = await predictLearningPath(user.id, 'general', defaultCognitiveState);
       setCurrentLearningPath(path.nextSteps);
     } catch (error) {
       console.error('Error generating recommendations:', error);
@@ -340,8 +352,8 @@ export default function AdaptiveHomeScreen() {
               <ContentCard
                 key={content.id}
                 title={content.title}
-                description={content.description}
-                imageUrl={content.thumbnail_url}
+                description={content.description || undefined}
+                imageUrl={content.thumbnail_url || undefined}
                 duration={`${content.duration_minutes} min`}
                 level={content.difficulty_level}
                 rating={content.average_rating}
@@ -366,7 +378,7 @@ export default function AdaptiveHomeScreen() {
               <TeacherCard
                 key={teacher.id}
                 name={teacher.full_name || 'Expert Teacher'}
-                bio={teacher.bio}
+                bio={teacher.bio || undefined}
                 rating={teacher.average_rating}
                 studentsCount={teacher.total_students}
                 style={styles.teacherCard}
