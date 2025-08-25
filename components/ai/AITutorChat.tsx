@@ -1,5 +1,9 @@
 import { useAI } from '@/context/AIModelContext';
 import { useTheme } from '@/context/ThemeContext';
+import { Camera } from 'expo-camera';
+import * as FaceDetector from 'expo-face-detector';
+import { GLView } from 'expo-gl';
+import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
     Animated,
@@ -13,13 +17,40 @@ import {
     View
 } from 'react-native';
 
+interface ImmersiveContent {
+  type: '3d' | 'ar' | 'hologram';
+  modelUri?: string;
+  arAnchors?: any[];
+  hapticPattern?: string;
+  spatialAudio?: {
+    uri: string;
+    position: { x: number; y: number; z: number };
+  };
+}
+
 interface Message {
   id: string;
   text: string;
   isUser: boolean;
   timestamp: Date;
-  type?: 'text' | 'suggestion' | 'concept' | 'quiz';
+  type?: 'text' | 'suggestion' | 'concept' | 'quiz' | '3d' | 'ar' | 'hologram';
   metadata?: any;
+  immersiveContent?: ImmersiveContent;
+  emotionalContext?: {
+    sentiment: string;
+    confidence: number;
+    suggestedResponse?: string;
+  };
+}
+
+interface BiometricState {
+  attentionLevel: number;
+  emotionalState: string;
+  cognitiveLoad: number;
+  eyeTrackingData?: {
+    gazePosition: { x: number; y: number };
+    pupilDilation: number;
+  };
 }
 
 interface AITutorChatProps {
@@ -27,6 +58,10 @@ interface AITutorChatProps {
   onClose?: () => void;
   minimized?: boolean;
   onToggleMinimize?: () => void;
+  enableBiometrics?: boolean;
+  enableImmersive?: boolean;
+  hapticFeedback?: boolean;
+  spatialAudio?: boolean;
 }
 
 export function AITutorChat({
@@ -34,15 +69,74 @@ export function AITutorChat({
   onClose,
   minimized = false,
   onToggleMinimize,
+  enableBiometrics = false,
+  enableImmersive = false,
+  hapticFeedback = false,
+  spatialAudio = false,
 }: AITutorChatProps) {
   const { theme } = useTheme();
-  const { isAIEnabled, generateContent, analyzeEngagement } = useAI();
+  const { 
+    isAIEnabled, 
+    generateContent, 
+    analyzeEngagement,
+    updateBiometricData,
+    getCognitiveState,
+    generateHapticPattern,
+    generateImmersiveContent
+  } = useAI();
+  
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [biometricState, setBiometricState] = useState<BiometricState>({
+    attentionLevel: 1,
+    emotionalState: 'neutral',
+    cognitiveLoad: 0.5
+  });
+  
   const flatListRef = useRef<FlatList>(null);
+  const cameraRef = useRef<Camera>(null);
+  const glViewRef = useRef<GLView>(null);
   const animatedHeight = useRef(new Animated.Value(minimized ? 60 : 400)).current;
+  
+  // Biometric monitoring interval
+  useEffect(() => {
+    if (!enableBiometrics) return;
+    
+    const biometricInterval = setInterval(async () => {
+      if (cameraRef.current) {
+        const faces = await detectFaces();
+        if (faces.length > 0) {
+          const face = faces[0];
+          const newBiometricState = {
+            attentionLevel: calculateAttention(face),
+            emotionalState: detectEmotion(face),
+            cognitiveLoad: estimateCognitiveLoad(face),
+            eyeTrackingData: {
+              gazePosition: { x: face.leftEyePosition.x, y: face.leftEyePosition.y },
+              pupilDilation: face.leftEyeOpenProbability || 0.5
+            }
+          };
+          
+          setBiometricState(newBiometricState);
+          updateBiometricData({
+            facialExpressions: {
+              attention: newBiometricState.attentionLevel,
+              emotion: newBiometricState.emotionalState,
+              microExpressions: []
+            },
+            eyeTracking: {
+              gazePosition: newBiometricState.eyeTrackingData.gazePosition,
+              pupilDilation: newBiometricState.eyeTrackingData.pupilDilation
+            }
+          });
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(biometricInterval);
+  }, [enableBiometrics]);
 
   useEffect(() => {
     if (isAIEnabled && contentContext) {
@@ -208,6 +302,128 @@ export function AITutorChat({
     );
   }
 
+  // Biometric analysis functions
+  const detectFaces = async () => {
+    if (!cameraRef.current) return [];
+    const options = {
+      mode: FaceDetector.FaceDetectorMode.fast,
+      detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
+      runClassifications: FaceDetector.FaceDetectorClassifications.all,
+      minDetectionInterval: 100,
+      tracking: true,
+    };
+
+    try {
+      const faces = await cameraRef.current.detectFacesAsync(options);
+      return faces;
+    } catch (error) {
+      console.error('Face detection error:', error);
+      return [];
+    }
+  };
+
+  const calculateAttention = (face: any) => {
+    const eyeOpenScore = (face.leftEyeOpenProbability + face.rightEyeOpenProbability) / 2;
+    const headRotation = Math.abs(face.rollAngle) + Math.abs(face.yawAngle);
+    return Math.max(0, Math.min(1, (eyeOpenScore * 0.7 + (1 - headRotation / 90) * 0.3)));
+  };
+
+  const detectEmotion = (face: any) => {
+    if (face.smilingProbability > 0.7) return 'happy';
+    if (face.smilingProbability < 0.2) return 'serious';
+    return 'neutral';
+  };
+
+  const estimateCognitiveLoad = (face: any) => {
+    const blinkRate = face.leftEyeOpenProbability < 0.2 ? 1 : 0;
+    const headMovement = Math.abs(face.rollAngle) + Math.abs(face.yawAngle);
+    return Math.min(1, (blinkRate * 0.4 + headMovement / 90 * 0.6));
+  };
+
+  // Haptic feedback based on message content
+  const provideFeedback = async (message: Message) => {
+    if (!hapticFeedback) return;
+    
+    const emotion = message.emotionalContext?.sentiment || 'neutral';
+    const intensity = message.emotionalContext?.confidence || 0.5;
+    const pattern = await generateHapticPattern(emotion, intensity);
+    
+    switch (pattern) {
+      case 'success':
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        break;
+      case 'warning':
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        break;
+      case 'error':
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        break;
+      default:
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  };
+
+  const renderImmersiveContent = (content: ImmersiveContent) => {
+    if (!enableImmersive) return null;
+
+    switch (content.type) {
+      case '3d':
+        return (
+          <GLView
+            ref={glViewRef}
+            style={{ width: '100%', height: 200 }}
+            onContextCreate={async (gl) => {
+              // Initialize THREE.js scene here
+              const modelData = await generateImmersiveContent('3d', {
+                modelUri: content.modelUri,
+                context: contentContext
+              });
+              // Render 3D model
+            }}
+          />
+        );
+      
+      case 'ar':
+        return (
+          <Camera
+            ref={cameraRef}
+            style={{ width: '100%', height: 200 }}
+            type={Camera.Constants.Type.back}
+          >
+            {/* AR content overlay */}
+          </Camera>
+        );
+      
+      case 'hologram':
+        return (
+          <View style={{ width: '100%', height: 200, backgroundColor: 'black' }}>
+            {/* Holographic effect implementation */}
+          </View>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
+  const renderBiometricOverlay = () => {
+    if (!enableBiometrics) return null;
+
+    return (
+      <View style={styles.biometricOverlay}>
+        <Text style={[styles.biometricText, { color: theme.colors.textSecondary }]}>
+          Attention: {Math.round(biometricState.attentionLevel * 100)}%
+        </Text>
+        <Text style={[styles.biometricText, { color: theme.colors.textSecondary }]}>
+          Emotion: {biometricState.emotionalState}
+        </Text>
+        <Text style={[styles.biometricText, { color: theme.colors.textSecondary }]}>
+          Cognitive Load: {Math.round(biometricState.cognitiveLoad * 100)}%
+        </Text>
+      </View>
+    );
+  };
+
   return (
     <Animated.View style={[
       styles.container,
@@ -217,6 +433,31 @@ export function AITutorChat({
         borderColor: theme.colors.border,
       }
     ]}>
+      {enableBiometrics && (
+        <Camera
+          ref={cameraRef}
+          style={styles.biometricCamera}
+          type={Camera.Constants.Type.front}
+          onFacesDetected={({ faces }) => {
+            if (faces.length > 0) {
+              const face = faces[0];
+              setBiometricState({
+                attentionLevel: calculateAttention(face),
+                emotionalState: detectEmotion(face),
+                cognitiveLoad: estimateCognitiveLoad(face)
+              });
+            }
+          }}
+          faceDetectorSettings={{
+            mode: FaceDetector.FaceDetectorMode.fast,
+            detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
+            runClassifications: FaceDetector.FaceDetectorClassifications.all,
+            minDetectionInterval: 100,
+            tracking: true,
+          }}
+        />
+      )}
+      
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
         <View style={styles.headerLeft}>
@@ -236,6 +477,8 @@ export function AITutorChat({
           )}
         </View>
       </View>
+      
+      {renderBiometricOverlay()}
 
       {!minimized && (
         <>
@@ -333,6 +576,32 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 8,
+  },
+  biometricCamera: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: 1,
+    height: 1,
+    opacity: 0,
+  },
+  biometricOverlay: {
+    position: 'absolute',
+    top: 60,
+    right: 16,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 8,
+    borderRadius: 8,
+    zIndex: 100,
+  },
+  biometricText: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  immersiveContainer: {
+    width: '100%',
+    height: 200,
+    backgroundColor: '#000',
   },
   disabledContainer: {
     position: 'absolute',

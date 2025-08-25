@@ -1,15 +1,49 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+interface BiometricData {
+  eegPatterns?: number[];
+  heartRate?: number;
+  gsrLevel?: number;
+  eyeTracking?: {
+    gazePosition: { x: number; y: number };
+    pupilDilation: number;
+  };
+  facialExpressions?: {
+    attention: number;
+    emotion: string;
+    microExpressions: string[];
+  };
+}
+
+interface CognitiveState {
+  focusLevel: number;
+  cognitiveLoad: number;
+  emotionalState: string;
+  brainwaveStates: {
+    alpha: number;
+    beta: number;
+    theta: number;
+    delta: number;
+  };
+  learningReadiness: number;
+}
+
 interface AIModelContextType {
   isAIEnabled: boolean;
   modelLoading: boolean;
   currentModel: string;
+  currentCognitiveState: CognitiveState | null;
+  lastBiometricData: BiometricData | null;
   enableAI: () => Promise<void>;
   disableAI: () => Promise<void>;
-  generateContent: (prompt: string, type: 'text' | 'lesson' | 'quiz') => Promise<string>;
-  analyzeEngagement: (data: any) => Promise<EngagementAnalysis>;
-  predictLearningPath: (userId: string, skillId: string) => Promise<LearningPath>;
+  generateContent: (prompt: string, type: 'text' | 'lesson' | 'quiz' | '3d' | 'ar' | 'haptic') => Promise<string>;
+  analyzeEngagement: (data: BiometricData) => Promise<EngagementAnalysis>;
+  predictLearningPath: (userId: string, skillId: string, cognitiveState: CognitiveState) => Promise<LearningPath>;
+  updateBiometricData: (data: BiometricData) => void;
+  getCognitiveState: () => CognitiveState;
+  generateHapticPattern: (emotion: string, intensity: number) => Promise<string>;
+  generateImmersiveContent: (type: '3d' | 'ar' | 'vr', context: any) => Promise<string>;
 }
 
 interface EngagementAnalysis {

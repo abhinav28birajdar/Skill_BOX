@@ -1,5 +1,99 @@
 import { supabase } from '../lib/supabase';
 
+export interface BiometricMetrics {
+  eeg_patterns: number[];
+  heart_rate: number;
+  gsr_level: number;
+  eye_tracking: {
+    gaze_position: { x: number;   // Bio-Cognitive Analytics
+  static async analyzeBiometricData(
+    userId: string,
+    biometricData: BiometricMetrics
+  ): Promise<{
+    cognitive_state: CognitiveMetrics;
+    learning_recommendations: string[];
+    adaptation_required: boolean;
+  }> {
+    try {
+      const { data, error } = await supabase.functions.invoke('bio-cognitive-analysis', {
+        body: {
+          user_id: userId,
+          biometric_data: biometricData,
+        },
+      });
+
+      if (error) throw error;
+      return {
+        cognitive_state: data.cognitive_state,
+        learning_recommendations: data.recommendations || [],
+        adaptation_required: data.needs_adaptation || false,
+      };
+    } catch (error) {
+      console.error('Error analyzing biometric data:', error);
+      return {
+        cognitive_state: {
+          focus_level: 0.5,
+          cognitive_load: 0.5,
+          emotional_state: 'neutral',
+          brainwave_states: {
+            alpha: 0,
+            beta: 0,
+            theta: 0,
+            delta: 0
+          },
+          learning_readiness: 0.5,
+          optimal_content_type: 'visual',
+          timestamp: new Date().toISOString()
+        },
+        learning_recommendations: [],
+        adaptation_required: false
+      };
+    }
+  }
+
+  // Learning Analytics with Bio-Cognitive Integration
+  static async getLearningInsights(userId: string): Promise<AIInsight[]> {
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-insights', {
+        body: {
+          user_id: userId,
+          include_biometrics: true
+        },
+      });
+
+      if (error) throw error;
+      return data.insights || [];
+    } catch (error) {
+      console.error('Error getting learning insights:', error);
+      return [];
+    }
+  }  pupil_dilation: number;
+    fixation_duration: number;
+  };
+  facial_expressions: {
+    attention: number;
+    emotion: string;
+    micro_expressions: string[];
+    engagement_score: number;
+  };
+  timestamp: string;
+}
+
+export interface CognitiveMetrics {
+  focus_level: number;
+  cognitive_load: number;
+  emotional_state: string;
+  brainwave_states: {
+    alpha: number;
+    beta: number;
+    theta: number;
+    delta: number;
+  };
+  learning_readiness: number;
+  optimal_content_type: 'visual' | 'auditory' | 'kinesthetic' | 'reading';
+  timestamp: string;
+}
+
 export interface LearningMetrics {
   completion_rate: number;
   quiz_average: number;
@@ -7,6 +101,8 @@ export interface LearningMetrics {
   preferred_learning_style: 'visual' | 'auditory' | 'kinesthetic' | 'reading';
   struggle_areas: string[];
   strength_areas: string[];
+  cognitive_metrics: CognitiveMetrics;
+  biometric_metrics: BiometricMetrics;
   last_updated: string;
 }
 
