@@ -402,7 +402,7 @@ export class NotificationService {
         },
         trigger: scheduledTime 
           ? { 
-              type: Notifications.SchedulableTriggerInputTypes.DATE,
+              type: 'date' as const,
               date: scheduledTime
             } as Notifications.DateTriggerInput
           : null, // Send immediately if no scheduled time

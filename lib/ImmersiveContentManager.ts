@@ -1,14 +1,11 @@
 import { Asset } from 'expo-asset';
 import { Audio } from 'expo-av';
-import { ExpoWebGLRenderingContext } from 'expo-gl';
 import * as Haptics from 'expo-haptics';
-import { Renderer, TextureLoader } from 'expo-three';
-import * as THREE from 'three';
-import { BIOMETRIC_CONFIG } from '../config/bioCognitiveConfig';
 
+// Simplified interfaces for when 3D features are disabled
 export interface SpatialAudioSource {
   uri: string;
-  position: THREE.Vector3;
+  position: { x: number; y: number; z: number };
   sound?: Audio.Sound;
 }
 
@@ -18,154 +15,95 @@ export interface HapticPattern {
 }
 
 export class ImmersiveContentManager {
-  private gl: ExpoWebGLRenderingContext | null = null;
-  private renderer: Renderer | null = null;
-  private camera: THREE.PerspectiveCamera | null = null;
-  private scene: THREE.Scene | null = null;
   private audioSources: Map<string, SpatialAudioSource> = new Map();
-  private isInitialized = false;
+  private masterVolume: number = 1.0;
 
-  constructor() {
-    this.setupAudio();
+  public async initialize() {
+    console.log('ImmersiveContentManager initialized (3D features disabled)');
   }
 
-  private async setupAudio() {
-    await Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      allowsRecordingIOS: false,
-      staysActiveInBackground: false,
-      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
-      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
-      shouldDuckAndroid: false,
-    });
+  public async loadModel(uri: string): Promise<any> {
+    console.log('3D model loading disabled');
+    return null;
   }
 
-  public async initialize(glContext: ExpoWebGLRenderingContext) {
-    if (this.isInitialized) return;
-
-    this.gl = glContext;
-    this.renderer = new Renderer({ gl: this.gl });
-    this.scene = new THREE.Scene();
-    
-    // Setup camera
-    const { drawingBufferWidth: width, drawingBufferHeight: height } = this.gl;
-    this.camera = new THREE.PerspectiveCamera(70, width / height, 0.01, 1000);
-    this.camera.position.z = 5;
-
-    // Basic lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    this.scene.add(ambientLight);
-    
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLight.position.set(5, 5, 5);
-    this.scene.add(directionalLight);
-
-    this.isInitialized = true;
+  public async loadTexture(uri: string): Promise<any> {
+    console.log('Texture loading disabled');
+    return null;
   }
 
-  public async loadModel(uri: string): Promise<THREE.Object3D> {
-    const asset = await Asset.fromURI(uri);
-    // Implementation would depend on file type (glTF, OBJ, etc.)
-    // This is a placeholder that creates a basic cube
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    return cube;
-  }
-
-  public async loadTexture(uri: string): Promise<THREE.Texture> {
-    const asset = await Asset.fromURI(uri);
-    const texture = await new TextureLoader().loadAsync(asset);
-    return texture;
-  }
-
-  public async addSpatialAudio(source: SpatialAudioSource) {
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: source.uri },
-      {
-        shouldPlay: true,
-        isLooping: true,
-        volume: 1.0,
-        rate: 1.0,
-        shouldCorrectPitch: true,
-      }
-    );
-
-    this.audioSources.set(source.uri, {
-      ...source,
-      sound,
-    });
-
-    await this.updateAudioPositions();
-  }
-
-  private async updateAudioPositions() {
-    if (!this.camera) return;
-
-    for (const [_, source] of this.audioSources) {
-      if (!source.sound) continue;
-
-      const distance = this.camera.position.distanceTo(
-        new THREE.Vector3(source.position.x, source.position.y, source.position.z)
+  public async setupSpatialAudio(sources: SpatialAudioSource[]) {
+    for (const source of sources) {
+      const asset = Asset.fromURI(source.uri);
+      await asset.downloadAsync();
+      
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: asset.localUri || source.uri },
+        { 
+          shouldPlay: false,
+          volume: this.masterVolume,
+          isLooping: false
+        }
       );
 
-      // Simple distance-based attenuation
-      const maxDistance = BIOMETRIC_CONFIG.IMMERSIVE_CONTENT.SPATIAL_AUDIO.ROLLOFF_FACTOR;
-      const volume = Math.max(0, 1 - (distance / maxDistance));
-      
-      await source.sound.setVolumeAsync(volume);
+      source.sound = sound;
+      this.audioSources.set(source.uri, source);
     }
   }
 
-  public async playHapticPattern(pattern: HapticPattern[]) {
-    for (const step of pattern) {
-      if (step.intensity >= 0.8) {
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      } else if (step.intensity >= 0.5) {
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      } else {
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  public async playSpatialAudio(sourceUri: string) {
+    const source = this.audioSources.get(sourceUri);
+    if (source?.sound) {
+      await source.sound.playAsync();
+    }
+  }
+
+  public async stopSpatialAudio(sourceUri: string) {
+    const source = this.audioSources.get(sourceUri);
+    if (source?.sound) {
+      await source.sound.stopAsync();
+    }
+  }
+
+  public updateCameraPosition(position: { x: number; y: number; z: number }) {
+    console.log('Camera position update disabled');
+  }
+
+  public async renderFrame() {
+    console.log('3D rendering disabled');
+  }
+
+  public async performHapticFeedback(pattern: HapticPattern) {
+    const impacts = Math.floor(pattern.duration / 100);
+    for (let i = 0; i < impacts; i++) {
+      await Haptics.impactAsync(
+        pattern.intensity > 0.7 
+          ? Haptics.ImpactFeedbackStyle.Heavy
+          : pattern.intensity > 0.4 
+          ? Haptics.ImpactFeedbackStyle.Medium
+          : Haptics.ImpactFeedbackStyle.Light
+      );
+      if (i < impacts - 1) {
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
-      
-      await new Promise(resolve => setTimeout(resolve, step.duration));
     }
   }
 
-  public render() {
-    if (!this.isInitialized || !this.renderer || !this.scene || !this.camera) return;
-    this.renderer.render(this.scene, this.camera);
-  }
-
-  public updateCameraPosition(position: THREE.Vector3) {
-    if (!this.camera) return;
-    this.camera.position.copy(position);
-    this.updateAudioPositions();
-  }
-
-  public resize(width: number, height: number) {
-    if (!this.camera || !this.renderer) return;
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(width, height);
-  }
-
-  public dispose() {
-    // Clean up resources
+  public setMasterVolume(volume: number) {
+    this.masterVolume = Math.max(0, Math.min(1, volume));
     this.audioSources.forEach(async (source) => {
+      if (source.sound) {
+        await source.sound.setVolumeAsync(this.masterVolume);
+      }
+    });
+  }
+
+  public async cleanup() {
+    for (const source of this.audioSources.values()) {
       if (source.sound) {
         await source.sound.unloadAsync();
       }
-    });
-    this.audioSources.clear();
-
-    if (this.renderer) {
-      this.renderer.dispose();
     }
-
-    this.scene = null;
-    this.camera = null;
-    this.renderer = null;
-    this.gl = null;
-    this.isInitialized = false;
+    this.audioSources.clear();
   }
 }

@@ -1,4 +1,4 @@
-import { Camera } from 'expo-camera';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
 import { DeviceMotion, DeviceMotionMeasurement } from 'expo-sensors';
 import { useEffect, useRef, useState } from 'react';
@@ -28,7 +28,7 @@ export function useBioSensors() {
 
   const [isInitialized, setIsInitialized] = useState(false);
   const motionSubscription = useRef<any>(null);
-  const cameraRef = useRef<Camera>(null);
+  const cameraRef = useRef<CameraView>(null);
 
   useEffect(() => {
     initializeSensors();
@@ -38,10 +38,14 @@ export function useBioSensors() {
     };
   }, []);
 
+  const [permission, requestPermission] = useCameraPermissions();
+
   const initializeSensors = async () => {
     try {
       // Request camera permissions
-      const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
+      if (!permission?.granted) {
+        await requestPermission();
+      }
       
       // Setup device motion
       DeviceMotion.setUpdateInterval(BIOMETRIC_CONFIG.SAMPLING_RATES.EYE_TRACKING);
@@ -49,12 +53,12 @@ export function useBioSensors() {
       setSensorData(prev => ({
         ...prev,
         permissions: {
-          camera: cameraStatus === 'granted',
+          camera: permission?.granted || false,
           motion: true // DeviceMotion doesn't require explicit permission
         }
       }));
 
-      if (cameraStatus === 'granted') {
+      if (permission?.granted) {
         await startFaceTracking();
       }
 

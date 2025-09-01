@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Camera, CameraType } from 'expo-camera';
-import * as FaceDetector from 'expo-face-detector';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -95,11 +94,17 @@ export function ImmersiveARLearning({
     }
   }, [faceData]);
 
-  const initializeARSession = async () => {
-    const { status } = await Camera.requestCameraPermissionsAsync();
-    setHasPermission(status === 'granted');
+  const [permission, requestPermission] = useCameraPermissions();
 
-    if (status === 'granted') {
+  const initializeARSession = async () => {
+    if (!permission?.granted) {
+      const result = await requestPermission();
+      setHasPermission(result.granted);
+    } else {
+      setHasPermission(true);
+    }
+
+    if (permission?.granted) {
       initializeARContent();
       startARSession();
     }
@@ -468,15 +473,9 @@ export function ImmersiveARLearning({
   return (
     <View style={styles.container} {...panResponder.panHandlers}>
       {/* AR Camera View */}
-      <Camera
+      <CameraView
         style={styles.camera}
-        type={CameraType.back}
-        onFacesDetected={handleFacesDetected}
-        faceDetectorSettings={{
-          mode: FaceDetector.FaceDetectorMode.fast,
-          detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
-          runClassifications: FaceDetector.FaceDetectorClassifications.all,
-        }}
+        facing="back"
       >
         {/* AR Overlay */}
         <Animated.View
@@ -553,7 +552,7 @@ export function ImmersiveARLearning({
             <Ionicons name="close" size={24} color={theme.colors.text} />
           </TouchableOpacity>
         </View>
-      </Camera>
+      </CameraView>
     </View>
   );
 }

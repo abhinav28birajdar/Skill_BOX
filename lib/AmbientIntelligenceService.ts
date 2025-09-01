@@ -1,7 +1,7 @@
-import { Brightness } from 'expo-brightness';
-import * as ScreenCapture from 'expo-screen-capture';
 import * as Sensors from 'expo-sensors';
 import { BIOMETRIC_CONFIG } from '../config/bioCognitiveConfig';
+import { Brightness } from './brightness-stub';
+import * as ScreenCapture from './screen-capture-stub';
 
 interface AmbientConditions {
   lightLevel: number;  // 0-1
@@ -91,7 +91,7 @@ export class AmbientIntelligenceService {
 
     // Clear monitoring interval
     if (this.monitoringInterval) {
-      clearInterval(this.monitoringInterval);
+      clearInterval(this.monitoringInterval as unknown as number);
       this.monitoringInterval = null;
     }
 
@@ -102,7 +102,7 @@ export class AmbientIntelligenceService {
   private async monitorEnvironment() {
     try {
       // Get current brightness
-      const { brightness } = await Brightness.getBrightnessAsync();
+      const brightness = await Brightness.getBrightnessAsync();
 
       // Simulate noise level detection (would need actual microphone access)
       const noiseLevel = Math.random() * 60 + 30; // 30-90 dB

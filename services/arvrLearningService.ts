@@ -1,4 +1,4 @@
-import { Camera } from 'expo-camera';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
 import * as Haptics from 'expo-haptics';
 import { Subscription } from 'expo-modules-core';
@@ -7,7 +7,7 @@ import { BIOMETRIC_CONFIG } from '../config/bioCognitiveConfig';
 import { ARVRServiceState, FaceDetectionResult, HapticFeedbackType } from '../immersive/types';
 
 export class ARVRLearningService {
-  private camera: Camera | null = null;
+  private camera: CameraView | null = null;
   private state: ARVRServiceState = {
     isTracking: false,
     lastAttentionScore: 0,
@@ -22,11 +22,8 @@ export class ARVRLearningService {
 
   private async initializeSensors() {
     try {
-      // Request camera permissions
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        throw new Error('Camera permission is required for AR features');
-      }
+      // Note: Camera permissions will be handled by the component using useCameraPermissions hook
+      console.log('ARVRLearningService initialized - camera permissions handled by components');
 
       // Initialize device motion tracking
       DeviceMotion.setUpdateInterval(BIOMETRIC_CONFIG.SAMPLING_RATES.EYE_TRACKING);
@@ -97,7 +94,7 @@ export class ARVRLearningService {
     };
   }
 
-  public setCameraRef = (ref: Camera | null) => {
+  public setCameraRef = (ref: CameraView | null) => {
     this.camera = ref;
   };
 

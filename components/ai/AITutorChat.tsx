@@ -1,20 +1,20 @@
 import { useAI } from '@/context/AIModelContext';
 import { useTheme } from '@/context/ThemeContext';
-import { Camera, CameraType } from 'expo-camera';
+import { CameraView } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
 // import { GLView } from 'expo-gl';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Animated,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Animated,
+    FlatList,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 interface ImmersiveContent {
@@ -96,7 +96,7 @@ export function AITutorChat({
   });
   
   const flatListRef = useRef<FlatList>(null);
-  const cameraRef = useRef<Camera>(null);
+  const cameraRef = useRef<CameraView>(null);
   const glViewRef = useRef<View>(null);
   const animatedHeight = useRef(new Animated.Value(minimized ? 60 : 400)).current;
   
@@ -379,13 +379,13 @@ export function AITutorChat({
       
       case 'ar':
         return (
-          <Camera
+          <CameraView
             ref={cameraRef}
             style={{ width: '100%', height: 200 }}
-            type={CameraType.back}
+            facing="back"
           >
             {/* AR content overlay */}
-          </Camera>
+          </CameraView>
         );
       
       case 'hologram':
@@ -428,27 +428,10 @@ export function AITutorChat({
       }
     ]}>
       {enableBiometrics && (
-        <Camera
+        <CameraView
           ref={cameraRef}
           style={styles.biometricCamera}
-          type={CameraType.front}
-          onFacesDetected={({ faces }) => {
-            if (faces.length > 0) {
-              const face = faces[0];
-              setBiometricState({
-                attentionLevel: calculateAttention(face),
-                emotionalState: detectEmotion(face),
-                cognitiveLoad: estimateCognitiveLoad(face)
-              });
-            }
-          }}
-          faceDetectorSettings={{
-            mode: FaceDetector.FaceDetectorMode.fast,
-            detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
-            runClassifications: FaceDetector.FaceDetectorClassifications.all,
-            minDetectionInterval: 100,
-            tracking: true,
-          }}
+          facing="front"
         />
       )}
       

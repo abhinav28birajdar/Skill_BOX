@@ -1,3 +1,4 @@
+// @ts-nocheck - This is a Deno edge function, not React Native
 import { serve } from 'https://deno.land/std@0.131.0/http/server.ts'
 import { supabaseClient } from '../_shared/supabaseClient.ts'
 
@@ -34,7 +35,7 @@ interface CognitiveState {
   timestamp: string
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   try {
     const { user_id, biometric_data } = await req.json()
     
@@ -73,7 +74,8 @@ serve(async (req) => {
       },
     )
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     })

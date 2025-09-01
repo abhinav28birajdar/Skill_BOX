@@ -85,25 +85,28 @@ export class NeuralFeedbackProcessor {
     const getPowerInBand = (band: { min: number; max: number }) => {
       const startBin = Math.floor(band.min / freqResolution);
       const endBin = Math.floor(band.max / freqResolution);
-      return fftData
+      const dataArray = Array.isArray(fftData) ? (fftData as number[]) : [fftData as number];
+      return dataArray
         .slice(startBin, endBin + 1)
-        .reduce((sum, val) => sum + Math.pow(Math.abs(val), 2), 0);
+        .reduce((sum: number, val: number) => sum + Math.pow(Math.abs(val), 2), 0);
     };
 
-    const totalPower = fftData.reduce((sum, val) => sum + Math.pow(Math.abs(val), 2), 0);
+    const dataArray = Array.isArray(fftData) ? (fftData as number[]) : [fftData as number];
+    const totalPower = dataArray.reduce((sum: number, val: number) => sum + Math.pow(Math.abs(val), 2), 0);
 
     return {
-      delta: getPowerInBand(BRAINWAVE_BANDS.DELTA) / totalPower,
-      theta: getPowerInBand(BRAINWAVE_BANDS.THETA) / totalPower,
-      alpha: getPowerInBand(BRAINWAVE_BANDS.ALPHA) / totalPower,
-      beta: getPowerInBand(BRAINWAVE_BANDS.BETA) / totalPower,
+      delta: (getPowerInBand(BRAINWAVE_BANDS.DELTA) as number) / (totalPower as number),
+      theta: (getPowerInBand(BRAINWAVE_BANDS.THETA) as number) / (totalPower as number),
+      alpha: (getPowerInBand(BRAINWAVE_BANDS.ALPHA) as number) / (totalPower as number),
+      beta: (getPowerInBand(BRAINWAVE_BANDS.BETA) as number) / (totalPower as number),
+      gamma: (getPowerInBand(BRAINWAVE_BANDS.GAMMA) as number) / (totalPower as number),
     };
   }
 
   private async calculateAttention(data: {
     eyeTracking: BiometricMetrics['eye_tracking'];
     facialExpressions: BiometricMetrics['facial_expressions'];
-    brainwaves: { alpha: number; beta: number; theta: number; delta: number; };
+    brainwaves: { alpha: number; beta: number; theta: number; delta: number; gamma: number; };
   }): Promise<number> {
     const { ATTENTION_WEIGHTS } = COGNITIVE_ANALYSIS;
 
@@ -176,7 +179,7 @@ export class NeuralFeedbackProcessor {
   }
 
   private determineOptimalContentType(
-    brainwaves: { alpha: number; beta: number; theta: number; delta: number; }
+    brainwaves: { alpha: number; beta: number; theta: number; delta: number; gamma: number; }
   ): 'visual' | 'auditory' | 'kinesthetic' | 'reading' {
     // High beta waves indicate analytical thinking - good for reading
     if (brainwaves.beta > 0.6) return 'reading';

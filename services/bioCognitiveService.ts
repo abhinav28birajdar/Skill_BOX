@@ -27,6 +27,7 @@ export interface CognitiveMetrics {
     beta: number;
     theta: number;
     delta: number;
+    gamma: number;
   };
   learning_readiness: number;
   optimal_content_type: 'visual' | 'auditory' | 'kinesthetic' | 'reading';
@@ -77,7 +78,7 @@ export class BioCognitiveService {
           focus_level: 0.5,
           cognitive_load: 0.5,
           emotional_state: 'neutral',
-          brainwave_states: { alpha: 0, beta: 0, theta: 0, delta: 0 },
+          brainwave_states: { alpha: 0, beta: 0, theta: 0, delta: 0, gamma: 0 },
           learning_readiness: 0.5,
           optimal_content_type: 'visual',
           timestamp: new Date().toISOString()
