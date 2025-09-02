@@ -1,7 +1,6 @@
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { CameraView } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
 import * as Haptics from 'expo-haptics';
-import { Subscription } from 'expo-modules-core';
 import { DeviceMotion, DeviceMotionMeasurement } from 'expo-sensors';
 import { BIOMETRIC_CONFIG } from '../config/bioCognitiveConfig';
 import { ARVRServiceState, FaceDetectionResult, HapticFeedbackType } from '../immersive/types';
@@ -14,7 +13,7 @@ export class ARVRLearningService {
     calibrationComplete: false
   };
   private lastMotionUpdate: DeviceMotionMeasurement | null = null;
-  private motionSubscription: Subscription | null = null;
+  private motionSubscription: { remove: () => void } | null = null;
 
   constructor() {
     this.initializeSensors();

@@ -161,7 +161,7 @@ function calculateLearningReadiness(focusLevel: number, cognitiveLoad: number, e
 
 function determineOptimalContentType(
   learningReadiness: number,
-  brainwaves: { alpha: number; beta: number; theta: number; delta: number }
+  brainwaves: { alpha: number; beta: number; theta: number; delta: number; gamma: number }
 ): 'visual' | 'auditory' | 'kinesthetic' | 'reading' {
   // High beta waves indicate analytical thinking - good for reading
   if (brainwaves.beta > 0.6) return 'reading'
