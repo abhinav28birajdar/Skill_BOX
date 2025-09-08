@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "skillbox",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "sdkVersion": "53.0.0",
     "ios": {
       "supportsTablet": true,
