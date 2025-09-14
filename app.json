@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "skillbox",
     "userInterfaceStyle": "automatic",
-    "sdkVersion": "53.0.0",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.skillbox.app"
