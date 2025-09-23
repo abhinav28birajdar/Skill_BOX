@@ -160,7 +160,7 @@ export class OpenAITutor extends AITutorService {
     }
 
     // Calculate learning readiness
-    const emotionalPositivity = ['happy', 'excited', 'confident', 'focused'].includes(emotionalState) ? 0.8 : 0.5;
+    const emotionalPositivity = ['happy', 'excited', 'confident', 'focused'].indexOf(emotionalState) !== -1 ? 0.8 : 0.5;
     const learningReadiness = Math.max(0, Math.min(1, 
       focusLevel * 0.4 + 
       (1 - Math.abs(cognitiveLoad - 0.6)) * 0.3 + 
@@ -401,15 +401,15 @@ export class OpenAITutor extends AITutorService {
     // Analyze user input to determine intent
     const lowerInput = userInput.toLowerCase();
     
-    if (lowerInput.includes('explain') || lowerInput.includes('what is')) {
+    if (lowerInput.indexOf('explain') !== -1 || lowerInput.indexOf('what is') !== -1) {
       return 'explanation_request';
-    } else if (lowerInput.includes('how') || lowerInput.includes('show me')) {
+    } else if (lowerInput.indexOf('how') !== -1 || lowerInput.indexOf('show me') !== -1) {
       return 'demonstration_request';
-    } else if (lowerInput.includes('practice') || lowerInput.includes('exercise')) {
+    } else if (lowerInput.indexOf('practice') !== -1 || lowerInput.indexOf('exercise') !== -1) {
       return 'practice_request';
-    } else if (lowerInput.includes('question') || lowerInput.includes('test')) {
+    } else if (lowerInput.indexOf('question') !== -1 || lowerInput.indexOf('test') !== -1) {
       return 'assessment_request';
-    } else if (lowerInput.includes('confused') || lowerInput.includes('don\'t understand')) {
+    } else if (lowerInput.indexOf('confused') !== -1 || lowerInput.indexOf('don\'t understand') !== -1) {
       return 'clarification_request';
     }
     
@@ -582,7 +582,7 @@ The response should be engaging, appropriate for their focus level, and help the
   }
 
   private generateFollowUpActions(responseType: string, cognitiveState: CognitiveState): string[] {
-    const actions = [];
+    const actions: string[] = [];
     
     if (cognitiveState.focusLevel < 0.5) {
       actions.push('Suggest taking a short break');

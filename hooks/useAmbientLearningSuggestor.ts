@@ -415,7 +415,7 @@ export function useAmbientLearningSuggestor(
   const getAdaptiveRecommendations = () => {
     if (!cognitiveState || !currentOpportunity) return [];
 
-    const recommendations = [];
+    const recommendations: string[] = [];
 
     if (cognitiveState.focusLevel < 0.4) {
       recommendations.push('Consider taking a break before learning');

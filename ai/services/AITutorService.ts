@@ -44,14 +44,17 @@ export class AITutorService {
     this.initializeAdaptationEngine();
   }
 
-  private async initializeAdaptationEngine() {
-    // Initialize ML models for real-time adaptation
-    this.adaptationEngine = {
-      cognitiveLoadPredictor: null,
-      emotionalStateClassifier: null,
-      learningStyleAnalyzer: null,
-      contentRecommendationEngine: null
-    };
+  private initializeAdaptationEngine(): Promise<void> {
+    return new Promise((resolve) => {
+      // Initialize ML models for real-time adaptation
+      this.adaptationEngine = {
+        cognitiveLoadPredictor: null,
+        emotionalStateClassifier: null,
+        learningStyleAnalyzer: null,
+        contentRecommendationEngine: null
+      };
+      resolve();
+    });
   }
 
   async createPersonalizedTutor(
@@ -429,7 +432,7 @@ export class AITutorService {
     if (biometricData.facialExpressions?.emotion) {
       const emotion = biometricData.facialExpressions.emotion;
       const positiveEmotions = ['happy', 'excited', 'confident', 'focused'];
-      return positiveEmotions.includes(emotion) ? 0.8 : 0.4;
+      return positiveEmotions.indexOf(emotion) !== -1 ? 0.8 : 0.4;
     }
     
     return 0.5; // Neutral

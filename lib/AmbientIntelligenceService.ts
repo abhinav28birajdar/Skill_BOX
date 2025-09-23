@@ -21,7 +21,7 @@ interface AmbientAdaptation {
 export class AmbientIntelligenceService {
   private static instance: AmbientIntelligenceService;
   private isMonitoring = false;
-  private monitoringInterval: NodeJS.Timer | null = null;
+  private monitoringInterval: number | null = null;
   private lastConditions: AmbientConditions | null = null;
   private onConditionsChange: ((conditions: AmbientConditions) => void) | null = null;
 

@@ -33,7 +33,7 @@ export function useCognitiveLoad(biometricData?: BiometricData) {
   });
 
   const history = useRef<number[]>([]);
-  const analysisInterval = useRef<NodeJS.Timeout | null>(null);
+  const analysisInterval = useRef<number | null>(null);
 
   useEffect(() => {
     if (biometricData) {
@@ -238,7 +238,7 @@ export function useCognitiveLoad(biometricData?: BiometricData) {
   };
 
   const getAdaptationSuggestions = () => {
-    const suggestions = [];
+    const suggestions: string[] = [];
 
     if (cognitiveState.cognitiveLoad > 0.8) {
       suggestions.push('Take a 5-minute break');
