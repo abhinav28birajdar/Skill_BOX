@@ -1,7 +1,18 @@
 import { supabase } from '@/lib/supabase';
-import { SignInData, SignUpData, User, UserProfileUpdate } from '@/types/database';
 import { Session } from '@supabase/supabase-js';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User, UserProfileUpdate, UserRole, getFullName } from '../types/supabase';
+
+// Sign up data interface
+interface SignUpData {
+  email: string;
+  password: string;
+  username?: string;
+  full_name?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: UserRole;
+}
 
 interface AuthContextType {
   session: Session | null;
@@ -9,7 +20,8 @@ interface AuthContextType {
   isCreator: boolean;
   loading: boolean;
   signUp: (data: SignUpData) => Promise<{ error?: string }>;
-  signIn: (data: SignInData) => Promise<{ error?: string }>;
+  signIn: (email: string, password: string) => Promise<{ error?: string }>;
+  signInWithGoogle: () => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: UserProfileUpdate) => Promise<{ error?: string }>;
 }
@@ -53,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('user_profiles')
         .select('*')
         .eq('id', userId)
         .single();
@@ -65,7 +77,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null);
         }
       } else {
-        setUser(data);
+        // Add computed full_name property
+        const userWithFullName = {
+          ...(data as any),
+          full_name: getFullName(data as any)
+        } as User;
+        setUser(userWithFullName);
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -81,9 +98,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Check if username is available (if provided)
       if (username) {
         const { data: existingUser } = await supabase
-          .from('users')
-          .select('username')
-          .eq('username', username)
+          .from('user_profiles')
+          .select('display_name')
+          .eq('display_name', username)
           .maybeSingle();
 
         if (existingUser) {
@@ -117,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signIn = async ({ email, password }: SignInData) => {
+  const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signInWithPassword({
@@ -138,6 +155,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      setLoading(true);
+      
+      // For now, return a placeholder implementation
+      // In production, this would integrate with Google Sign-In SDK
+      console.log('Google Sign-In would be implemented here');
+      
+      // Mock successful Google sign-in for demo purposes
+      return { error: 'Google Sign-In not yet implemented. Please use email/password.' };
+    } catch (error) {
+      console.error('Google sign in error:', error);
+      return { error: 'Google Sign-In failed. Please try again.' };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const signOut = async () => {
     try {
       setLoading(true);
@@ -153,8 +188,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       if (!user) return { error: 'No user logged in' };
 
-      const { error } = await supabase
-        .from('users')
+      const { error } = await (supabase as any)
+        .from('user_profiles')
         .update(updates)
         .eq('id', user.id);
 
@@ -162,8 +197,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: error.message };
       }
 
-      // Update local state
-      setUser({ ...user, ...updates });
+      // Update local state with computed full_name
+      const updatedUser = { ...user, ...updates } as User;
+      updatedUser.full_name = getFullName(updatedUser);
+      setUser(updatedUser);
       return {};
     } catch (error) {
       console.error('Update profile error:', error);
@@ -172,7 +209,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Check if the user is a creator
-  const isCreator = user?.role === 'creator' || user?.role === 'teacher';
+  const isCreator = user?.role === 'creator' || user?.role === 'teacher_approved' || user?.role === 'teacher_pending';
   
   const value: AuthContextType = {
     session,
@@ -181,6 +218,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut,
     updateProfile,
   };

@@ -77,7 +77,7 @@ export class AmbientIntelligenceService {
     this.monitoringInterval = setInterval(
       () => this.monitorEnvironment(),
       BIOMETRIC_CONFIG.AMBIENT.ENVIRONMENT_SAMPLING_RATE
-    );
+    ) as unknown as number;
 
     // Initial environment check
     await this.monitorEnvironment();

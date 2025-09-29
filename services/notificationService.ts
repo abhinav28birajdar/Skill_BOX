@@ -115,7 +115,7 @@ export class NotificationService {
   // Push Token Management
   static async updatePushToken(userId: string, token: string): Promise<boolean> {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_devices')
         .upsert({
           user_id: userId,
@@ -138,7 +138,7 @@ export class NotificationService {
     preferences: Partial<NotificationPreferences>
   ): Promise<boolean> {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('notification_preferences')
         .upsert({
           user_id: userId,
@@ -347,7 +347,7 @@ export class NotificationService {
       if (!preferences?.learning_reminders) return false;
 
       // Schedule reminders based on user's optimal learning times
-      const preferredTimes = learningData?.preferred_learning_times || ['09:00', '14:00', '19:00'];
+      const preferredTimes = (learningData as any)?.preferred_learning_times || ['09:00', '14:00', '19:00'];
       
       for (const time of preferredTimes) {
         const [hours, minutes] = time.split(':').map(Number);
@@ -462,7 +462,7 @@ export class NotificationService {
 
   private static async logNotification(notification: NotificationTemplate): Promise<void> {
     try {
-      await supabase
+      await (supabase as any)
         .from('notification_logs')
         .insert({
           notification_id: notification.id,
@@ -494,10 +494,10 @@ export class NotificationService {
       if (error) throw error;
 
       return {
-        total_sent: data.total_sent || 0,
-        open_rate: data.open_rate || 0,
-        most_effective_times: data.most_effective_times || [],
-        preferred_types: data.preferred_types || [],
+        total_sent: (data as any).total_sent || 0,
+        open_rate: (data as any).open_rate || 0,
+        most_effective_times: (data as any).most_effective_times || [],
+        preferred_types: (data as any).preferred_types || [],
       };
     } catch (error) {
       console.error('Error getting notification analytics:', error);

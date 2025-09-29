@@ -139,7 +139,7 @@ export class AIService {
     metrics: Partial<LearningMetrics>
   ): Promise<boolean> {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('learner_profiles')
         .upsert({
           user_id: userId,

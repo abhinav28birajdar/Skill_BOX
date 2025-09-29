@@ -1,7 +1,7 @@
-import { Database } from '@/types/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import 'react-native-url-polyfill/auto';
+import { Database } from '../types/supabase';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
@@ -114,7 +114,7 @@ export const dbUpdate = async <T = any>(
   updates: Record<string, any>,
   filters: Record<string, any>
 ) => {
-  let query = supabase.from(table).update(updates);
+  let query = (supabase as any).from(table).update(updates);
   
   Object.entries(filters).forEach(([key, value]) => {
     query = query.eq(key, value);
@@ -243,7 +243,7 @@ export const dbRpc = async <T = any>(
   functionName: string,
   params?: Record<string, any>
 ) => {
-  const { data, error } = await supabase.rpc(functionName, params);
+  const { data, error } = await (supabase as any).rpc(functionName, params);
   if (error) throw error;
   return data as T;
 };

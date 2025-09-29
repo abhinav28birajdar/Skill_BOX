@@ -8,13 +8,13 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface Skill {
@@ -143,7 +143,7 @@ export default function UploadProjectScreen() {
         .getPublicUrl(projectPath);
 
       // Upload thumbnail if provided
-      let thumbnailUrl = null;
+      let thumbnailUrl: string | null = null;
       if (thumbnailFile) {
         const thumbnailPath = await uploadFile(thumbnailFile, 'content', 'thumbnails');
         const { data: { publicUrl } } = supabase.storage
@@ -159,7 +159,7 @@ export default function UploadProjectScreen() {
         .filter(tag => tag.length > 0);
 
       // Save to database
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('learning_content')
         .insert({
           title: formData.title,

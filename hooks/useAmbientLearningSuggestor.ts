@@ -361,7 +361,7 @@ export function useAmbientLearningSuggestor(
   const acceptSuggestion = async (suggestion: AmbientSuggestion) => {
     try {
       // Log suggestion acceptance for learning
-      await supabase
+      await (supabase as any)
         .from('suggestion_interactions')
         .insert({
           user_id: userId,
@@ -386,7 +386,7 @@ export function useAmbientLearningSuggestor(
   const dismissSuggestion = async (suggestion: AmbientSuggestion, reason?: string) => {
     try {
       // Log suggestion dismissal for learning
-      await supabase
+      await (supabase as any)
         .from('suggestion_interactions')
         .insert({
           user_id: userId,

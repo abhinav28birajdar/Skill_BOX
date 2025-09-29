@@ -84,7 +84,7 @@ export class AITutorService {
       };
 
       // Store tutor personality
-      await supabase
+      await (supabase as any)
         .from('ai_tutor_personalities')
         .upsert({
           user_id: userId,

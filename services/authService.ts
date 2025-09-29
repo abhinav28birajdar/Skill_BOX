@@ -98,7 +98,7 @@ export class AuthService {
       }
 
       // Step 2: Create user profile
-      const { error: profileError } = await supabase
+      const { error: profileError } = await (supabase as any)
         .from('user_profiles')
         .insert({
           id: authData.user.id,
@@ -181,7 +181,7 @@ export class AuthService {
       }
 
       // Update last login
-      await supabase
+      await (supabase as any)
         .from('user_profiles')
         .update({ last_login_at: new Date().toISOString() })
         .eq('id', authData.user.id);
@@ -419,7 +419,7 @@ export class AuthService {
         };
       }
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_profiles')
         .update({
           ...data,
@@ -475,7 +475,7 @@ export class AuthService {
       const userId = sessionData.session.user.id;
 
       // Update profile with onboarding data
-      const { error: profileError } = await supabase
+      const { error: profileError } = await (supabase as any)
         .from('user_profiles')
         .update({
           bio: data.bio,
@@ -505,7 +505,7 @@ export class AuthService {
           is_teaching: false,
         }));
 
-        const { error: skillsError } = await supabase
+        const { error: skillsError } = await (supabase as any)
           .from('user_skills')
           .insert(skillInserts);
 
@@ -523,7 +523,7 @@ export class AuthService {
           is_teaching: true,
         }));
 
-        const { error: teachingSkillsError } = await supabase
+        const { error: teachingSkillsError } = await (supabase as any)
           .from('user_skills')
           .insert(teachingSkillInserts);
 
@@ -572,7 +572,7 @@ export class AuthService {
 
       // Update profile verification status
       if (data.user) {
-        await supabase
+        await (supabase as any)
           .from('user_profiles')
           .update({
             is_verified: true,
@@ -656,7 +656,7 @@ export class AuthService {
       }
 
       // Soft delete: Mark account as deleted
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_profiles')
         .update({
           is_active: false,

@@ -143,7 +143,7 @@ export default function UploadVideoScreen() {
         .getPublicUrl(videoPath);
 
       // Upload thumbnail if provided
-      let thumbnailUrl = null;
+      let thumbnailUrl: string | null = null;
       if (thumbnailFile) {
         const thumbnailPath = await uploadFile(thumbnailFile, 'content', 'thumbnails');
         const { data: { publicUrl } } = supabase.storage
@@ -159,7 +159,7 @@ export default function UploadVideoScreen() {
         .filter(tag => tag.length > 0);
 
       // Save to database
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('learning_content')
         .insert({
           title: formData.title,

@@ -503,7 +503,7 @@ export class CourseService {
     score?: number
   ): Promise<UserProgress | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('user_progress')
         .upsert({
           user_id: userId,
@@ -778,4 +778,104 @@ export class CourseService {
       return false;
     }
   }
+
+  // Additional methods for dashboard and components
+  static async getSkillCategories(): Promise<any[]> {
+    try {
+      const { data, error } = await supabase
+        .from('skills')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching skill categories:', error);
+      return [];
+    }
+  }
+
+  static async getEnrolledCourses(userId: string): Promise<CourseWithDetails[]> {
+    try {
+      const { data, error } = await supabase
+        .from('course_enrollments')
+        .select(`
+          course:courses(
+            *,
+            teacher:users(*),
+            skill:skills(*),
+            sub_skill:sub_skills(*)
+          )
+        `)
+        .eq('student_id', userId)
+        .eq('status', 'in_progress');
+
+      if (error) throw error;
+      return (data as any)?.map((enrollment: any) => enrollment.course).filter(Boolean) || [];
+    } catch (error) {
+      console.error('Error fetching enrolled courses:', error);
+      return [];
+    }
+  }
+
+  static async getRecommendedCourses(userId: string, limit: number = 10): Promise<CourseWithDetails[]> {
+    try {
+      // Get user's skills and interests
+      const { data: userProfile } = await supabase
+        .from('user_profiles')
+        .select('skills_interested_in')
+        .eq('user_id', userId)
+        .single();
+
+      let query = supabase
+        .from('courses')
+        .select(`
+          *,
+          teacher:users(*),
+          skill:skills(*),
+          sub_skill:sub_skills(*)
+        `)
+        .eq('status', 'published')
+        .order('average_rating', { ascending: false, nullsFirst: false })
+        .limit(limit);
+
+      // If user has skill interests, filter by those
+      const profile = userProfile as any;
+      if (profile?.skills_interested_in && Array.isArray(profile.skills_interested_in)) {
+        query = query.in('skill_id', profile.skills_interested_in);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return (data as CourseWithDetails[]) || [];
+    } catch (error) {
+      console.error('Error fetching recommended courses:', error);
+      return [];
+    }
+  }
+
+  static async getInstructorCourses(instructorId: string): Promise<CourseWithDetails[]> {
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select(`
+          *,
+          teacher:users(*),
+          skill:skills(*),
+          sub_skill:sub_skills(*)
+        `)
+        .eq('teacher_id', instructorId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return (data as CourseWithDetails[]) || [];
+    } catch (error) {
+      console.error('Error fetching instructor courses:', error);
+      return [];
+    }
+  }
 }
+
+// Export default instance for convenience
+export const courseService = new CourseService();
+export default courseService;

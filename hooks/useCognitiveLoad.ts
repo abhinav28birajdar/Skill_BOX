@@ -45,7 +45,7 @@ export function useCognitiveLoad(biometricData?: BiometricData) {
     // Start continuous analysis
     analysisInterval.current = setInterval(() => {
       updateMetrics();
-    }, 5000); // Update every 5 seconds
+    }, 5000) as unknown as number; // Update every 5 seconds
 
     return () => {
       if (analysisInterval.current) {
