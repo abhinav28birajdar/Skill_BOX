@@ -64,11 +64,12 @@ export class AITutorService {
   ): Promise<AITutorPersonality> {
     try {
       // Generate AI tutor personality based on user preferences and learning history
-      const { data: userProfile } = await supabase
+      const { data: userProfileData } = await supabase
         .from('learner_profiles')
         .select('*')
         .eq('user_id', userId)
         .single();
+      const userProfile = userProfileData as any;
 
       const personality: AITutorPersonality = {
         id: `tutor_${userId}_${Date.now()}`,

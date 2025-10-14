@@ -1,12 +1,12 @@
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import StudentDashboard from '../components/dashboard/StudentDashboard';
 import TeacherDashboard from '../components/dashboard/TeacherDashboard';

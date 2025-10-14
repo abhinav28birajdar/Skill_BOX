@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase, dbInsert, dbUpdate, dbDelete, dbRpc } from '../lib/supabase';
 import { Assignment, Course, CourseEnrollment, CourseWithDetails, Lesson, Module, PaginatedResponse, SearchFilters, StudentSubmission, UserProgress } from '../types/database';
 
 export class CourseService {
@@ -8,21 +8,15 @@ export class CourseService {
     courseData: Partial<Course>
   ): Promise<Course | null> {
     try {
-      const { data, error } = await supabase
-        .from('courses')
-        .insert({
-          ...courseData,
-          teacher_id: teacherId,
-          status: 'draft',
-          average_rating: null,
-          total_students_enrolled: 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      const [data] = await dbInsert('courses', {
+        ...courseData,
+        teacher_id: teacherId,
+        status: 'draft',
+        average_rating: null,
+        total_students_enrolled: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
       return data;
     } catch (error) {
       console.error('Error creating course:', error);
@@ -36,18 +30,16 @@ export class CourseService {
     updates: Partial<Course>
   ): Promise<Course | null> {
     try {
-      const { data, error } = await supabase
-        .from('courses')
-        .update({
+      const [data] = await dbUpdate('courses', 
+        {
           ...updates,
           updated_at: new Date().toISOString(),
-        })
-        .eq('id', courseId)
-        .eq('teacher_id', teacherId)
-        .select()
-        .single();
-
-      if (error) throw error;
+        }, 
+        {
+          id: courseId,
+          teacher_id: teacherId
+        }
+      );
       return data;
     } catch (error) {
       console.error('Error updating course:', error);
@@ -57,13 +49,10 @@ export class CourseService {
 
   static async deleteCourse(courseId: string, teacherId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('courses')
-        .delete()
-        .eq('id', courseId)
-        .eq('teacher_id', teacherId);
-
-      if (error) throw error;
+      await dbDelete('courses', {
+        id: courseId,
+        teacher_id: teacherId
+      });
       return true;
     } catch (error) {
       console.error('Error deleting course:', error);
@@ -269,18 +258,12 @@ export class CourseService {
     moduleData: Partial<Module>
   ): Promise<Module | null> {
     try {
-      const { data, error } = await supabase
-        .from('modules')
-        .insert({
-          ...moduleData,
-          course_id: courseId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      const [data] = await dbInsert('modules', {
+        ...moduleData,
+        course_id: courseId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
       return data;
     } catch (error) {
       console.error('Error creating module:', error);
@@ -293,17 +276,13 @@ export class CourseService {
     updates: Partial<Module>
   ): Promise<Module | null> {
     try {
-      const { data, error } = await supabase
-        .from('modules')
-        .update({
+      const [data] = await dbUpdate('modules', 
+        {
           ...updates,
           updated_at: new Date().toISOString(),
-        })
-        .eq('id', moduleId)
-        .select()
-        .single();
-
-      if (error) throw error;
+        }, 
+        { id: moduleId }
+      );
       return data;
     } catch (error) {
       console.error('Error updating module:', error);
@@ -338,7 +317,7 @@ export class CourseService {
           ...lessonData,
           module_id: moduleId,
           created_at: new Date().toISOString(),
-        })
+        } as any)
         .select()
         .single();
 
@@ -355,14 +334,7 @@ export class CourseService {
     updates: Partial<Lesson>
   ): Promise<Lesson | null> {
     try {
-      const { data, error } = await supabase
-        .from('lessons')
-        .update(updates)
-        .eq('id', lessonId)
-        .select()
-        .single();
-
-      if (error) throw error;
+      const [data] = await dbUpdate('lessons', updates, { id: lessonId });
       return data;
     } catch (error) {
       console.error('Error updating lesson:', error);
@@ -411,14 +383,14 @@ export class CourseService {
           enrollment_date: new Date().toISOString(),
           progress_percentage: 0,
           status: 'in_progress',
-        })
+        } as any)
         .select()
         .single();
 
       if (error) throw error;
 
       // Update course enrollment count
-      await supabase.rpc('increment_course_enrollments', { course_id: courseId });
+      await supabase.rpc('increment_course_enrollments', { p_course_id: courseId } as any);
 
       return data;
     } catch (error) {
@@ -543,28 +515,28 @@ export class CourseService {
         .eq('id', lessonId)
         .single();
 
-      if (!lesson?.modules || !Array.isArray(lesson.modules) || lesson.modules.length === 0) return;
+      const lessonAsAny = lesson as any;
+      if (!lessonAsAny?.modules) return;
 
-      const courseId = lesson.modules[0].course_id;
+      const courseId = lessonAsAny.modules.course_id;
 
       // Calculate progress percentage
       const { data: courseProgress } = await supabase.rpc('calculate_course_progress', {
-        student_id: userId,
-        course_id: courseId,
-      });
+        p_student_id: userId,
+        p_course_id: courseId,
+      } as any);
 
       if (courseProgress !== null) {
-        await supabase
-          .from('course_enrollments')
-          .update({
-            progress_percentage: courseProgress,
-            ...(courseProgress === 100 && {
-              completion_date: new Date().toISOString(),
-              status: 'completed',
-            }),
+        await dbUpdate('course_enrollments', {
+          progress_percentage: courseProgress,
+          ...(courseProgress === 100 && {
+            completion_date: new Date().toISOString(),
+            status: 'completed',
           })
-          .eq('student_id', userId)
-          .eq('course_id', courseId);
+        }, {
+          student_id: userId,
+          course_id: courseId
+        });
       }
     } catch (error) {
       console.error('Error updating course progress:', error);
@@ -594,7 +566,7 @@ export class CourseService {
         .select('id')
         .eq('course_id', courseId);
 
-      const moduleIds = modules?.map(m => m.id) || [];
+      const moduleIds = modules?.map(m => (m as any).id) || [];
 
       const { data: totalLessons } = await supabase
         .from('lessons')
@@ -607,7 +579,7 @@ export class CourseService {
         .select('id')
         .in('module_id', moduleIds);
 
-      const lessonIds = lessons?.map(l => l.id) || [];
+      const lessonIds = lessons?.map(l => (l as any).id) || [];
 
       const { data: completedLessons } = await supabase
         .from('user_progress')
@@ -627,10 +599,10 @@ export class CourseService {
         .single();
 
       return {
-        progress_percentage: enrollment?.progress_percentage || 0,
+        progress_percentage: (enrollment as any)?.progress_percentage || 0,
         completed_lessons: completedLessons?.length || 0,
         total_lessons: totalLessons?.length || 0,
-        last_accessed: lastAccessed?.last_accessed_at || null,
+        last_accessed: (lastAccessed as any)?.last_accessed_at || null,
       };
     } catch (error) {
       console.error('Error fetching student progress:', error);
@@ -655,7 +627,7 @@ export class CourseService {
           ...assignmentData,
           teacher_id: teacherId,
           created_at: new Date().toISOString(),
-        })
+        } as any)
         .select()
         .single();
 
@@ -681,7 +653,7 @@ export class CourseService {
           student_id: studentId,
           submitted_at: new Date().toISOString(),
           status: 'submitted',
-        })
+        } as any)
         .select()
         .single();
 
@@ -700,18 +672,23 @@ export class CourseService {
     feedback?: string
   ): Promise<StudentSubmission | null> {
     try {
+      // First update using helper function
+      await dbUpdate('student_submissions', {
+        teacher_grade: grade,
+        teacher_feedback: feedback,
+        status: 'graded',
+      }, {
+        id: submissionId
+      });
+      
+      // Then fetch with relations
       const { data, error } = await supabase
         .from('student_submissions')
-        .update({
-          teacher_grade: grade,
-          teacher_feedback: feedback,
-          status: 'graded',
-        })
-        .eq('id', submissionId)
         .select(`
           *,
           assignment:assignments!inner(teacher_id)
         `)
+        .eq('id', submissionId)
         .single();
 
       if (error) throw error;
@@ -725,12 +702,12 @@ export class CourseService {
       await supabase
         .from('notifications')
         .insert({
-          recipient_id: data.student_id,
+          recipient_id: (data as any).student_id,
           notification_type: 'assignment_graded',
           message: `Your assignment has been graded: ${grade}${feedback ? ` - ${feedback}` : ''}`,
           is_read: false,
           created_at: new Date().toISOString(),
-        });
+        } as any);
 
       return data;
     } catch (error) {
@@ -742,17 +719,14 @@ export class CourseService {
   // Course Publishing
   static async publishCourse(courseId: string, teacherId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('courses')
-        .update({
-          status: 'published',
-          published_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', courseId)
-        .eq('teacher_id', teacherId);
-
-      if (error) throw error;
+      await dbUpdate('courses', {
+        status: 'published',
+        published_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, {
+        id: courseId,
+        teacher_id: teacherId
+      });
       return true;
     } catch (error) {
       console.error('Error publishing course:', error);
@@ -762,16 +736,13 @@ export class CourseService {
 
   static async unpublishCourse(courseId: string, teacherId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('courses')
-        .update({
-          status: 'private',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', courseId)
-        .eq('teacher_id', teacherId);
-
-      if (error) throw error;
+      await dbUpdate('courses', {
+        status: 'private',
+        updated_at: new Date().toISOString(),
+      }, {
+        id: courseId,
+        teacher_id: teacherId
+      });
       return true;
     } catch (error) {
       console.error('Error unpublishing course:', error);

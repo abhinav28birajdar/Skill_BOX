@@ -10,7 +10,7 @@ import {
     View,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
-import { courseService } from '../../services/courseService';
+import { CourseService } from '../../services/courseService';
 
 interface DashboardStats {
   enrolled_courses: number;
@@ -58,16 +58,16 @@ export default function StudentDashboard() {
       setLoading(true);
 
       // Load enrolled courses
-      const enrolled = await courseService.getEnrolledCourses(user.id);
-      setEnrolledCourses(enrolled);
+      const enrolled = await CourseService.getEnrolledCourses(user.id);
+      setEnrolledCourses(enrolled as any);
 
       // Load recommended courses
-      const recommended = await courseService.getRecommendedCourses(user.id, 6);
+      const recommended = await CourseService.getRecommendedCourses(user.id, 6);
       setRecommendedCourses(recommended);
 
       // Calculate stats
-      const completedCount = enrolled.filter(e => e.progress_percentage >= 100).length;
-      const totalTime = enrolled.reduce((sum, e) => sum + (e.time_spent_minutes || 0), 0);
+      const completedCount = (enrolled as any).filter((e: any) => e.progress_percentage >= 100).length;
+      const totalTime = (enrolled as any).reduce((sum: number, e: any) => sum + (e.time_spent_minutes || 0), 0);
 
       setStats({
         enrolled_courses: enrolled.length,
@@ -249,7 +249,7 @@ export default function StudentDashboard() {
             <Text style={styles.goalTitle}>30 minutes of learning</Text>
             <Text style={styles.goalProgress}>15 minutes completed</Text>
           </View>
-          <View style={styles.goalProgress}>
+          <View>
             <View style={styles.goalProgressBar}>
               <View style={[styles.goalProgressFill, { width: '50%' }]} />
             </View>

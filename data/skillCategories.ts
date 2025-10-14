@@ -287,7 +287,7 @@ export async function seedSkillCategories() {
     // Insert all categories
     const { data, error } = await supabase
       .from('skill_categories')
-      .insert(skillCategoriesData)
+      .insert(skillCategoriesData as any)
       .select();
 
     if (error) {

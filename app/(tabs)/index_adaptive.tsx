@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  Animated,
-  Dimensions,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Animated,
+    Dimensions,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 import { AITutorChat } from '@/components/ai/AITutorChat';
@@ -89,7 +89,7 @@ export default function AdaptiveHomeScreen() {
         .order('views_count', { ascending: false })
         .limit(10);
 
-      if (content) setRecommendations(content);
+      if (content) setRecommendations(content as any);
 
       // Load featured teachers
       const { data: teachers } = await supabase
@@ -99,7 +99,7 @@ export default function AdaptiveHomeScreen() {
         .order('average_rating', { ascending: false })
         .limit(5);
 
-      if (teachers) setFeaturedTeachers(teachers);
+      if (teachers) setFeaturedTeachers(teachers as any);
 
       // Load skills for neural map
       const { data: skills } = await supabase
@@ -108,7 +108,7 @@ export default function AdaptiveHomeScreen() {
         .eq('is_active', true);
 
       if (skills) {
-        const processedSkills = skills.map((skill, index) => ({
+        const processedSkills = (skills as any).map((skill: any, index: number) => ({
           id: skill.id,
           name: skill.name,
           level: Math.random() * 100, // In real app, get from user progress
@@ -116,7 +116,7 @@ export default function AdaptiveHomeScreen() {
           y: Math.floor(index / 5) * 150 + 100,
           category: skill.category || 'general',
           prerequisites: [],
-          connections: skills.filter(s => s.category === skill.category && s.id !== skill.id).slice(0, 2).map(s => s.id),
+          connections: (skills as any).filter((s: any) => s.category === skill.category && s.id !== skill.id).slice(0, 2).map((s: any) => s.id),
           isUnlocked: Math.random() > 0.3,
           isCompleted: Math.random() > 0.7,
           estimatedHours: Math.floor(Math.random() * 50) + 10,

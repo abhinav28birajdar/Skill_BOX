@@ -105,7 +105,7 @@ export default function OnboardingScreen() {
       setLoading(true);
       
       const updates = {
-        role: selectedRole || 'student',
+        role: (selectedRole === 'teacher' ? 'teacher_pending' : 'student') as 'teacher_pending' | 'student',
         skills: getSelectedSkillsList(),
         updated_at: new Date().toISOString()
       };

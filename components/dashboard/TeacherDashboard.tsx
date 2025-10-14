@@ -10,7 +10,7 @@ import {
     View,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
-import { courseService } from '../../services/courseService';
+import { CourseService } from '../../services/courseService';
 
 interface TeacherStats {
   total_courses: number;
@@ -57,17 +57,17 @@ export default function TeacherDashboard() {
       setLoading(true);
 
       // Load instructor's courses
-      const instructorCourses = await courseService.getInstructorCourses(user.id);
-      setCourses(instructorCourses);
+      const instructorCourses = await CourseService.getInstructorCourses(user.id);
+      setCourses(instructorCourses as any);
 
       // Calculate stats
-      const publishedCount = instructorCourses.filter(c => c.status === 'published').length;
-      const totalStudents = instructorCourses.reduce((sum, c) => sum + c.enrollment_count, 0);
+      const publishedCount = (instructorCourses as any).filter((c: any) => c.status === 'published').length;
+      const totalStudents = (instructorCourses as any).reduce((sum: number, c: any) => sum + c.enrollment_count, 0);
       
       // Mock revenue data - would come from payment service
-      const totalRevenue = instructorCourses
-        .filter(c => !c.is_free)
-        .reduce((sum, c) => sum + (c.price * c.enrollment_count), 0);
+      const totalRevenue = (instructorCourses as any)
+        .filter((c: any) => !c.is_free)
+        .reduce((sum: number, c: any) => sum + (c.price * c.enrollment_count), 0);
 
       setStats({
         total_courses: instructorCourses.length,

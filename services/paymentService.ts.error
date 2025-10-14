@@ -1,12 +1,9 @@
-import { supabase, dbUpdate, dbInsert, dbRpc } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import type { Database } from '../types/supabase';
 
 type Payment = Database['public']['Tables']['payments']['Row'];
 type PaymentInsert = Database['public']['Tables']['payments']['Insert'];
-type PaymentUpdate = Database['public']['Tables']['payments']['Update'];
-type EnrollmentInsert = Database['public']['Tables']['enrollments']['Insert'];
-type EnrollmentUpdate = Database['public']['Tables']['enrollments']['Update'];
-type UserProfileUpdate = Database['public']['Tables']['user_profiles']['Update'];
+type Enrollment = Database['public']['Tables']['enrollments']['Row'];
 
 export interface PaymentIntent {
   id: string;
@@ -26,8 +23,6 @@ export interface SubscriptionPlan {
   features: string[];
   description: string;
 }
-
-
 
 class PaymentService {
   private stripeKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
@@ -254,40 +249,41 @@ class PaymentService {
       if (!user) throw new Error('User not authenticated');
 
       // Update payment status
-      // Update payment status
-      const [payment] = await dbUpdate('payments', 
-        {
+      const { data: payment, error: paymentError } = await supabase
+        .from('payments')
+        .update({
           status: 'completed',
           payment_intent_id: paymentIntentId,
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: paymentId,
-          user_id: user.id
-        }
-      );
+          updated_at: new Date().toISOString()
+        } as any)
+        .eq('id', paymentId)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+
+      if (paymentError) throw paymentError;
       const paymentResult = payment as any;
 
       // Handle course purchase
       if (paymentResult.course_id) {
-        try {
-          await dbInsert('enrollments', {
-            student_id: user.id,
-            course_id: paymentResult.course_id,
-            payment_id: paymentId,
-            status: 'active',
-            enrolled_at: new Date().toISOString()
-          });
-        } catch (error) {
-          throw error;
-        }
+        const enrollmentData = {
+          student_id: user.id,
+          course_id: paymentResult.course_id,
+          payment_id: paymentId,
+          status: 'active' as const,
+          enrolled_at: new Date().toISOString()
+        };
 
-        // Error handling is done in try/catch
+        const { error: enrollmentError } = await supabase
+          .from('enrollments')
+          .insert(enrollmentData as any);
+
+        if (enrollmentError) throw enrollmentError;
 
         // Update course enrollment count
-        await dbRpc('increment_course_enrollment', {
+        await supabase.rpc('increment_course_enrollment', {
           p_course_id: paymentResult.course_id
-        });
+        } as any);
       }
 
       // Handle subscription purchase
@@ -301,17 +297,16 @@ class PaymentService {
             expiresAt.setFullYear(expiresAt.getFullYear() + 1);
           }
 
-          try {
-            await dbUpdate('user_profiles', {
+          const { error: userUpdateError } = await supabase
+            .from('user_profiles')
+            .update({
               subscription_tier: paymentResult.subscription_type,
               subscription_expires_at: expiresAt.toISOString(),
               updated_at: new Date().toISOString()
-            }, { id: user.id });
-          } catch (error) {
-            throw error;
-          }
+            } as any)
+            .eq('id', user.id);
 
-          // Error handling is done in try/catch
+          if (userUpdateError) throw userUpdateError;
         }
       }
 
@@ -319,7 +314,7 @@ class PaymentService {
     } catch (error) {
       console.error('Error confirming payment:', error);
       // Rollback payment status if something fails
-      await dbUpdate('payments', { status: 'failed' }, { id: paymentId });
+      await supabase.from('payments').update({ status: 'failed' } as any).eq('id', paymentId);
       return false;
     }
   }
@@ -338,7 +333,7 @@ class PaymentService {
 
       if (error) throw error;
 
-      return data as any[];
+      return data as any;
     } catch (error) {
       console.error('Error getting payment history:', error);
       throw error;
@@ -365,42 +360,43 @@ class PaymentService {
       }
 
       // Update payment status
-      try {
-        await dbUpdate('payments', {
+      const { error: updateError } = await supabase
+        .from('payments')
+        .update({
           status: 'refunded',
           refund_amount: paymentResult.amount,
           refunded_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        }, { id: paymentId });
-      } catch (error) {
-        throw error;
-      }
+        } as any)
+        .eq('id', paymentId);
 
-      // Error is caught and thrown in the try/catch block
+      if (updateError) throw updateError;
 
       // Handle course refund
       if (paymentResult.course_id) {
-        try {
-          await dbUpdate('enrollments', {
+        const { error: enrollmentError } = await supabase
+          .from('enrollments')
+          .update({
             status: 'refunded',
             access_expires_at: new Date().toISOString()
-          }, { payment_id: paymentId });
-        } catch (error) {
-          throw error;
-        }
+          } as any)
+          .eq('payment_id', paymentId);
+
+        if (enrollmentError) throw enrollmentError;
       }
 
       // Handle subscription refund
       if (paymentResult.subscription_type && paymentResult.subscription_type !== 'course') {
-        try {
-          await dbUpdate('user_profiles', {
+        const { error: userUpdateError } = await supabase
+          .from('user_profiles')
+          .update({
             subscription_tier: 'free',
             subscription_expires_at: null,
             updated_at: new Date().toISOString()
-          }, { id: user.id });
-        } catch (error) {
-          throw error;
-        }
+          } as any)
+          .eq('id', user.id);
+
+        if (userUpdateError) throw userUpdateError;
       }
 
       return true;

@@ -28,7 +28,7 @@ export default function SignInScreen() {
     }
 
     setLoading(true);
-    const { error } = await signIn({ email, password });
+    const { error } = await signIn(email, password);
     setLoading(false);
 
     if (error) {

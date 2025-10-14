@@ -1,7 +1,7 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { dbUpdate, supabase } from '@/lib/supabase';
 import { LearningContent } from '@/types/database';
 import * as DocumentPicker from 'expo-document-picker';
 import { Image } from 'expo-image';
@@ -9,13 +9,13 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface Skill {
@@ -56,8 +56,8 @@ export default function EditContentScreen() {
           *,
           skills(name)
         `)
-        .eq('id', id)
-        .eq('creator_id', user?.id)
+        .eq('id', id as string)
+        .eq('creator_id', user?.id || '')
         .single();
 
       if (error) {
@@ -66,13 +66,14 @@ export default function EditContentScreen() {
         return;
       }
 
-      setContent(data);
+      const dataAsAny = data as any;
+      setContent(dataAsAny);
       setFormData({
-        title: data.title,
-        description: data.description || '',
-        skillId: data.skill_id,
-        skillLevel: data.skill_level || 'beginner',
-        tags: data.tags?.join(', ') || '',
+        title: dataAsAny.title,
+        description: dataAsAny.description || '',
+        skillId: dataAsAny.skill_id,
+        skillLevel: dataAsAny.skill_level || 'beginner',
+        tags: dataAsAny.tags?.join(', ') || '',
       });
     } catch (error) {
       console.error('Error loading content:', error);
@@ -227,12 +228,7 @@ export default function EditContentScreen() {
         updateData.tags = null;
       }
 
-      const { error } = await supabase
-        .from('learning_content')
-        .update(updateData)
-        .eq('id', content.id);
-
-      if (error) throw error;
+      await dbUpdate('learning_content', updateData, { id: content.id });
 
       Alert.alert(
         'Success',
