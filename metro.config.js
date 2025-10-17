@@ -3,30 +3,20 @@ const path = require('path');
 
 const config = getDefaultConfig(__dirname);
 
-// Fix resolver issues and ignore patterns
+// Add support for additional file types
 config.resolver = {
   ...config.resolver,
   assetExts: [...config.resolver.assetExts, 'md', 'sql'],
   sourceExts: [...config.resolver.sourceExts, 'ts', 'tsx', 'js', 'jsx'],
   platforms: ['ios', 'android', 'native', 'web'],
-  // Add more robust path resolution
   resolverMainFields: ['react-native', 'browser', 'main'],
   symlinks: false,
 };
 
-// Fix the regex pattern that's causing the error
+// Set watch folders
 config.watchFolders = [path.resolve(__dirname)];
 
-// More specific ignore patterns
-config.resolver.blockList = [
-  /node_modules[\/\\]react[\/\\]dist[\/\\].*/,
-  /website[\/\\]node_modules[\/\\].*/,
-  /heapCapture[\/\\]bundle\.js$/,
-  /.*[\/\\]__tests__[\/\\].*/,
-  /\.expo[\/\\].*/,
-];
-
-// Add transformer options
+// Configure transformer
 config.transformer = {
   ...config.transformer,
   getTransformOptions: async () => ({
