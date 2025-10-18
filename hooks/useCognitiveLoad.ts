@@ -12,16 +12,21 @@ export interface CognitiveLoadMetrics {
 
 export function useCognitiveLoad(biometricData?: BiometricData) {
   const [cognitiveState, setCognitiveState] = useState<CognitiveState>({
+    focus: 0.5,
     focusLevel: 0.5,
     cognitiveLoad: 0.5,
+    comprehension: 0.6,
+    engagement: 0.5,
     emotionalState: 'neutral',
+    learningReadiness: 0.5,
+    fatigue: 0.3,
+    timestamp: Date.now(),
     brainwaveStates: {
       alpha: 0.5,
       beta: 0.5,
       theta: 0.3,
       delta: 0.2
-    },
-    learningReadiness: 0.5
+    }
   });
 
   const [metrics, setMetrics] = useState<CognitiveLoadMetrics>({
@@ -61,11 +66,16 @@ export function useCognitiveLoad(biometricData?: BiometricData) {
     const learningReadiness = calculateLearningReadiness(focusLevel, cognitiveLoad, emotionalState);
 
     const newState: CognitiveState = {
+      focus: focusLevel,
       focusLevel,
       cognitiveLoad,
+      comprehension: 0.6, // Default value
+      engagement: 0.7, // Default value
       emotionalState,
-      brainwaveStates: analyzeBrainwaves(data),
-      learningReadiness
+      learningReadiness,
+      fatigue: 0.3, // Default value
+      timestamp: Date.now(),
+      brainwaveStates: analyzeBrainwaves(data)
     };
 
     setCognitiveState(newState);
@@ -279,9 +289,14 @@ export function useCognitiveLoad(biometricData?: BiometricData) {
   const resetAnalysis = () => {
     history.current = [];
     setCognitiveState({
+      focus: 0.5,
       focusLevel: 0.5,
       cognitiveLoad: 0.5,
+      comprehension: 0.6,
+      engagement: 0.5,
       emotionalState: 'neutral',
+      fatigue: 0.3,
+      timestamp: Date.now(),
       brainwaveStates: {
         alpha: 0.5,
         beta: 0.5,

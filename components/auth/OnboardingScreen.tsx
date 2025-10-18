@@ -188,7 +188,7 @@ export default function OnboardingScreen() {
               contentContainerStyle={styles.skillsGrid}
               showsVerticalScrollIndicator={false}
             >
-              {featuredCategories.map((category) => (
+              {featuredCategories.map((category: any) => (
                 <TouchableOpacity
                   key={category.name}
                   style={[

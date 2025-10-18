@@ -48,13 +48,7 @@ export function AdaptiveLearningInterface({
     acceptSuggestion,
     dismissSuggestion,
     getAdaptiveRecommendations
-  } = useAmbientLearningSuggestor(user?.id || '', {
-    cognitiveLoad,
-    focusLevel,
-    learningReadiness,
-    emotionalState: cognitiveState.emotionalState,
-    brainwaveStates: cognitiveState.brainwaveStates
-  });
+  } = useAmbientLearningSuggestor(user?.id || '', cognitiveState);
 
   // UI adaptation states
   const [interfaceMode, setInterfaceMode] = useState<'adaptive' | 'focus' | 'rest'>('adaptive');

@@ -8,6 +8,9 @@ import { ARVRServiceState, FaceDetectionResult, HapticFeedbackType } from '../im
 export class ARVRLearningService {
   private camera: CameraView | null = null;
   private state: ARVRServiceState = {
+    isActive: false,
+    currentMode: 'ar',
+    deviceConnected: false,
     isTracking: false,
     lastAttentionScore: 0,
     calibrationComplete: false
@@ -64,6 +67,8 @@ export class ARVRLearningService {
         pattern = BIOMETRIC_CONFIG.HAPTIC_PATTERNS.FOCUS_PROMPT;
         break;
     }
+    
+    if (!pattern) return;
     
     for (const step of pattern) {
       if (step.intensity >= 0.8) {
@@ -130,8 +135,14 @@ export class ARVRLearningService {
   }
 
   private calculateAttentionScore(face: FaceDetectionResult['faces'][0]): number {
-    const eyeOpenScore = (face.leftEyeOpenProbability + face.rightEyeOpenProbability) / 2;
-    const headAngleScore = 1 - (Math.abs(face.rollAngle) / 180);
+    // Default to moderate attention if properties are missing
+    const eyeOpenScore = face.leftEyeOpenProbability && face.rightEyeOpenProbability 
+      ? (face.leftEyeOpenProbability + face.rightEyeOpenProbability) / 2 
+      : 0.5;
+      
+    const headAngleScore = face.rollAngle !== undefined
+      ? 1 - (Math.abs(face.rollAngle) / 180)
+      : 0.5;
     
     return eyeOpenScore * 0.6 + headAngleScore * 0.4;
   }

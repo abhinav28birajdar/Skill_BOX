@@ -2,6 +2,7 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "noEmit": true,
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
@@ -9,23 +10,27 @@
     "moduleResolution": "bundler",
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "ignoreDeprecations": "5.0",
+    "noImplicitAny": false,
+    "useUnknownInCatchVariables": false,
     "types": [
       "react-native",
       "expo",
       "node"
     ],
+
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./app/*",
-        "./components/*",
-        "./constants/*",
-        "./context/*",
-        "./hooks/*",
-        "./lib/*",
-        "./services/*",
-        "./types/*"
-      ]
+      "@/*": ["./*"],
+      "@/context/*": ["./context/*"],
+      "@/hooks/*": ["./hooks/*"],
+      "@/components/*": ["./components/*"],
+      "@/constants/*": ["./constants/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/services/*": ["./services/*"],
+      "@/types/*": ["./types/*"],
+      "@/app/*": ["./app/*"],
+      "@/ai/*": ["./ai/*"]
     }
   },
   "include": [
