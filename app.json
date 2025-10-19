@@ -3,11 +3,15 @@
     "name": "SkillBox",
     "slug": "skillbox-app",
     "version": "4.0.0",
+    "sdkVersion": "54.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "skillbox",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "developmentClient": {
+      "silentLaunch": false
+    },
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -52,6 +56,10 @@
       "eas": {
         "projectId": "your-project-id-here"
       }
+    },
+    "developerTool": "dev-build",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     }
   }
 }

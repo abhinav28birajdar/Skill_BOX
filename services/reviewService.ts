@@ -1,6 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { PaginatedResponse } from '../types/database';
-import { ExtendedReview as Review, adaptReview } from '../types/mergedDatabase';
+import { PaginatedResponse, Review } from '../types/database';
 import { NotificationService } from './messagingService';
 
 export class ReviewService {

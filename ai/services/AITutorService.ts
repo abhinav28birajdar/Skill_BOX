@@ -1,7 +1,7 @@
 import { BiometricData, CognitiveState, AITutorPersonality } from '../models/interfaces';
 import { BIOMETRIC_CONFIG, COGNITIVE_ANALYSIS } from '../../config/bioCognitiveConfig';
 
-export { AITutorPersonality };
+export type { AITutorPersonality };
 
 export interface LearningContent {
   id: string;

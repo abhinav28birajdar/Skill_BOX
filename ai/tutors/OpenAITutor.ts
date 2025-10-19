@@ -7,10 +7,10 @@ export class OpenAITutor extends AITutorService {
   private model: string;
   private context: string[] = [];
   
-  constructor(apiKey: string = '', model: string = 'gpt-4o') {
+  constructor(config: any) {
     super();
-    this.apiKey = apiKey;
-    this.model = model;
+    this.apiKey = config.apiKey || '';
+    this.model = config.model || 'gpt-4o';
     this.tutorPersonality = {
       name: 'Ada',
       style: 'supportive',

@@ -9,7 +9,7 @@ export class ARVRLearningService {
   private camera: CameraView | null = null;
   private state: ARVRServiceState = {
     isActive: false,
-    currentMode: 'ar',
+    currentMode: 'mixed',
     deviceConnected: false,
     isTracking: false,
     lastAttentionScore: 0,

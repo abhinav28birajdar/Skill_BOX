@@ -1,6 +1,6 @@
 {
   "name": "skillbox-app",
-  "main": "expo-router/entry",
+  "main": "index.js",
   "version": "4.0.0",
   "description": "SkillBox - The Omni-Learner AI Ecosystem",
   "scripts": {

@@ -4,9 +4,9 @@
   # SkillBox
   **Modern Learning Platform & Skill Development Ecosystem**
   
-  [![React Native](https://img.shields.io/badge/React%20Native-0.74.5-61DAFB?style=flat&logo=react)](https://reactnative.dev)
-  [![Expo](https://img.shields.io/badge/Expo%20SDK-53-000020?style=flat&logo=expo)](https://expo.dev)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-3178C6?style=flat&logo=typescript&logoColor=white)](https://typescriptlang.org)
+  [![React Native](https://img.shields.io/badge/React%20Native-0.81.4-61DAFB?style=flat&logo=react)](https://reactnative.dev)
+  [![Expo](https://img.shields.io/badge/Expo%20SDK-54-000020?style=flat&logo=expo)](https://expo.dev)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-3178C6?style=flat&logo=typescript&logoColor=white)](https://typescriptlang.org)
   [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white)](https://supabase.com)
 </div>
 

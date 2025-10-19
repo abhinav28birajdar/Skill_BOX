@@ -188,7 +188,7 @@ export default function OnboardingScreen() {
               contentContainerStyle={styles.skillsGrid}
               showsVerticalScrollIndicator={false}
             >
-              {featuredCategories.map((category: any) => (
+              {featuredCategories.map((category) => (
                 <TouchableOpacity
                   key={category.name}
                   style={[
@@ -198,11 +198,11 @@ export default function OnboardingScreen() {
                   onPress={() => handleSkillToggle(category.name)}
                 >
                   <Image
-                    source={{ uri: category.icon_url || '' }}
+                    source={{ uri: category.icon || '' }}
                     style={styles.skillIcon}
                   />
                   <Text style={styles.skillName}>{category.name}</Text>
-                  <Text style={styles.skillCategory}>{category.category}</Text>
+                  <Text style={styles.skillCategory}>{category.description}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
