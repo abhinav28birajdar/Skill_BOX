@@ -3,19 +3,19 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
-import '../global.css';
 
 import { AIModelProvider } from '@/context/AIModelContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ThemeProvider as EnhancedThemeProvider } from '@/context/ThemeContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { LoadingScreen } from '@/components/common/LoadingScreen';
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { user, loading } = useAuth();
 
   if (loading) {
-    return null; // You can add a loading screen here
+    return <LoadingScreen />;
   }
 
   return (
@@ -57,7 +57,7 @@ export default function RootLayout() {
   });
 
   if (!loaded) {
-    return null;
+    return <LoadingScreen />;
   }
 
   return (

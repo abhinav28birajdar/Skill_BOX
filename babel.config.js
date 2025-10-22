@@ -3,6 +3,8 @@ module.exports = function (api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
+      // NativeWind plugin for CSS imports
+      'nativewind/babel',
       // Reanimated plugin needs to be listed last
       'react-native-reanimated/plugin',
     ],

@@ -8,9 +8,21 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Modal,
+    Dimensions,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { CourseService } from '../../services/courseService';
+
+// Import our new feature components
+import { AIStudyAssistant } from '../learning/AIStudyAssistant';
+import { GamificationDashboard } from '../gamification/GamificationDashboard';
+import { SmartNotes } from '../learning/SmartNotes';
+import { PomodoroTimer } from '../learning/PomodoroTimer';
+import { SocialLearningHub } from '../social/SocialLearningHub';
+
+const { width } = Dimensions.get('window');
 
 interface DashboardStats {
   enrolled_courses: number;
@@ -44,8 +56,53 @@ export default function StudentDashboard() {
   const [recommendedCourses, setRecommendedCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeFeature, setActiveFeature] = useState<string | null>(null);
 
   const { user } = useAuth();
+
+  // New features configuration
+  const features = [
+    {
+      id: 'ai-assistant',
+      title: 'AI Study Assistant',
+      description: 'Get instant help and explanations',
+      icon: 'chatbubbles',
+      color: '#3B82F6',
+      component: AIStudyAssistant,
+    },
+    {
+      id: 'gamification',
+      title: 'Achievements',
+      description: 'Track your progress and earn rewards',
+      icon: 'trophy',
+      color: '#F59E0B',
+      component: GamificationDashboard,
+    },
+    {
+      id: 'smart-notes',
+      title: 'Smart Notes',
+      description: 'AI-powered note-taking system',
+      icon: 'document-text',
+      color: '#10B981',
+      component: SmartNotes,
+    },
+    {
+      id: 'pomodoro',
+      title: 'Focus Timer',
+      description: 'Pomodoro technique for better focus',
+      icon: 'timer',
+      color: '#EF4444',
+      component: PomodoroTimer,
+    },
+    {
+      id: 'social',
+      title: 'Learning Community',
+      description: 'Connect with fellow learners',
+      icon: 'people',
+      color: '#8B5CF6',
+      component: SocialLearningHub,
+    },
+  ];
 
   useEffect(() => {
     loadDashboardData();
@@ -112,6 +169,34 @@ export default function StudentDashboard() {
     );
   }
 
+  // Render active feature modal
+  if (activeFeature) {
+    const feature = features.find(f => f.id === activeFeature);
+    if (feature) {
+      const FeatureComponent = feature.component;
+      return (
+        <Modal visible={true} animationType="slide" presentationStyle="pageSheet">
+          <View style={styles.featureContainer}>
+            {/* Feature Header */}
+            <View style={styles.featureHeader}>
+              <TouchableOpacity
+                onPress={() => setActiveFeature(null)}
+                style={styles.backButton}
+              >
+                <Ionicons name="arrow-back" size={24} color="#007AFF" />
+              </TouchableOpacity>
+              <Text style={styles.featureTitle}>{feature.title}</Text>
+              <View style={{ width: 24 }} />
+            </View>
+            
+            {/* Feature Component */}
+            <FeatureComponent />
+          </View>
+        </Modal>
+      );
+    }
+  }
+
   return (
     <ScrollView
       style={styles.container}
@@ -148,6 +233,26 @@ export default function StudentDashboard() {
             <Text style={styles.statLabel}>Day Streak 🔥</Text>
           </View>
         </View>
+      </View>
+
+      {/* New Features Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>✨ New Features</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {features.map((feature) => (
+            <TouchableOpacity
+              key={feature.id}
+              onPress={() => setActiveFeature(feature.id)}
+              style={styles.featureCard}
+            >
+              <View style={[styles.featureIcon, { backgroundColor: feature.color + '20' }]}>
+                <Ionicons name={feature.icon as any} size={24} color={feature.color} />
+              </View>
+              <Text style={styles.featureCardTitle}>{feature.title}</Text>
+              <Text style={styles.featureCardDescription}>{feature.description}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       {/* Continue Learning Section */}
@@ -261,19 +366,31 @@ export default function StudentDashboard() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.actionsContainer}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionIcon}>🔍</Text>
-            <Text style={styles.actionText}>Browse Courses</Text>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => setActiveFeature('ai-assistant')}
+          >
+            <Text style={styles.actionIcon}>🤖</Text>
+            <Text style={styles.actionText}>AI Assistant</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionIcon}>📊</Text>
-            <Text style={styles.actionText}>View Progress</Text>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => setActiveFeature('pomodoro')}
+          >
+            <Text style={styles.actionIcon}>⏱️</Text>
+            <Text style={styles.actionText}>Focus Timer</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionIcon}>🎯</Text>
-            <Text style={styles.actionText}>Set Goals</Text>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => setActiveFeature('smart-notes')}
+          >
+            <Text style={styles.actionIcon}>📝</Text>
+            <Text style={styles.actionText}>Smart Notes</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => setActiveFeature('social')}
+          >
             <Text style={styles.actionIcon}>👥</Text>
             <Text style={styles.actionText}>Community</Text>
           </TouchableOpacity>
@@ -469,5 +586,61 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1a1a1a',
     textAlign: 'center',
+  },
+  // New feature modal styles
+  featureContainer: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  featureHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 20,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  backButton: {
+    padding: 8,
+  },
+  featureTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+  },
+  // Feature cards styles
+  featureCard: {
+    width: 200,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginRight: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  featureIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  featureCardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    marginBottom: 8,
+  },
+  featureCardDescription: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
   },
 });
