@@ -1,5 +1,6 @@
 {
   "expo": {
+<<<<<<< HEAD
     "name": "SkillBOx",
     "slug": "SkillBOx",
     "version": "1.0.0",
@@ -43,6 +44,66 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+=======
+    "name": "SkillBox",
+    "slug": "skillbox-app",
+    "version": "4.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "skillbox",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "developmentClient": {
+      "silentLaunch": false
+    },
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.skillbox.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.skillbox.app",
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "expo-camera",
+      "expo-notifications",
+      "expo-local-authentication"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id-here"
+      }
+    },
+    "developerTool": "dev-build",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+>>>>>>> 663af87f49b6c2063bb6ee3bd31fe3f2cfba9260
     }
   }
 }
