@@ -2,48 +2,6 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-<<<<<<< HEAD
-    "jsx": "react-native",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true,
-    "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@components/*": [
-        "./src/components/*"
-      ],
-      "@screens/*": [
-        "./src/screens/*"
-      ],
-      "@services/*": [
-        "./src/services/*"
-      ],
-      "@hooks/*": [
-        "./src/hooks/*"
-      ],
-      "@utils/*": [
-        "./src/utils/*"
-      ],
-      "@types/*": [
-        "./src/types/*"
-      ],
-      "@contexts/*": [
-        "./src/contexts/*"
-      ],
-      "@theme/*": [
-        "./src/theme/*"
-      ],
-      "@config/*": [
-        "./src/config/*"
-      ],
-      "@navigation/*": [
-        "./src/navigation/*"
-      ]
-=======
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
@@ -70,13 +28,14 @@
       "@/services/*": ["./services/*"],
       "@/types/*": ["./types/*"],
       "@/app/*": ["./app/*"],
-      "@/ai/*": ["./ai/*"]
->>>>>>> 663af87f49b6c2063bb6ee3bd31fe3f2cfba9260
+      "@/ai/*": ["./ai/*"],
+      "@/store/*": ["./store/*"],
+      "@/config/*": ["./config/*"],
+      "@/assets/*": ["./assets/*"]
     }
   },
   "include": [
     "**/*.ts",
-<<<<<<< HEAD
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
@@ -86,8 +45,3 @@
     "node_modules"
   ]
 }
-=======
-    "**/*.tsx"
-  ]
-}
->>>>>>> 663af87f49b6c2063bb6ee3bd31fe3f2cfba9260

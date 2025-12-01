@@ -1,8 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createClient } from '@supabase/supabase-js';
 import 'react-native-url-polyfill/auto';
-import { Database } from '../types/mergedDatabase';
-import { createTypedClient, handleSupabaseError } from './supabase-types';
+import { createTypedClient } from './supabase-types';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
@@ -24,6 +22,45 @@ export const supabase = createTypedClient(supabaseUrl, supabaseAnonKey, {
     },
   },
 });
+
+// Initialize Supabase with custom credentials
+export const initializeSupabase = (url?: string, key?: string) => {
+  if (url && key) {
+    return createTypedClient(url, key, {
+      auth: {
+        storage: AsyncStorage,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false,
+      },
+    });
+  }
+  return supabase;
+};
+
+// Set Supabase credentials dynamically
+export const setSupabaseCredentials = async (url: string, key: string) => {
+  try {
+    const newClient = createTypedClient(url, key, {
+      auth: {
+        storage: AsyncStorage,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false,
+      },
+    });
+
+    // Test the connection
+    const { error } = await newClient.from('profiles').select('count').single();
+    if (error && error.code !== 'PGRST116') {
+      throw new Error('Invalid Supabase credentials');
+    }
+
+    return newClient;
+  } catch (error) {
+    throw new Error('Failed to connect with provided credentials');
+  }
+};
 
 // Storage helpers
 export const uploadFile = async (

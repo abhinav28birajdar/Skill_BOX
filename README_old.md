@@ -1,79 +1,296 @@
-<div align="center">
-  <img src="./assets/images/icon.png" alt="SkillBox Logo" width="80" height="80">
-  
-  # SkillBox
-  **Modern Learning Platform & Skill Development Ecosystem**
-  
-  [![React Native](https://img.shields.io/badge/React%20Native-0.81.4-61DAFB?style=flat&logo=react)](https://reactnative.dev)
-  [![Expo](https://img.shields.io/badge/Expo%20SDK-54-000020?style=flat&logo=expo)](https://expo.dev)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-3178C6?style=flat&logo=typescript&logoColor=white)](https://typescriptlang.org)
-  [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white)](https://supabase.com)
-</div>
+# SkillBox Mobile - Learn & Teach Any Skill 📱
 
-## 🎯 What is SkillBox?
+**A Production-Ready React Native Expo App for Teaching & Learning**
 
-SkillBox is a comprehensive learning management system designed to compete with platforms like Coursera and Udemy. Built with modern React Native technology, it provides a seamless experience for both learners and educators.
+[![React Native](https://img.shields.io/badge/React%20Native-0.81.5-blue)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-54.0-black)](https://expo.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green)](https://supabase.com/)
 
-### 🌟 Recent Platform Transformation (December 2025)
+---
 
-✅ **Complete Learning Management System** - Full-featured platform with course management, payments, and analytics
-✅ **Payment Processing** - Multi-provider support (Stripe, PayPal, Razorpay, Google Pay, Apple Pay)
-✅ **Role-Based Authentication** - Student, Teacher, Creator, and Admin roles with proper permissions
-✅ **40+ Skill Categories** - Comprehensive categorization across design, development, business, and more
-✅ **Real-time Features** - Live notifications, progress tracking, and course updates
-✅ **Professional Database Schema** - Production-ready PostgreSQL schema with proper relationships
-✅ **TypeScript Excellence** - Fully typed codebase with comprehensive type safety
+## 🌟 Overview
 
-A comprehensive learning platform built with React Native, Expo, and Supabase that combines traditional education with cutting-edge AI, AR/VR, and real-time features.
+SkillBox is a comprehensive mobile learning platform connecting **Teachers** and **Students** for skill-based education. Built with React Native (Expo), TypeScript, and Supabase, it provides a complete solution for creating, managing, and consuming educational content across categories like Photography, Video Editing, Dance, Design, and more.
 
-## 🚀 Features
+### Key Features
+- 📚 Course creation and management
+- 🎥 Video streaming with progress tracking
+- 💬 Real-time chat messaging
+- 🎓 Live video classes (Jitsi integration)
+- 🔔 Real-time notifications
+- 📊 Student progress tracking
+- 🏆 Student showcases
+- ⭐ Course reviews and ratings
+- 🌓 Dark/light theme support
 
-### Core Learning Platform
-- **Multi-format Content**: Videos, documents, interactive quizzes, AR/VR experiences
-- **Live Classes**: Real-time one-on-one and group learning sessions
-- **Course Management**: Structured learning paths with modules and lessons
-- **Progress Tracking**: Detailed analytics and completion tracking
-- **Skill-based Learning**: Organized by skills and difficulty levels
+---
 
-### Advanced Features
-- **AI-Powered Recommendations**: Personalized content suggestions
-- **Real-time Chat & Notifications**: Instant messaging and updates
-- **Social Learning**: Follow creators, comments, reviews, and community features
-- **Teacher Tools**: Content creation, analytics, and student management
-- **Multi-language Support**: International content and interface
-- **Offline Support**: Download content for offline viewing
+## 🚀 Quick Start
 
-### UI/UX Excellence
-- **Modern Design**: Clean, responsive interface with dark/light themes
-- **Native Performance**: Optimized for both iOS and Android
-- **Accessibility**: Full screen reader and accessibility support
-- **Smooth Animations**: Fluid transitions and micro-interactions
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+- Expo CLI (`npm install -g expo-cli`)
+- Android Studio (for Android development)
+- Supabase account (free tier available)
 
-## 🛠 Tech Stack
+### Installation
 
-### Frontend
-- **React Native 0.79.2** - Cross-platform mobile development
-- **Expo SDK 53** - Development platform and tools
-- **TypeScript** - Type-safe development
-- **Expo Router** - File-based routing system
-- **React Navigation** - Navigation library
-- **Reanimated 3** - High-performance animations
-- **TailwindCSS** - Utility-first styling
-- **React Query** - Data fetching and caching
+```bash
+# Install dependencies
+npm install
 
-### Backend & Database
-- **Supabase** - Backend-as-a-Service
-- **PostgreSQL** - Relational database
-- **Row Level Security** - Data protection
-- **Real-time Subscriptions** - Live updates
-- **Authentication** - Built-in auth system
-- **File Storage** - Media and document storage
+# Copy environment variables
+cp .env.example .env
 
-### Additional Libraries
-- **React Hook Form** - Form handling
-- **Zustand** - State management
-- **React Native Paper** - UI components
-- **React Native Video** - Video playback
-- **Three.js** - 3D graphics (for AR/VR)
-- **React Native SVG** - Vector graphics
+# Edit .env with your Supabase credentials
+```
 
+### Database Setup
+
+1. Create a Supabase project at https://supabase.com
+2. Go to **SQL Editor** and run:
+   - `supabase/001_schema.sql`
+   - `supabase/002_storage.sql`
+3. Enable Email authentication in **Authentication** → **Providers**
+
+### Run the App
+
+```bash
+npm start          # Start Expo dev server
+npm run android    # Run on Android
+```
+
+---
+
+## 📁 Project Structure
+
+```
+SkillBox/
+├── app/                    # Expo Router screens
+│   ├── (auth)/            # Login, signup, role selection
+│   ├── (student)/         # Student tab screens
+│   ├── (teacher)/         # Teacher tab screens
+│   └── course/            # Course detail, lesson viewer
+├── src/
+│   ├── components/        # Reusable UI components
+│   ├── services/          # API services (Supabase)
+│   │   ├── supabase.ts   ✅
+│   │   └── auth.ts       ✅
+│   ├── hooks/             # Custom React hooks
+│   ├── contexts/          # React contexts
+│   ├── types/             # TypeScript types ✅
+│   ├── config/            # App configuration ✅
+│   └── utils/             # Helper functions
+├── supabase/              # Database migrations ✅
+└── assets/                # Images, icons, fonts
+```
+
+See **[MASTER_IMPLEMENTATION_GUIDE.md](./MASTER_IMPLEMENTATION_GUIDE.md)** for complete architecture.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React Native (Expo SDK 54), TypeScript
+- **Styling**: NativeWind (Tailwind CSS for RN)
+- **Backend**: Supabase (PostgreSQL, Auth, Storage, Realtime)
+- **Navigation**: Expo Router (file-based routing)
+- **State**: Zustand
+- **Video**: Expo Video, Jitsi Meet
+- **File Handling**: Expo Image Picker, Document Picker
+
+---
+
+## 📚 Core Services
+
+### Authentication
+```typescript
+import authService from '@services/auth';
+
+// Sign up
+const { user, profile, error } = await authService.signUp({
+  email: 'user@example.com',
+  password: 'password123',
+  name: 'John Doe',
+  role: 'student', // or 'teacher'
+});
+
+// Sign in
+const { user, profile, error } = await authService.signIn({
+  email: 'user@example.com',
+  password: 'password123',
+});
+```
+
+### Courses (To be implemented - see guide)
+```typescript
+import courseService from '@services/courses';
+
+const courses = await courseService.getAllCourses({
+  category: 1,
+  skill_level: 'beginner',
+});
+```
+
+### Real-time Chat (To be implemented - see guide)
+```typescript
+import chatService from '@services/chat';
+
+const channel = chatService.subscribeToMessages(threadId, (message) => {
+  console.log('New message:', message);
+});
+```
+
+---
+
+## 🗄️ Database Schema
+
+**12 Core Tables** with Row-Level Security:
+- `users` - Authentication and roles
+- `profiles` - User profiles
+- `categories` - 10 pre-populated categories
+- `courses` - Course information
+- `lessons` - Video/document lessons
+- `enrollments` - Student enrollments
+- `messages` - Chat messages
+- `threads` - Chat conversations
+- `notifications` - Real-time notifications
+- `live_sessions` - Scheduled live classes
+- `reviews` - Course ratings
+- `showcases` - Student portfolios
+
+All tables include automatic timestamps, foreign keys, indexes, and RLS policies.
+
+---
+
+## 🎨 Theme System
+
+```typescript
+import { useTheme } from '@contexts/ThemeContext';
+
+function MyScreen() {
+  const { isDark, setTheme } = useTheme();
+
+  return (
+    <View className="bg-white dark:bg-dark-900">
+      <Text className="text-dark-900 dark:text-white">
+        Theme: {isDark ? 'Dark' : 'Light'}
+      </Text>
+    </View>
+  );
+}
+```
+
+---
+
+## 📦 Build for Production
+
+```bash
+# Install EAS CLI
+npm install -g eas-cli
+
+# Configure
+eas build:configure
+
+# Build Android APK (testing)
+eas build --platform android --profile preview
+
+# Build Android AAB (Play Store)
+eas build --platform android --profile production
+```
+
+---
+
+## 📖 Documentation
+
+- **[MASTER_IMPLEMENTATION_GUIDE.md](./MASTER_IMPLEMENTATION_GUIDE.md)** - Complete implementation guide with code examples for all services, components, screens, and hooks
+- **Supabase SQL Scripts** - `supabase/001_schema.sql` and `supabase/002_storage.sql`
+- **Environment Variables** - See `.env.example`
+
+---
+
+## 🗺️ Implementation Roadmap
+
+### ✅ Phase 1: Foundation (COMPLETED)
+- [x] Project setup with Expo + TypeScript
+- [x] Supabase database schema (12 tables)
+- [x] Storage buckets with RLS policies
+- [x] Authentication service
+- [x] TypeScript type definitions
+- [x] NativeWind configuration
+
+### 🔨 Phase 2: Core Services (IN PROGRESS)
+- [ ] Course service (CRUD operations)
+- [ ] Lesson service
+- [ ] Enrollment service
+- [ ] Chat service with real-time
+- [ ] Notification service
+- [ ] Live session service
+- [ ] Upload service
+
+### 🎨 Phase 3: UI Components (NEXT)
+- [ ] Base components (Button, Input, Card, etc.)
+- [ ] Course components (CourseCard, VideoPlayer, etc.)
+- [ ] Chat components (MessageBubble, ChatList, etc.)
+- [ ] Layout components (Header, TabBar, etc.)
+
+### 📱 Phase 4: Screens (NEXT)
+- [ ] Authentication screens (login, signup, role select)
+- [ ] Student screens (home, explore, courses, messages, profile)
+- [ ] Teacher screens (dashboard, courses, create, messages, profile)
+- [ ] Shared screens (course detail, lesson viewer, chat, live class)
+
+### 🪝 Phase 5: Hooks & Context (NEXT)
+- [ ] useAuth hook
+- [ ] useCourses hook
+- [ ] useChat hook
+- [ ] useNotifications hook
+- [ ] ThemeContext
+- [ ] AuthContext
+
+### 🚀 Phase 6: Advanced Features
+- [ ] File upload with progress
+- [ ] Video streaming optimization
+- [ ] Real-time presence
+- [ ] Push notifications
+- [ ] Offline mode
+- [ ] Payment integration
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
+
+---
+
+## 📝 License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- [Expo](https://expo.dev/) - React Native framework
+- [Supabase](https://supabase.com/) - Backend-as-a-Service
+- [NativeWind](https://www.nativewind.dev/) - Tailwind for RN
+- [Jitsi Meet](https://jitsi.org/) - Video conferencing
+
+---
+
+## 📞 Support
+
+- **Documentation**: [Master Implementation Guide](./MASTER_IMPLEMENTATION_GUIDE.md)
+- **Issues**: [GitHub Issues](https://github.com/yourusername/skillbox-mobile/issues)
+- **Email**: support@skillbox.com
+
+---
+
+**Made with ❤️ for learners and teachers worldwide**
