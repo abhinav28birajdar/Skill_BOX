@@ -7,6 +7,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -14,7 +16,7 @@ export interface NotificationData {
   title: string;
   body: string;
   data?: Record<string, any>;
-  categoryId?: string;
+  categoryIdentifier?: string;
   trigger?: {
     type: 'time' | 'daily' | 'weekly';
     date?: Date;
@@ -98,12 +100,13 @@ class NotificationService {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user && this.expoPushToken) {
-        await supabase
+        await (supabase as any)
           .from('user_profiles')
           .update({ 
-            push_notifications: true,
+            push_token: this.expoPushToken,
+            push_notifications_enabled: true,
           })
-          .eq('id', user.id);
+          .eq('user_id', user.id);
       }
     } catch (error) {
       console.error('Error saving push token:', error);
@@ -142,7 +145,7 @@ class NotificationService {
           title: notification.title,
           body: notification.body,
           data: notification.data || {},
-          categoryIdentifier: notification.categoryId,
+          categoryIdentifier: notification.categoryIdentifier,
           sound: 'default',
         },
         trigger,
@@ -165,13 +168,14 @@ class NotificationService {
 
   async sendLocalNotification(notification: NotificationData) {
     try {
-      await Notifications.presentNotificationAsync({
-        title: notification.title,
-        body: notification.body,
-        data: { 
-          ...notification.data || {},
-          categoryId: notification.categoryId,
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: notification.title,
+          body: notification.body,
+          data: notification.data || {},
+          categoryIdentifier: notification.categoryIdentifier,
         },
+        trigger: null,
       });
     } catch (error) {
       console.error('Error sending local notification:', error);

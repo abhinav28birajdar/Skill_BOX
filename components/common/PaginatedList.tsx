@@ -81,13 +81,14 @@ export function PaginatedList<T>({
           {Array.from({ length: skeletonCount }).map((_, index) => (
             <Skeleton
               key={index}
-              style={[
-                styles.skeleton,
-                skeletonVariant === 'card' && styles.skeletonCard,
-                skeletonVariant === 'text' && styles.skeletonText,
-                skeletonVariant === 'avatar' && styles.skeletonAvatar,
-                skeletonVariant === 'image' && styles.skeletonImage,
-              ]}
+              variant={skeletonVariant}
+              style={{
+                ...styles.skeleton,
+                ...(skeletonVariant === 'card' && styles.skeletonCard),
+                ...(skeletonVariant === 'text' && styles.skeletonText),
+                ...(skeletonVariant === 'avatar' && styles.skeletonAvatar),
+                ...(skeletonVariant === 'image' && styles.skeletonImage),
+              }}
             />
           ))}
         </View>

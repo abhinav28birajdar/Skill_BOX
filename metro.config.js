@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-const { getDefaultConfig } = require('expo/metro-config');
-const { withNativeWind } = require('nativewind/metro');
-
-const config = getDefaultConfig(__dirname);
-
-module.exports = withNativeWind(config, { input: './global.css' });
-=======
 // Learn more https://docs.expo.io/guides/customizing-metro
 const { getDefaultConfig } = require('@expo/metro-config');
 const path = require('path');
@@ -37,4 +29,3 @@ config.resolver.nodeModulesPaths = [path.resolve(projectRoot, 'node_modules')];
 config.cacheVersion = '2.0';
 
 module.exports = config;
->>>>>>> 663af87f49b6c2063bb6ee3bd31fe3f2cfba9260

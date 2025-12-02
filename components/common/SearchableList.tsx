@@ -2,7 +2,7 @@ import ModernCard from '@/components/ui/ModernCard';
 import ModernInput from '@/components/ui/ModernInput';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useEnhancedTheme } from '@/hooks/useEnhancedTheme';
-import { SearchResult, searchService } from '@/services/searchService';
+import { searchService } from '@/services/searchService';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
@@ -37,7 +37,9 @@ export function SearchableList<T>({
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [results, setResults] = useState<SearchResult<T>>({
+  type LocalSearchResult = { items: T[]; total: number; hasMore: boolean; facets?: any };
+
+  const [results, setResults] = useState<LocalSearchResult>({
     items: [],
     total: 0,
     hasMore: false,
@@ -70,7 +72,7 @@ export function SearchableList<T>({
       if (reset) {
         setResults(result);
       } else {
-        setResults(prev => ({
+        setResults((prev: LocalSearchResult) => ({
           ...result,
           items: [...prev.items, ...result.items],
         }));
@@ -93,7 +95,7 @@ export function SearchableList<T>({
   }, [query, sortBy, filters, searchType, page]);
 
   const debouncedSearch = useMemo(() => {
-    let timeout: NodeJS.Timeout;
+    let timeout: any;
     return (searchQuery: string) => {
       clearTimeout(timeout);
       timeout = setTimeout(() => performSearch(searchQuery), 500);

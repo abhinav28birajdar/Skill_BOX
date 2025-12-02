@@ -89,7 +89,7 @@ export default function Button({
           borderWidth: 0,
           textColor: colors.buttonText,
           gradientColors: isDisabled 
-            ? [colors.borderSecondary, colors.borderSecondary] as const
+            ? [colors.borderSecondary, colors.borderSecondary]
             : colors.primaryGradient,
         };
       
@@ -99,7 +99,7 @@ export default function Button({
           borderWidth: 0,
           textColor: colors.buttonText,
           gradientColors: isDisabled 
-            ? [colors.borderSecondary, colors.borderSecondary] as const
+            ? [colors.borderSecondary, colors.borderSecondary]
             : colors.secondaryGradient,
         };
       
@@ -109,7 +109,7 @@ export default function Button({
           borderWidth: 1,
           borderColor: isDisabled ? colors.borderSecondary : colors.primary,
           textColor: isDisabled ? colors.textTertiary : colors.primary,
-          gradientColors: ['transparent', 'transparent'] as const,
+          gradientColors: ['transparent', 'transparent'],
         };
       
       case 'ghost':
@@ -117,7 +117,7 @@ export default function Button({
           backgroundColor: isDisabled ? colors.surfaceSecondary : colors.surfaceSecondary,
           borderWidth: 0,
           textColor: isDisabled ? colors.textTertiary : colors.text,
-          gradientColors: ['transparent', 'transparent'] as const,
+          gradientColors: ['transparent', 'transparent'],
         };
       
       case 'danger':
@@ -126,8 +126,8 @@ export default function Button({
           borderWidth: 0,
           textColor: colors.buttonText,
           gradientColors: isDisabled 
-            ? [colors.borderSecondary, colors.borderSecondary] as const
-            : [colors.error, '#DC2626'] as const,
+            ? [colors.borderSecondary, colors.borderSecondary]
+            : [colors.error, '#DC2626'],
         };
       
       default:
@@ -217,7 +217,7 @@ export default function Button({
           {...props}
         >
           <LinearGradient
-            colors={variantStyles.gradientColors}
+            colors={variantStyles.gradientColors as any}
             style={touchableStyle}
           >
             {buttonContent}

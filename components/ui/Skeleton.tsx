@@ -15,9 +15,10 @@ interface SkeletonProps {
   height?: number;
   borderRadius?: number;
   style?: ViewStyle;
+  variant?: 'text' | 'card' | 'circle';
 }
 
-export function Skeleton({ width = '100%', height = 20, borderRadius = 4, style }: SkeletonProps) {
+export function Skeleton({ width = '100%', height = 20, borderRadius = 4, style, variant = 'text' }: SkeletonProps) {
   const { colors, isDark } = useEnhancedTheme();
   const animatedValue = useSharedValue(0);
 
@@ -82,7 +83,7 @@ export function SkeletonText({
         <Skeleton
           key={index}
           height={lineHeight}
-          width={index === lines - 1 ? lastLineWidth : '100%'}
+          width={index === lines - 1 ? (lastLineWidth as any) : '100%'}
           style={{ marginBottom: index < lines - 1 ? 8 : 0 }}
         />
       ))}

@@ -9,7 +9,7 @@ import { useEnhancedTheme } from '@/hooks/useEnhancedTheme';
 import { useFormWithZod } from '@/hooks/useFormWithZod';
 import { supabase } from '@/lib/supabase';
 import { LoginFormData, loginSchema } from '@/lib/validationSchemas';
-import { useAppStore, User } from '@/store/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function EnhancedLoginForm() {
   const { colors, spacing, fontSize, fontWeight } = useEnhancedTheme();
@@ -43,22 +43,24 @@ export default function EnhancedLoginForm() {
 
       if (authData?.user && authData?.session) {
         // Get user profile
-        const { data: profileData } = await supabase
+        const { data: profileDataRaw } = (await supabase
           .from('user_profiles')
           .select('*')
           .eq('user_id', authData.user.id)
-          .single();
+          .single()) as any;
+
+        const profileData: any = profileDataRaw;
 
         if (profileData) {
           setUser({
             id: authData.user.id,
             email: authData.user.email!,
-            firstName: profileData.first_name || '',
-            lastName: profileData.last_name || '',
-            displayName: profileData.display_name || '',
-            avatarUrl: profileData.avatar_url || '',
-            role: profileData.role as User['role'],
-            isVerified: profileData.is_verified || false,
+            firstName: profileData.first_name,
+            lastName: profileData.last_name,
+            displayName: profileData.display_name,
+            avatarUrl: profileData.avatar_url,
+            role: profileData.role,
+            isVerified: profileData.is_verified,
             preferences: profileData.preferences || {},
           });
         }
@@ -69,7 +71,7 @@ export default function EnhancedLoginForm() {
         if (profileData?.role === 'student') {
           router.replace('/(tabs)' as any);
         } else if (profileData?.role === 'teacher' || profileData?.role === 'creator') {
-          router.replace('/(tabs)' as any);
+          router.replace('/(tabs)/creator' as any);
         } else {
           router.replace('/(tabs)' as any);
         }
@@ -159,7 +161,7 @@ export default function EnhancedLoginForm() {
 
       {/* Forgot Password Link */}
       <TouchableOpacity
-        onPress={() => router.push('/forgot-password')}
+        onPress={() => router.push('/forgot-password' as any)}
         style={{ alignSelf: 'flex-end', marginBottom: spacing.xl }}
       >
         <Text style={{
@@ -231,7 +233,7 @@ export default function EnhancedLoginForm() {
         }}>
           Don't have an account? {' '}
         </Text>
-        <TouchableOpacity onPress={() => router.push('/signup')}>
+        <TouchableOpacity onPress={() => router.push('/signup' as any)}>
           <Text style={{
             fontSize: fontSize.base,
             color: colors.primary,

@@ -145,9 +145,9 @@ export default function EnhancedSettingsScreen() {
         {
           text: 'Sign Out',
           style: 'destructive',
-          onPress: () => {
+            onPress: () => {
             reset();
-            router.replace('/login');
+            router.replace('/login' as any);
           },
         },
       ]
@@ -190,7 +190,7 @@ export default function EnhancedSettingsScreen() {
             icon="person"
             title="Profile"
             subtitle="Update your personal information"
-            onPress={() => router.push('/profile')}
+            onPress={() => router.push('/profile' as any)}
             showChevron
           />
           

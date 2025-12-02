@@ -17,7 +17,7 @@ interface SearchOptions {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface SearchResult<T> {
+interface SearchResult<T> {
   items: T[];
   total: number;
   hasMore: boolean;
@@ -27,6 +27,8 @@ export interface SearchResult<T> {
     languages: { name: string; count: number }[];
   };
 }
+
+export type { SearchResult };
 
 class SearchService {
   private readonly CACHE_TTL = 15; // 15 minutes
@@ -145,7 +147,7 @@ class SearchService {
       const limit = options.limit || 20;
       const offset = options.offset || 0;
       
-      const { data, error, count } = await queryBuilder
+      const { data, error, count } = await (queryBuilder as any)
         .range(offset, offset + limit - 1)
         .limit(limit);
 
@@ -193,7 +195,7 @@ class SearchService {
       const limit = options.limit || 20;
       const offset = options.offset || 0;
       
-      const { data, error, count } = await queryBuilder
+      const { data, error, count } = await (queryBuilder as any)
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
 
@@ -234,7 +236,7 @@ class SearchService {
       const limit = options.limit || 20;
       const offset = options.offset || 0;
       
-      const { data, error, count } = await queryBuilder
+      const { data, error, count } = await (queryBuilder as any)
         .order('popularity_score', { ascending: false })
         .range(offset, offset + limit - 1);
 
@@ -258,33 +260,33 @@ class SearchService {
   private async getCourseFacets(query: string, filters: SearchFilters) {
     try {
       const [categoriesResult, difficultiesResult, languagesResult] = await Promise.all([
-        supabase
+        (supabase as any)
           .from('courses')
           .select('categories(name)')
           .or(query ? `title.ilike.%${query}%,description.ilike.%${query}%` : '1.eq.1'),
         
-        supabase
+        (supabase as any)
           .from('courses')
           .select('difficulty_level')
           .or(query ? `title.ilike.%${query}%,description.ilike.%${query}%` : '1.eq.1'),
         
-        supabase
+        (supabase as any)
           .from('courses')
           .select('language')
           .or(query ? `title.ilike.%${query}%,description.ilike.%${query}%` : '1.eq.1'),
-      ]);
+      ] as any);
 
       // Count occurrences for facets
       const categories = this.countOccurrences(
-        (categoriesResult.data as any[])?.map((item: any) => item.categories?.name).filter(Boolean) || []
+        ((categoriesResult as any)?.data || []).map((item: any) => item.categories?.name).filter(Boolean) || []
       );
       
       const difficulties = this.countOccurrences(
-        (difficultiesResult.data as any[])?.map((item: any) => item.difficulty_level).filter(Boolean) || []
+        ((difficultiesResult as any)?.data || []).map((item: any) => item.difficulty_level).filter(Boolean) || []
       );
       
       const languages = this.countOccurrences(
-        (languagesResult.data as any[])?.map((item: any) => item.language).filter(Boolean) || []
+        ((languagesResult as any)?.data || []).map((item: any) => item.language).filter(Boolean) || []
       );
 
       return {
@@ -328,7 +330,7 @@ class SearchService {
 
       if (error) throw error;
 
-      return (data as any[])?.map((item: any) => item.query) || [];
+      return data?.map(item => item.query) || [];
     } catch (error) {
       console.error('Popular searches error:', error);
       return [];
@@ -338,14 +340,14 @@ class SearchService {
   async recordSearch(query: string): Promise<void> {
     try {
       await (supabase as any)
-        .from('search_analytics')
-        .upsert({
-          query: query.toLowerCase().trim(),
-          search_count: 1,
-        }, {
-          onConflict: 'query',
-          ignoreDuplicates: false,
-        });
+          .from('search_analytics')
+          .upsert({
+            query: query.toLowerCase().trim(),
+            search_count: 1,
+          }, {
+            onConflict: 'query',
+            ignoreDuplicates: false,
+          });
     } catch (error) {
       console.error('Record search error:', error);
     }

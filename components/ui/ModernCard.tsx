@@ -22,6 +22,7 @@ interface BaseCardProps {
 interface TouchableCardProps extends BaseCardProps {
   touchable: true;
   onPress: () => void;
+  children?: React.ReactNode;
 }
 
 interface NonTouchableCardProps extends BaseCardProps {
@@ -130,9 +131,9 @@ export default function ModernCard({
         {...(touchable ? touchableProps : {})}
       >
         <LinearGradient
-          colors={gradientColors as readonly [string, string, ...string[]]}
-          style={{ flex: 1 }}
-        >
+              colors={gradientColors as any}
+              style={{ flex: 1 }}
+            >
           {renderContent()}
         </LinearGradient>
       </CardComponent>
