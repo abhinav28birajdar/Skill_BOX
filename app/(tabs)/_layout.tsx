@@ -1,15 +1,5 @@
 import { Tabs } from 'expo-router';
-<<<<<<< HEAD
-import React from 'react';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-=======
 import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
@@ -28,10 +18,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
         tabBarButton: HapticTab,
-<<<<<<< HEAD
-=======
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
@@ -40,7 +27,6 @@ export default function TabLayout() {
           },
           default: {},
         }),
->>>>>>> 663af87f49b6c2063bb6ee3bd31fe3f2cfba9260
       }}>
       <Tabs.Screen
         name="index"
@@ -53,9 +39,6 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: 'Explore',
-<<<<<<< HEAD
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-=======
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="magnifyingglass" color={color} />,
         }}
       />
@@ -73,7 +56,6 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
->>>>>>> 663af87f49b6c2063bb6ee3bd31fe3f2cfba9260
         }}
       />
     </Tabs>
