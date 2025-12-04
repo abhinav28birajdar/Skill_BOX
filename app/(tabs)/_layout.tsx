@@ -12,7 +12,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { user } = useAuth();
->>>>>>> 663af87f49b6c2063bb6ee3bd31fe3f2cfba9260
+
 
   return (
     <Tabs

@@ -81,7 +81,7 @@ export function PaginatedList<T>({
           {Array.from({ length: skeletonCount }).map((_, index) => (
             <Skeleton
               key={index}
-              variant={skeletonVariant}
+              variant={skeletonVariant === 'avatar' || skeletonVariant === 'image' ? 'circle' : (skeletonVariant as 'text' | 'card')}
               style={{
                 ...styles.skeleton,
                 ...(skeletonVariant === 'card' && styles.skeletonCard),

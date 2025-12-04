@@ -330,7 +330,7 @@ class SearchService {
 
       if (error) throw error;
 
-      return data?.map(item => item.query) || [];
+      return data?.map((item: any) => item.query) || [];
     } catch (error) {
       console.error('Popular searches error:', error);
       return [];

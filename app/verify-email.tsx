@@ -1,2 +1,195 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {\n  View,\n  Text,\n  TextInput,\n  TouchableOpacity,\n  StatusBar,\n  Alert\n} from 'react-native';\nimport { SafeAreaView } from 'react-native-safe-area-context';\nimport { useRouter } from 'expo-router';\nimport { Ionicons } from '@expo/vector-icons';\nimport { Button } from '../src/components/ui/Button';\nimport { useThemeColors } from '../src/theme';\nimport { useAuth } from '../src/hooks/useAuth';\n\nexport default function VerifyEmailScreen() {\n  const router = useRouter();\n  const colors = useThemeColors();\n  const { user, resendVerification } = useAuth();\n  const [code, setCode] = useState(['', '', '', '', '', '']);\n  const [loading, setLoading] = useState(false);\n  const [timer, setTimer] = useState(60);\n  const [canResend, setCanResend] = useState(false);\n  const inputRefs = useRef<TextInput[]>([]);\n\n  useEffect(() => {\n    const countdown = setInterval(() => {\n      setTimer((prev) => {\n        if (prev <= 1) {\n          setCanResend(true);\n          clearInterval(countdown);\n          return 0;\n        }\n        return prev - 1;\n      });\n    }, 1000);\n\n    return () => clearInterval(countdown);\n  }, []);\n\n  const handleCodeChange = (text: string, index: number) => {\n    const newCode = [...code];\n    newCode[index] = text;\n    setCode(newCode);\n\n    // Auto-focus next input\n    if (text && index < 5) {\n      inputRefs.current[index + 1]?.focus();\n    }\n  };\n\n  const handleKeyPress = (key: string, index: number) => {\n    if (key === 'Backspace' && !code[index] && index > 0) {\n      inputRefs.current[index - 1]?.focus();\n    }\n  };\n\n  const handleVerify = async () => {\n    const verificationCode = code.join('');\n    if (verificationCode.length !== 6) {\n      Alert.alert('Error', 'Please enter the complete verification code');\n      return;\n    }\n\n    setLoading(true);\n    // Simulate verification process\n    setTimeout(() => {\n      setLoading(false);\n      Alert.alert('Success', 'Email verified successfully!', [\n        { text: 'OK', onPress: () => router.replace('/(student)') }\n      ]);\n    }, 2000);\n  };\n\n  const handleResend = async () => {\n    if (!canResend) return;\n    \n    setLoading(true);\n    await resendVerification?.();\n    setLoading(false);\n    setTimer(60);\n    setCanResend(false);\n  };\n\n  return (\n    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>\n      <StatusBar barStyle=\"dark-content\" />\n      \n      {/* Header */}\n      <View className=\"px-6 pt-4 pb-8\">\n        <TouchableOpacity \n          onPress={() => router.back()}\n          className=\"w-10 h-10 rounded-full items-center justify-center mb-6\"\n          style={{ backgroundColor: colors.surface }}\n        >\n          <Ionicons name=\"chevron-back\" size={24} color={colors.text} />\n        </TouchableOpacity>\n      </View>\n\n      <View className=\"flex-1 px-6\">\n        {/* Icon */}\n        <View className=\"items-center mb-8\">\n          <View \n            className=\"w-24 h-24 rounded-full items-center justify-center mb-6\"\n            style={{ backgroundColor: colors.primary + '20' }}\n          >\n            <Ionicons name=\"mail-outline\" size={40} color={colors.primary} />\n          </View>\n          \n          <Text \n            className=\"text-3xl font-bold text-center mb-4\"\n            style={{ color: colors.text }}\n          >\n            Check your email\n          </Text>\n          \n          <Text \n            className=\"text-lg text-center leading-6\"\n            style={{ color: colors.textSecondary }}\n          >\n            We've sent a 6-digit verification code to{' '}\n            <Text style={{ color: colors.text, fontWeight: '600' }}>\n              {user?.email}\n            </Text>\n          </Text>\n        </View>\n\n        {/* Code Input */}\n        <View className=\"mb-8\">\n          <Text \n            className=\"text-base font-semibold mb-4 text-center\"\n            style={{ color: colors.text }}\n          >\n            Enter verification code\n          </Text>\n          \n          <View className=\"flex-row justify-center space-x-3\">\n            {code.map((digit, index) => (\n              <TextInput\n                key={index}\n                ref={(ref) => (inputRefs.current[index] = ref!)}\n                value={digit}\n                onChangeText={(text) => handleCodeChange(text, index)}\n                onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}\n                maxLength={1}\n                keyboardType=\"numeric\"\n                className=\"w-12 h-12 rounded-xl text-center text-xl font-bold border-2\"\n                style={{ \n                  borderColor: digit ? colors.primary : colors.border,\n                  backgroundColor: colors.surface,\n                  color: colors.text\n                }}\n              />\n            ))}\n          </View>\n        </View>\n\n        {/* Verify Button */}\n        <Button\n          title=\"Verify Email\"\n          onPress={handleVerify}\n          loading={loading}\n          fullWidth\n          size=\"lg\"\n          style={{ marginBottom: 24 }}\n        />\n\n        {/* Resend */}\n        <View className=\"items-center\">\n          <Text \n            className=\"text-sm mb-2\"\n            style={{ color: colors.textSecondary }}\n          >\n            Didn't receive the code?\n          </Text>\n          \n          {canResend ? (\n            <TouchableOpacity onPress={handleResend}>\n              <Text \n                className=\"text-base font-semibold\"\n                style={{ color: colors.primary }}\n              >\n                Resend Code\n              </Text>\n            </TouchableOpacity>\n          ) : (\n            <Text \n              className=\"text-sm\"\n              style={{ color: colors.textTertiary }}\n            >\n              Resend in {timer}s\n            </Text>\n          )}\n        </View>\n      </View>\n    </SafeAreaView>\n  );\n}
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+    Alert,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+export default function VerifyEmailScreen() {
+  const router = useRouter();
+  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [loading, setLoading] = useState(false);
+  const [timer, setTimer] = useState(60);
+  const [canResend, setCanResend] = useState(false);
+  const inputRefs = useRef<TextInput[]>([]);
+
+  useEffect(() => {
+    const countdown = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          setCanResend(true);
+          clearInterval(countdown);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdown);
+  }, []);
+
+  const handleCodeChange = (text: string, index: number) => {
+    const newCode = [...code];
+    newCode[index] = text;
+    setCode(newCode);
+
+    // Auto-focus next input
+    if (text && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyPress = (key: string, index: number) => {
+    if (key === 'Backspace' && !code[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleVerify = async () => {
+    const verificationCode = code.join('');
+    if (verificationCode.length !== 6) {
+      Alert.alert('Error', 'Please enter the complete verification code');
+      return;
+    }
+
+    setLoading(true);
+    // Simulate verification process
+    setTimeout(() => {
+      setLoading(false);
+      Alert.alert('Success', 'Email verified successfully!', [
+        { text: 'OK', onPress: () => router.replace('/(student)' as any) }
+      ]);
+    }, 2000);
+  };
+
+  const handleResend = async () => {
+    if (!canResend) return;
+    
+    setLoading(true);
+    // Simulate resend
+    setTimeout(() => {
+      setLoading(false);
+      setTimer(60);
+      setCanResend(false);
+    }, 1000);
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <StatusBar barStyle="dark-content" />
+      
+      {/* Header */}
+      <View className="px-6 pt-4 pb-8">
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          className="w-10 h-10 rounded-full items-center justify-center mb-6"
+          style={{ backgroundColor: '#f5f5f5' }}
+        >
+          <Ionicons name="chevron-back" size={24} color="#000" />
+        </TouchableOpacity>
+      </View>
+
+      <View className="flex-1 px-6">
+        {/* Icon */}
+        <View className="items-center mb-8">
+          <View 
+            className="w-24 h-24 rounded-full items-center justify-center mb-6"
+            style={{ backgroundColor: '#3b82f620' }}
+          >
+            <Ionicons name="mail-outline" size={40} color="#3b82f6" />
+          </View>
+          
+          <Text 
+            className="text-3xl font-bold text-center mb-4"
+            style={{ color: '#000' }}
+          >
+            Check your email
+          </Text>
+          
+          <Text 
+            className="text-lg text-center leading-6"
+            style={{ color: '#666' }}
+          >
+            We've sent a 6-digit verification code to your email
+          </Text>
+        </View>
+
+        {/* Code Input */}
+        <View className="mb-8">
+          <Text 
+            className="text-base font-semibold mb-4 text-center"
+            style={{ color: '#000' }}
+          >
+            Enter verification code
+          </Text>
+          
+          <View className="flex-row justify-center space-x-3">
+            {code.map((digit, index) => (
+              <TextInput
+                key={index}
+                ref={(ref) => { if (ref) inputRefs.current[index] = ref; }}
+                value={digit}
+                onChangeText={(text) => handleCodeChange(text, index)}
+                onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
+                maxLength={1}
+                keyboardType="numeric"
+                className="w-12 h-12 rounded-xl text-center text-xl font-bold border-2"
+                style={{ 
+                  borderColor: digit ? '#3b82f6' : '#e5e5e5',
+                  backgroundColor: '#f5f5f5',
+                  color: '#000'
+                }}
+              />
+            ))}
+          </View>
+        </View>
+
+        {/* Verify Button */}
+        <TouchableOpacity
+          onPress={handleVerify}
+          disabled={loading}
+          className="bg-blue-600 py-4 rounded-xl items-center mb-6"
+          style={{ opacity: loading ? 0.7 : 1 }}
+        >
+          <Text className="text-white text-lg font-semibold">
+            {loading ? 'Verifying...' : 'Verify Email'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Resend */}
+        <View className="items-center">
+          <Text 
+            className="text-sm mb-2"
+            style={{ color: '#666' }}
+          >
+            Didn't receive the code?
+          </Text>
+          
+          {canResend ? (
+            <TouchableOpacity onPress={handleResend}>
+              <Text 
+                className="text-base font-semibold"
+                style={{ color: '#3b82f6' }}
+              >
+                Resend Code
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <Text 
+              className="text-sm"
+              style={{ color: '#999' }}
+            >
+              Resend in {timer}s
+            </Text>
+          )}
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+}

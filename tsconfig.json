@@ -11,12 +11,12 @@
     "noEmit": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "ignoreDeprecations": "6.0",
     "types": [
       "react-native",
       "expo",
       "node"
     ],
-    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],

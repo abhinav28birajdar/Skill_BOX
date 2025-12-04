@@ -1,5 +1,4 @@
 import { useEnhancedTheme } from '@/hooks/useEnhancedTheme';
-import { initializeSupabase, setSupabaseCredentials } from '@/lib/supabase';
 import { useAppStore } from '@/store/useAppStore';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';

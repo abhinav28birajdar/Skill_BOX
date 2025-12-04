@@ -307,6 +307,7 @@ export default function ExploreScreen() {
           </View>
         )}
       </ScrollView>
+    </ThemedView>
   );
 }
 

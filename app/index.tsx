@@ -160,4 +160,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
->>>>>>> 663af87f49b6c2063bb6ee3bd31fe3f2cfba9260
+
