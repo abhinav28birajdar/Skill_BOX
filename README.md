@@ -33,4 +33,3 @@ Welcome to SkillBox, a comprehensive learning management system built with React
 - **Study Groups**: Collaborative learning spaces
 - **Discussion Forums**: Subject-specific communities
 - **Peer Reviews**: Student-to-student feedback system
-
