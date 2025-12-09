@@ -1,15 +1,30 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-url-polyfill/auto';
+import { configManager } from './configManager';
 import { createTypedClient } from './supabase-types';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+// Default values for development
+const defaultUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const defaultKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
 
-if (!process.env.EXPO_PUBLIC_SUPABASE_URL || !process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY) {
-  console.warn('Missing Supabase environment variables. Using placeholder values for development.');
-}
+// Initialize with default or stored credentials
+let supabaseUrl = defaultUrl;
+let supabaseAnonKey = defaultKey;
 
-export const supabase = createTypedClient(supabaseUrl, supabaseAnonKey, {
+// Try to load from secure storage
+(async () => {
+  try {
+    const config = await configManager.getSupabaseConfig();
+    if (config) {
+      supabaseUrl = config.url;
+      supabaseAnonKey = config.key;
+    }
+  } catch (error) {
+    console.warn('Could not load stored Supabase config:', error);
+  }
+})();
+
+export let supabase = createTypedClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: AsyncStorage,
     autoRefreshToken: true,
@@ -36,7 +51,7 @@ export const initializeSupabase = (url?: string, key?: string) => {
     });
   }
   return supabase;
-};
+}
 
 // Set Supabase credentials dynamically
 export const setSupabaseCredentials = async (url: string, key: string) => {
@@ -51,14 +66,19 @@ export const setSupabaseCredentials = async (url: string, key: string) => {
     });
 
     // Test the connection
-    const { error } = await newClient.from('profiles').select('count').single();
-    if (error && error.code !== 'PGRST116') {
+    const { error } = await newClient.from('user_profiles').select('count').limit(1);
+    if (error && error.code !== 'PGRST116' && error.code !== '42P01') {
       throw new Error('Invalid Supabase credentials');
     }
 
+    // Update the global supabase client
+    supabase = newClient;
+    supabaseUrl = url;
+    supabaseAnonKey = key;
+
     return newClient;
-  } catch (error) {
-    throw new Error('Failed to connect with provided credentials');
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to connect with provided credentials');
   }
 };
 

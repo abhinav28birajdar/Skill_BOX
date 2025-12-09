@@ -4,7 +4,9 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { LoadingScreen } from '@/components/common/LoadingScreen';
+import { ToastProvider } from '@/components/common/Toast';
 import { AIModelProvider } from '@/context/AIModelContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ThemeProvider as EnhancedThemeProvider } from '@/context/ThemeContext';
@@ -61,12 +63,16 @@ export default function RootLayout() {
   }
 
   return (
-    <EnhancedThemeProvider>
-      <AuthProvider>
-        <AIModelProvider>
-          <RootLayoutNav />
-        </AIModelProvider>
-      </AuthProvider>
-    </EnhancedThemeProvider>
+    <ErrorBoundary>
+      <EnhancedThemeProvider>
+        <AuthProvider>
+          <AIModelProvider>
+            <ToastProvider>
+              <RootLayoutNav />
+            </ToastProvider>
+          </AIModelProvider>
+        </AuthProvider>
+      </EnhancedThemeProvider>
+    </ErrorBoundary>
   );
 }
