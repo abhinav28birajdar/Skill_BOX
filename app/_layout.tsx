@@ -9,51 +9,56 @@ import { LoadingScreen } from '@/components/common/LoadingScreen';
 import { ToastProvider } from '@/components/common/Toast';
 import { AIModelProvider } from '@/context/AIModelContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
-import { ThemeProvider as EnhancedThemeProvider } from '@/context/ThemeContext';
+import { EnhancedThemeProvider, useTheme } from '@/context/EnhancedThemeContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { user, loading } = useAuth();
+  const { isDark } = useTheme();
 
   if (loading) {
     return <LoadingScreen />;
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
+    <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+      <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
         {user ? (
           // Authenticated routes
           <>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="(creator)" options={{ headerShown: false }} />
-            <Stack.Screen name="(admin)" options={{ headerShown: false }} />
-            <Stack.Screen name="skills/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="content/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="creator/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="classes/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="(student)" options={{ headerShown: false }} />
+            <Stack.Screen name="skills/[id]" options={{ headerShown: false, presentation: 'modal' }} />
             <Stack.Screen name="courses/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="community" options={{ headerShown: false }} />
+            <Stack.Screen name="lessons/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="profile/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="messages" options={{ headerShown: false }} />
-            <Stack.Screen name="notifications" options={{ headerShown: false }} />
-            <Stack.Screen name="support" options={{ headerShown: false }} />
-            <Stack.Screen name="feedback" options={{ headerShown: false }} />
+            <Stack.Screen name="settings/index" options={{ headerShown: false }} />
+            <Stack.Screen name="notifications" options={{ headerShown: false, presentation: 'modal' }} />
+            <Stack.Screen name="support" options={{ headerShown: false, presentation: 'modal' }} />
+            <Stack.Screen name="feedback" options={{ headerShown: false, presentation: 'modal' }} />
+            <Stack.Screen name="config-setup" options={{ headerShown: false, presentation: 'modal' }} />
           </>
         ) : (
           // Public/Auth routes
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <>
+            <Stack.Screen name="welcome" options={{ headerShown: false }} />
+            <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen name="signup" options={{ headerShown: false }} />
+            <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
+            <Stack.Screen name="verify-email" options={{ headerShown: false }} />
+            <Stack.Screen name="role-selection" options={{ headerShown: false }} />
+          </>
         )}
         <Stack.Screen name="+not-found" options={{ headerShown: false }} />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
     </ThemeProvider>
   );
 }
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });

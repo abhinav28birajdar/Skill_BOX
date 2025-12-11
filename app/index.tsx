@@ -1,163 +1,88 @@
-import { Redirect } from 'expo-router';
+/**
+ * Main App Entry Point - SkillBox
+ * Handles initial routing logic and app initialization
+ */
+
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/EnhancedThemeContext';
+import { configManager } from '@/lib/configManager';
+import { Redirect, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import {
-    ActivityIndicator,
-    Alert,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
-} from 'react-native';
-import StudentDashboard from '../components/dashboard/StudentDashboard';
-import TeacherDashboard from '../components/dashboard/TeacherDashboard';
-import { useAuth } from '../context/AuthContext';
-import { seedSkillCategories, skillCategoriesData } from '../data/skillCategories';
-import { CourseService } from '../services/courseService';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 export default function IndexScreen() {
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [featuredCourses, setFeaturedCourses] = useState<any[]>([]);
-  const [skillCategories, setSkillCategories] = useState<any[]>([]);
-  
+  const [initializing, setInitializing] = useState(true);
+  const [needsConfig, setNeedsConfig] = useState(false);
   const { user, loading: authLoading } = useAuth();
+  const { theme } = useTheme();
+  const router = useRouter();
 
   useEffect(() => {
-    if (!authLoading) {
-      initializeApp();
-    }
-  }, [authLoading]);
+    checkConfiguration();
+  }, []);
 
-  const initializeApp = async () => {
+  const checkConfiguration = async () => {
     try {
-      setLoading(true);
+      // Check if Supabase is configured
+      const isConfigured = await configManager.isConfigured();
       
-      // Try to seed skill categories (will skip if already exists)
-      try {
-        await seedSkillCategories();
-      } catch (error) {
-        console.log('Skill categories already seeded or error occurred:', error);
+      if (!isConfigured) {
+        const config = await configManager.getSupabaseConfig();
+        if (!config || !config.url || !config.key) {
+          setNeedsConfig(true);
+          setInitializing(false);
+          return;
+        }
       }
-      
-      // Load featured courses and categories
-      await loadAppData();
-      
+
+      setNeedsConfig(false);
     } catch (error) {
-      console.error('Error initializing app:', error);
+      console.error('Configuration check error:', error);
+      setNeedsConfig(true);
     } finally {
-      setLoading(false);
+      setInitializing(false);
     }
   };
 
-  const loadAppData = async () => {
-    try {
-      // Load featured courses
-      const featured = await CourseService.getFeaturedCourses(6);
-      setFeaturedCourses(featured);
-
-      // Load skill categories
-      const categories = await CourseService.getSkillCategories();
-      setSkillCategories(categories.slice(0, 8)); // Show first 8 categories
-      
-    } catch (error) {
-      console.error('Error loading app data:', error);
-      // Use fallback data if database isn't set up yet
-      setSkillCategories(skillCategoriesData.slice(0, 8));
-    }
-  };
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadAppData();
-    setRefreshing(false);
-  };
-
-  if (authLoading || loading) {
+  // Show loading while checking auth and config
+  if (initializing || authLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Loading SkillBox...</Text>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
 
-  // If user is not authenticated, redirect to auth
+  // If needs configuration, redirect to config setup
+  if (needsConfig) {
+    return <Redirect href="/config-setup" />;
+  }
+
+  // If not authenticated, redirect to welcome/auth flow
   if (!user) {
-    return <Redirect href="/(auth)/signin" />;
+    return <Redirect href="/welcome" />;
   }
 
-  // If user needs onboarding (no interests selected)
-  if (!user.interests || user.interests.length === 0) {
-    return (
-      <View style={styles.onboardingContainer}>
-        <Text style={styles.onboardingTitle}>Welcome to SkillBox!</Text>
-        <Text style={styles.onboardingSubtitle}>
-          Let's set up your profile to get started
-        </Text>
-        <TouchableOpacity 
-          style={styles.onboardingButton}
-          onPress={() => {
-            // Navigate to onboarding - for now just redirect to tabs
-            Alert.alert('Setup', 'Profile setup coming soon!');
-          }}
-        >
-          <Text style={styles.onboardingButtonText}>Complete Setup</Text>
-        </TouchableOpacity>
-      </View>
-    );
+  // If user needs onboarding
+  if (user && !user.onboarding_completed) {
+    return <Redirect href="/role-selection" />;
   }
 
-  // Show role-based dashboard
-  if (user.role === 'teacher_approved' || user.role === 'creator' || user.role === 'admin_super' || user.role === 'admin_content' || user.role === 'admin_teacher_ops') {
-    return <TeacherDashboard />;
+  // Redirect to appropriate dashboard based on user role
+  if (user.role === 'learner') {
+    return <Redirect href="/(student)/dashboard" />;
+  } else if (user.role === 'teacher_approved' || user.role === 'teacher_pending') {
+    return <Redirect href="/(tabs)" />;
   }
 
-  return <StudentDashboard />;
+  // Default: redirect to tabs
+  return <Redirect href="/(tabs)" />;
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
+  container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#666',
-  },
-  onboardingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  onboardingTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  onboardingSubtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 32,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  onboardingButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 8,
-  },
-  onboardingButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
   },
 });
-

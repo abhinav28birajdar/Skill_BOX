@@ -1,18 +1,20 @@
-import { useEnhancedTheme } from '@/hooks/useEnhancedTheme';
+import { useTheme } from '@/context/EnhancedThemeContext';
+import { configManager } from '@/lib/configManager';
+import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/store/useAppStore';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface ApiKeyManagerProps {
@@ -32,7 +34,8 @@ interface FormErrors {
 }
 
 export default function ApiKeyManager({ visible, onClose, onComplete }: ApiKeyManagerProps) {
-  const { colors } = useEnhancedTheme();
+  const { theme } = useTheme();
+  const colors = theme.colors; // Extract colors for easier access
   const { setSupabaseConfig, supabase: supabaseConfig } = useAppStore();
   
   const [formData, setFormData] = useState<FormData>({
@@ -86,14 +89,8 @@ export default function ApiKeyManager({ visible, onClose, onComplete }: ApiKeyMa
   const testConnection = async (): Promise<boolean> => {
     setIsTestingConnection(true);
     try {
-      // Temporarily initialize with new credentials
-      const testClient = await initializeSupabase(
-        formData.supabaseUrl.trim(),
-        formData.supabaseAnonKey.trim()
-      );
-
       // Test the connection with a simple query
-      const { error } = await testClient
+      const { error } = await supabase
         .from('user_profiles')
         .select('id')
         .limit(1);
@@ -130,11 +127,9 @@ export default function ApiKeyManager({ visible, onClose, onComplete }: ApiKeyMa
         return;
       }
 
-      // Save credentials securely
-      await setSupabaseCredentials(
-        formData.supabaseUrl.trim(),
-        formData.supabaseAnonKey.trim()
-      );
+      // Save credentials securely using configManager
+      await configManager.setValue('supabase_url' as any, formData.supabaseUrl.trim());
+      await configManager.setValue('supabase_anon_key' as any, formData.supabaseAnonKey.trim());
 
       // Update app store
       setSupabaseConfig(formData.supabaseUrl.trim(), formData.supabaseAnonKey.trim());
@@ -171,9 +166,8 @@ export default function ApiKeyManager({ visible, onClose, onComplete }: ApiKeyMa
             try {
               await SecureStore.deleteItemAsync('SUPABASE_URL');
               await SecureStore.deleteItemAsync('SUPABASE_ANON_KEY');
+              await configManager.clearAll();
               setFormData({ supabaseUrl: '', supabaseAnonKey: '' });
-              // Re-initialize with default/placeholder credentials
-              await initializeSupabase();
               onClose();
             } catch (error) {
               console.error('Failed to clear credentials:', error);

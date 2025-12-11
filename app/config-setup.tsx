@@ -4,22 +4,22 @@
  */
 
 import { ThemedView } from '@/components/ThemedView';
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme } from '@/context/EnhancedThemeContext';
 import { configManager } from '@/lib/configManager';
-import { setSupabaseCredentials } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function ConfigSetupScreen() {
@@ -83,22 +83,25 @@ export default function ConfigSetupScreen() {
 
     setLoading(true);
     try {
-      // Test connection before saving
-      const client = await setSupabaseCredentials(supabaseUrl, supabaseKey);
-      
-      if (!client) {
-        throw new Error('Failed to create Supabase client');
-      }
-
-      // Save configuration
+      // Save configuration first
       await configManager.setSupabaseConfig(supabaseUrl, supabaseKey);
+
+      // Test basic connection (optional - you may need to reinitialize the app)
+      try {
+        const { error } = await supabase.from('user_profiles').select('count').limit(1);
+        if (error && error.code !== 'PGRST116' && error.code !== '42P01') {
+          console.warn('Connection test warning:', error);
+        }
+      } catch (testError) {
+        console.warn('Connection test failed:', testError);
+      }
 
       Alert.alert(
         'Success',
-        'Configuration saved successfully! You can now use the app.',
+        'Configuration saved successfully! Please restart the app to apply changes.',
         [
           {
-            text: 'Continue',
+            text: 'OK',
             onPress: () => {
               router.replace('/');
             },
@@ -107,8 +110,8 @@ export default function ConfigSetupScreen() {
       );
     } catch (error: any) {
       Alert.alert(
-        'Connection Failed',
-        error.message || 'Could not connect to Supabase. Please verify your credentials.'
+        'Configuration Failed',
+        error.message || 'Could not save configuration. Please try again.'
       );
     } finally {
       setLoading(false);

@@ -1,16 +1,16 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import GoogleSignInButton from './GoogleSignInButton';
@@ -52,10 +52,7 @@ export default function LoginForm() {
       return;
     }
     
-    router.push({
-      pathname: '/auth/forgot-password',
-      params: { email }
-    });
+    router.push('/forgot-password');
   };
 
   return (
@@ -132,7 +129,7 @@ export default function LoginForm() {
 
           <View style={styles.signupContainer}>
             <Text style={styles.signupText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => router.push('/auth/signup')}>
+            <TouchableOpacity onPress={() => router.push('/signup')}>
               <Text style={styles.signupLink}>Sign Up</Text>
             </TouchableOpacity>
           </View>
