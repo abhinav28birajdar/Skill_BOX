@@ -11,7 +11,21 @@ interface LoadingScreenProps {
 }
 
 export function LoadingScreen({ message = 'Loading SkillBox...' }: LoadingScreenProps) {
-  const { theme } = useTheme();
+  // Use optional theme - falls back to defaults if provider not available
+  let theme;
+  try {
+    const themeContext = useTheme();
+    theme = themeContext.theme;
+  } catch {
+    // Fallback theme for when used outside provider
+    theme = {
+      colors: {
+        background: '#FFFFFF',
+        primary: '#3B82F6',
+        textSecondary: '#6B7280',
+      },
+    };
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>

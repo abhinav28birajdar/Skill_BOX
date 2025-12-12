@@ -1,5 +1,5 @@
-import { STORAGE_KEYS } from '@config/constants';
 import * as SecureStore from 'expo-secure-store';
+import { STORAGE_KEYS } from '../../config/constants';
 import { Profile, User } from '../types/database';
 import supabase from './supabase';
 import { updateRecord } from './supabase-helpers';

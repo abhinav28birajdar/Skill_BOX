@@ -59,7 +59,7 @@ const difficultyLevels = [
   'advanced'
 ];
 
-export default function SkillsScreen() {
+function SkillsScreen() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -572,3 +572,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+export default SkillsScreen;

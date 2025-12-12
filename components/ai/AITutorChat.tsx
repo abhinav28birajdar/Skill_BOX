@@ -1,7 +1,8 @@
 import { useAI } from '@/context/AIModelContext';
 import { useTheme } from '@/context/ThemeContext';
 import { CameraView } from 'expo-camera';
-import * as FaceDetector from 'expo-face-detector';
+// Face detector temporarily disabled - requires additional native configuration
+// import * as FaceDetector from 'expo-face-detector';
 // import { GLView } from 'expo-gl';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -305,13 +306,15 @@ export function AITutorChat({
   // Biometric analysis functions
   const detectFaces = async () => {
     if (!cameraRef.current) return [];
-    const options = {
-      mode: FaceDetector.FaceDetectorMode.fast,
-      detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
-      runClassifications: FaceDetector.FaceDetectorClassifications.all,
-      minDetectionInterval: 100,
-      tracking: true,
-    };
+    
+    // Face detection temporarily disabled - requires expo-face-detector native setup
+    // const options = {
+    //   mode: FaceDetector.FaceDetectorMode.fast,
+    //   detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
+    //   runClassifications: FaceDetector.FaceDetectorClassifications.all,
+    //   minDetectionInterval: 100,
+    //   tracking: true,
+    // };
 
     try {
       // Simplified face detection for compatibility

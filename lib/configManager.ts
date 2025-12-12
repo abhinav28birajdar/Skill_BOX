@@ -3,16 +3,29 @@
  * Handles secure storage and retrieval of API keys and sensitive configuration
  */
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
-import { MMKV } from 'react-native-mmkv';
 
-// Initialize MMKV for encrypted storage (fallback for web)
-const storage = new MMKV({
-  id: 'skillbox-secure-storage',
-  encryptionKey: 'skillbox-app-encryption-key-2024',
-});
+// Lazy initialization of MMKV to avoid loading issues
+let storage: any = null;
+
+const getStorage = () => {
+  if (storage === null && Platform.OS === 'web') {
+    try {
+      const { MMKV } = require('react-native-mmkv');
+      storage = new MMKV({
+        id: 'skillbox-secure-storage',
+        encryptionKey: 'skillbox-app-encryption-key-2024',
+      });
+    } catch (error) {
+      console.warn('MMKV not available, using AsyncStorage fallback');
+      storage = false; // Mark as unavailable
+    }
+  }
+  return storage;
+};
 
 // Configuration keys
 export enum ConfigKey {
@@ -24,7 +37,7 @@ export enum ConfigKey {
 }
 
 /**
- * Secure storage wrapper that uses SecureStore on native and encrypted MMKV on web
+ * Secure storage wrapper that uses SecureStore on native and AsyncStorage on web
  */
 class SecureConfigManager {
   private static instance: SecureConfigManager;
@@ -44,8 +57,8 @@ class SecureConfigManager {
   async setValue(key: ConfigKey, value: string): Promise<void> {
     try {
       if (Platform.OS === 'web') {
-        // Use encrypted MMKV for web
-        storage.set(key, value);
+        // Use AsyncStorage for web (MMKV requires new architecture)
+        await AsyncStorage.setItem(key, value);
       } else {
         // Use SecureStore for native platforms
         await SecureStore.setItemAsync(key, value);
@@ -62,7 +75,7 @@ class SecureConfigManager {
   async getValue(key: ConfigKey): Promise<string | null> {
     try {
       if (Platform.OS === 'web') {
-        return storage.getString(key) || null;
+        return await AsyncStorage.getItem(key);
       } else {
         return await SecureStore.getItemAsync(key);
       }
@@ -78,7 +91,7 @@ class SecureConfigManager {
   async deleteValue(key: ConfigKey): Promise<void> {
     try {
       if (Platform.OS === 'web') {
-        storage.delete(key);
+        await AsyncStorage.removeItem(key);
       } else {
         await SecureStore.deleteItemAsync(key);
       }
