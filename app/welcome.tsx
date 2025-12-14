@@ -1,7 +1,8 @@
+import { useTheme } from '@/context/EnhancedThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
     Dimensions,
     ScrollView,
@@ -17,7 +18,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../src/components/ui/Button';
-import { useThemeColors } from '../src/theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -58,7 +58,8 @@ const onboardingData = [
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const colors = useThemeColors();
+  const { theme } = useTheme();
+  const colors = theme.colors;
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const animationValue = useSharedValue(0);
@@ -104,15 +105,27 @@ export default function WelcomeScreen() {
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
       <StatusBar barStyle="light-content" />
       
-      {/* Skip Button */}
-      <View className="absolute top-12 right-6 z-10">
-        <TouchableOpacity 
-          onPress={skip}
-          className="px-4 py-2 rounded-full"
-          style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
-        >
-          <Text className="text-white font-semibold">Skip</Text>
-        </TouchableOpacity>
+      {/* Quick Demo Access */}
+      <View className="absolute top-12 left-0 right-0 z-10 px-6">
+        <View className="flex-row justify-between items-center">
+          <TouchableOpacity 
+            onPress={() => router.replace('/(tabs)')}
+            className="px-4 py-2 rounded-full flex-row items-center"
+            style={{ backgroundColor: 'rgba(255,255,255,0.25)' }}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="flash" size={16} color="white" />
+            <Text className="text-white font-semibold ml-1">Quick Demo</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            onPress={skip}
+            className="px-4 py-2 rounded-full"
+            style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+          >
+            <Text className="text-white font-semibold">Skip</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -221,6 +234,43 @@ export default function WelcomeScreen() {
             }
           />
         </View>
+
+        {/* Demo Mode Buttons - Show on last slide */}
+        {currentIndex === onboardingData.length - 1 && (
+          <View className="mt-6 space-y-3">
+            <Text className="text-white text-center text-sm mb-2 opacity-80">
+              Or try the app without signing up:
+            </Text>
+            
+            <TouchableOpacity
+              onPress={() => router.replace('/(tabs)')}
+              className="py-4 px-6 rounded-full items-center"
+              style={{ backgroundColor: 'rgba(255,255,255,0.25)' }}
+              activeOpacity={0.8}
+            >
+              <View className="flex-row items-center">
+                <Ionicons name="school" size={20} color="white" />
+                <Text className="text-white font-bold text-base ml-2">
+                  Demo as Student 🎓
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => router.replace('/(tabs)')}
+              className="py-4 px-6 rounded-full items-center"
+              style={{ backgroundColor: 'rgba(255,255,255,0.25)' }}
+              activeOpacity={0.8}
+            >
+              <View className="flex-row items-center">
+                <Ionicons name="create" size={20} color="white" />
+                <Text className="text-white font-bold text-base ml-2">
+                  Demo as Creator 👨‍🏫
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );

@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/ui/Button';
 import { Card } from '../../src/components/ui/Card';
 import { useAuth } from '../../src/hooks/useAuth';
-import { useThemeColors } from '../../src/theme';
+import { useTheme } from '@/context/EnhancedThemeContext';
 
 const { width } = Dimensions.get('window');
 

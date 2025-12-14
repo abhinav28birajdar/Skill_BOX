@@ -257,7 +257,7 @@ class AuthService {
 
   // Listen to auth state changes
   onAuthStateChange(callback: (user: User | null) => void) {
-    return supabase.auth.onAuthStateChange(async (event, session) => {
+    return supabase.auth.onAuthStateChange(async (event: string, session: any) => {
       if (session?.user) {
         const { data } = await supabase
           .from('users')

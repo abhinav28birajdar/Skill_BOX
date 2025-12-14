@@ -1,6 +1,7 @@
+import { useTheme } from '@/context/EnhancedThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     Alert,
     StatusBar,
@@ -11,11 +12,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../src/components/ui/Button';
 import { Input } from '../src/components/ui/Input';
-import { useThemeColors } from '../src/theme';
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
-  const colors = useThemeColors();
+  const { theme } = useTheme();
+  const colors = theme.colors;
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -117,11 +118,11 @@ export default function ResetPasswordScreen() {
               <Ionicons 
                 name={password.length >= 8 ? "checkmark-circle" : "ellipse-outline"} 
                 size={16} 
-                color={password.length >= 8 ? colors.success : colors.textTertiary}
+                color={password.length >= 8 ? colors.success : colors.textSecondary}
               />
               <Text 
                 className="text-xs ml-2"
-                style={{ color: password.length >= 8 ? colors.success : colors.textTertiary }}
+                style={{ color: password.length >= 8 ? colors.success : colors.textSecondary }}
               >
                 At least 8 characters
               </Text>
@@ -130,11 +131,11 @@ export default function ResetPasswordScreen() {
               <Ionicons 
                 name={/[A-Z]/.test(password) ? "checkmark-circle" : "ellipse-outline"} 
                 size={16} 
-                color={/[A-Z]/.test(password) ? colors.success : colors.textTertiary}
+                color={/[A-Z]/.test(password) ? colors.success : colors.textSecondary}
               />
               <Text 
                 className="text-xs ml-2"
-                style={{ color: /[A-Z]/.test(password) ? colors.success : colors.textTertiary }}
+                style={{ color: /[A-Z]/.test(password) ? colors.success : colors.textSecondary }}
               >
                 One uppercase letter
               </Text>
@@ -143,11 +144,11 @@ export default function ResetPasswordScreen() {
               <Ionicons 
                 name={/[0-9]/.test(password) ? "checkmark-circle" : "ellipse-outline"} 
                 size={16} 
-                color={/[0-9]/.test(password) ? colors.success : colors.textTertiary}
+                color={/[0-9]/.test(password) ? colors.success : colors.textSecondary}
               />
               <Text 
                 className="text-xs ml-2"
-                style={{ color: /[0-9]/.test(password) ? colors.success : colors.textTertiary }}
+                style={{ color: /[0-9]/.test(password) ? colors.success : colors.textSecondary }}
               >
                 One number
               </Text>

@@ -1,14 +1,11 @@
-
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { supabase } from '@/lib/supabase';
-import { LearningContent, Skill, User } from '@/types/database';
-import { Image } from 'expo-image';
-import { useEffect, useState } from 'react';
+import { useTheme } from '@/context/EnhancedThemeContext';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import {
-    Alert,
     Dimensions,
     FlatList,
+    Image,
     ScrollView,
     StyleSheet,
     Text,
@@ -16,298 +13,265 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
+const CARD_WIDTH = (width - 60) / 2;
+
+// Mock data
+const ALL_COURSES = [
+  {
+    id: '1',
+    title: 'React Native Mastery',
+    instructor: 'John Doe',
+    rating: 4.8,
+    students: 12500,
+    price: '$49.99',
+    thumbnail: 'https://via.placeholder.com/300x200/667eea/ffffff?text=React+Native',
+    category: 'Development',
+    level: 'Intermediate'
+  },
+  {
+    id: '2',
+    title: 'UI/UX Design Fundamentals',
+    instructor: 'Sarah Smith',
+    rating: 4.9,
+    students: 8300,
+    price: '$39.99',
+    thumbnail: 'https://via.placeholder.com/300x200/f093fb/ffffff?text=UI/UX+Design',
+    category: 'Design',
+    level: 'Beginner'
+  },
+  {
+    id: '3',
+    title: 'Full Stack JavaScript',
+    instructor: 'Mike Johnson',
+    rating: 4.7,
+    students: 15200,
+    price: '$59.99',
+    thumbnail: 'https://via.placeholder.com/300x200/4facfe/ffffff?text=JavaScript',
+    category: 'Development',
+    level: 'Advanced'
+  },
+  {
+    id: '4',
+    title: 'Digital Marketing 2025',
+    instructor: 'Emily Brown',
+    rating: 4.6,
+    students: 9800,
+    price: '$44.99',
+    thumbnail: 'https://via.placeholder.com/300x200/43e97b/ffffff?text=Marketing',
+    category: 'Marketing',
+    level: 'Beginner'
+  },
+  {
+    id: '5',
+    title: 'Python for Data Science',
+    instructor: 'David Lee',
+    rating: 4.8,
+    students: 18500,
+    price: '$54.99',
+    thumbnail: 'https://via.placeholder.com/300x200/fa709a/ffffff?text=Python',
+    category: 'Development',
+    level: 'Intermediate'
+  },
+  {
+    id: '6',
+    title: 'Photography Masterclass',
+    instructor: 'Lisa Chen',
+    rating: 4.9,
+    students: 7200,
+    price: '$69.99',
+    thumbnail: 'https://via.placeholder.com/300x200/a8edea/ffffff?text=Photography',
+    category: 'Photography',
+    level: 'All Levels'
+  },
+];
+
+const CATEGORIES = ['All', 'Development', 'Design', 'Business', 'Marketing', 'Photography', 'Music'];
+const LEVELS = ['All Levels', 'Beginner', 'Intermediate', 'Advanced'];
 
 export default function ExploreScreen() {
+  const { theme } = useTheme();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'skills' | 'creators' | 'content'>('all');
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [creators, setCreators] = useState<User[]>([]);
-  const [content, setContent] = useState<LearningContent[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedLevel, setSelectedLevel] = useState('All Levels');
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const filteredCourses = ALL_COURSES.filter(course => {
+    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         course.instructor.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'All' || course.category === selectedCategory;
+    const matchesLevel = selectedLevel === 'All Levels' || course.level === selectedLevel;
+    return matchesSearch && matchesCategory && matchesLevel;
+  });
 
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      searchData(searchQuery);
-    } else {
-      loadData();
-    }
-  }, [searchQuery, selectedFilter]);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      
-      if (selectedFilter === 'all' || selectedFilter === 'skills') {
-        const { data: skillsData } = await supabase
-          .from('skills')
-          .select('*')
-          .eq('is_active', true)
-          .order('name');
-        
-        if (skillsData) setSkills(skillsData);
-      }
-
-      if (selectedFilter === 'all' || selectedFilter === 'creators') {
-        const { data: creatorsData } = await supabase
-          .from('users')
-          .select('*')
-          .eq('role', 'creator')
-          .eq('creator_status', 'approved')
-          .order('full_name');
-        
-        if (creatorsData) setCreators(creatorsData);
-      }
-
-      if (selectedFilter === 'all' || selectedFilter === 'content') {
-        const { data: contentData } = await supabase
-          .from('learning_content')
-          .select(`
-            *,
-            skills(name),
-            users(username, full_name)
-          `)
-          .eq('status', 'approved')
-          .order('created_at', { ascending: false })
-          .limit(20);
-        
-        if (contentData) setContent(contentData);
-      }
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const searchData = async (query: string) => {
-    if (!query.trim()) return;
-
-    try {
-      setLoading(true);
-      
-      if (selectedFilter === 'all' || selectedFilter === 'skills') {
-        const { data: skillsData } = await supabase
-          .from('skills')
-          .select('*')
-          .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
-          .eq('is_active', true);
-        
-        if (skillsData) setSkills(skillsData);
-      }
-
-      if (selectedFilter === 'all' || selectedFilter === 'creators') {
-        const { data: creatorsData } = await supabase
-          .from('users')
-          .select('*')
-          .or(`username.ilike.%${query}%,full_name.ilike.%${query}%,bio.ilike.%${query}%`)
-          .eq('role', 'creator')
-          .eq('creator_status', 'approved');
-        
-        if (creatorsData) setCreators(creatorsData);
-      }
-
-      if (selectedFilter === 'all' || selectedFilter === 'content') {
-        const { data: contentData } = await supabase
-          .from('learning_content')
-          .select(`
-            *,
-            skills(name),
-            users(username, full_name)
-          `)
-          .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
-          .eq('status', 'approved')
-          .limit(20);
-        
-        if (contentData) setContent(contentData);
-      }
-    } catch (error) {
-      console.error('Error searching:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const renderSkillItem = ({ item }: { item: Skill }) => (
+  const renderCourseCard = ({ item }: { item: typeof ALL_COURSES[0] }) => (
     <TouchableOpacity
-      style={styles.skillItem}
-      onPress={() => Alert.alert('Skill Details', `View details for: ${item.name}`)}
+      style={[styles.courseCard, { backgroundColor: theme.colors.card }]}
+      onPress={() => router.push(`/courses/${item.id}`)}
+      activeOpacity={0.7}
     >
-      {item.image_url ? (
-        <Image source={{ uri: item.image_url }} style={styles.skillImage} />
-      ) : (
-        <View style={[styles.skillImage, styles.placeholderImage]}>
-          <Text style={styles.placeholderText}>{item.name.charAt(0)}</Text>
-        </View>
-      )}
-      <View style={styles.skillInfo}>
-        <Text style={styles.skillName}>{item.name}</Text>
-        {item.description && (
-          <Text style={styles.skillDescription} numberOfLines={2}>
-            {item.description}
-          </Text>
-        )}
+      <Image source={{ uri: item.thumbnail }} style={styles.courseThumbnail} />
+      <View style={styles.levelBadge}>
+        <Text style={styles.levelText}>{item.level}</Text>
       </View>
-    </TouchableOpacity>
-  );
-
-  const renderCreatorItem = ({ item }: { item: User }) => (
-    <TouchableOpacity
-      style={styles.creatorItem}
-      onPress={() => Alert.alert('Creator Profile', `View profile for: ${item.full_name || item.username}`)}
-    >
-      {item.profile_image_url ? (
-        <Image source={{ uri: item.profile_image_url }} style={styles.creatorImage} />
-      ) : (
-        <View style={[styles.creatorImage, styles.placeholderAvatar]}>
-          <Text style={styles.avatarText}>
-            {(item.full_name || item.username || 'U').charAt(0).toUpperCase()}
-          </Text>
-        </View>
-      )}
-      <View style={styles.creatorInfo}>
-        <Text style={styles.creatorName}>{item.full_name || item.username}</Text>
-        {item.bio && (
-          <Text style={styles.creatorBio} numberOfLines={2}>
-            {item.bio}
-          </Text>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
-
-  const renderContentItem = ({ item }: { item: LearningContent }) => (
-    <TouchableOpacity
-      style={styles.contentItem}
-      onPress={() => Alert.alert('Content Details', `View content: ${item.title}`)}
-    >
-      {item.thumbnail_url ? (
-        <Image source={{ uri: item.thumbnail_url }} style={styles.contentThumbnail} />
-      ) : (
-        <View style={[styles.contentThumbnail, styles.placeholderThumbnail]}>
-          <Text style={styles.placeholderText}>📹</Text>
-        </View>
-      )}
-      <View style={styles.contentInfo}>
-        <Text style={styles.contentTitle} numberOfLines={2}>
+      <View style={styles.courseInfo}>
+        <Text style={[styles.courseTitle, { color: theme.colors.text }]} numberOfLines={2}>
           {item.title}
         </Text>
-        <Text style={styles.contentMeta}>
-          {item.views_count} views • {item.type}
+        <Text style={[styles.courseInstructor, { color: theme.colors.textSecondary }]}>
+          {item.instructor}
         </Text>
+        <View style={styles.courseFooter}>
+          <View style={styles.rating}>
+            <Ionicons name="star" size={14} color="#FFD700" />
+            <Text style={[styles.ratingText, { color: theme.colors.text }]}>{item.rating}</Text>
+            <Text style={[styles.students, { color: theme.colors.textSecondary }]}>
+              ({item.students.toLocaleString()})
+            </Text>
+          </View>
+          <Text style={[styles.coursePrice, { color: theme.colors.primary }]}>{item.price}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
 
-  const filterButtons = [
-    { key: 'all', label: 'All' },
-    { key: 'skills', label: 'Skills' },
-    { key: 'creators', label: 'Creators' },
-    { key: 'content', label: 'Content' },
-  ] as const;
-
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.header}>
-        <ThemedText type="title" style={styles.headerTitle}>
-          Explore
-        </ThemedText>
-        
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search skills, creators, content..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor="#666"
-          />
-        </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: theme.colors.background }]}>
+        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Explore Courses</Text>
+      </View>
 
+      {/* Search Bar */}
+      <View style={[styles.searchBar, { backgroundColor: theme.colors.card }]}>
+        <Ionicons name="search" size={20} color={theme.colors.textSecondary} />
+        <TextInput
+          style={[styles.searchInput, { color: theme.colors.text }]}
+          placeholder="Search courses..."
+          placeholderTextColor={theme.colors.textSecondary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <Ionicons name="close-circle" size={20} color={theme.colors.textSecondary} />
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* Category Filter */}
+      <View style={styles.filterSection}>
+        <Text style={[styles.filterLabel, { color: theme.colors.textSecondary }]}>Category</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={styles.filterContainer}
-          contentContainerStyle={styles.filterContent}
+          contentContainerStyle={styles.filterRow}
         >
-          {filterButtons.map((filter) => (
+          {CATEGORIES.map(category => (
             <TouchableOpacity
-              key={filter.key}
+              key={category}
               style={[
-                styles.filterButton,
-                selectedFilter === filter.key && styles.filterButtonActive,
+                styles.filterChip,
+                {
+                  backgroundColor: selectedCategory === category 
+                    ? theme.colors.primary 
+                    : theme.colors.card
+                }
               ]}
-              onPress={() => setSelectedFilter(filter.key)}
+              onPress={() => setSelectedCategory(category)}
+              activeOpacity={0.7}
             >
               <Text
                 style={[
-                  styles.filterButtonText,
-                  selectedFilter === filter.key && styles.filterButtonTextActive,
+                  styles.filterChipText,
+                  {
+                    color: selectedCategory === category 
+                      ? '#fff' 
+                      : theme.colors.text
+                  }
                 ]}
               >
-                {filter.label}
+                {category}
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
       </View>
 
-      <ScrollView style={styles.content}>
-        {(selectedFilter === 'all' || selectedFilter === 'skills') && skills.length > 0 && (
-          <View style={styles.section}>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>
-              Skills
-            </ThemedText>
-            <FlatList
-              data={skills}
-              renderItem={renderSkillItem}
-              keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-            />
-          </View>
-        )}
+      {/* Level Filter */}
+      <View style={styles.filterSection}>
+        <Text style={[styles.filterLabel, { color: theme.colors.textSecondary }]}>Level</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterRow}
+        >
+          {LEVELS.map(level => (
+            <TouchableOpacity
+              key={level}
+              style={[
+                styles.filterChip,
+                {
+                  backgroundColor: selectedLevel === level 
+                    ? theme.colors.primary 
+                    : theme.colors.card
+                }
+              ]}
+              onPress={() => setSelectedLevel(level)}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={[
+                  styles.filterChipText,
+                  {
+                    color: selectedLevel === level 
+                      ? '#fff' 
+                      : theme.colors.text
+                  }
+                ]}
+              >
+                {level}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
-        {(selectedFilter === 'all' || selectedFilter === 'creators') && creators.length > 0 && (
-          <View style={styles.section}>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>
-              Creators
-            </ThemedText>
-            <FlatList
-              data={creators}
-              renderItem={renderCreatorItem}
-              keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-            />
-          </View>
-        )}
+      {/* Results Count */}
+      <View style={styles.resultsHeader}>
+        <Text style={[styles.resultsText, { color: theme.colors.textSecondary }]}>
+          {filteredCourses.length} {filteredCourses.length === 1 ? 'course' : 'courses'} found
+        </Text>
+        <TouchableOpacity style={styles.sortButton}>
+          <Ionicons name="filter" size={18} color={theme.colors.text} />
+          <Text style={[styles.sortText, { color: theme.colors.text }]}>Sort</Text>
+        </TouchableOpacity>
+      </View>
 
-        {(selectedFilter === 'all' || selectedFilter === 'content') && content.length > 0 && (
-          <View style={styles.section}>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>
-              Content
-            </ThemedText>
-            <FlatList
-              data={content}
-              renderItem={renderContentItem}
-              keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-            />
-          </View>
-        )}
-
-        {!loading && searchQuery && skills.length === 0 && creators.length === 0 && content.length === 0 && (
+      {/* Courses Grid */}
+      <FlatList
+        data={filteredCourses}
+        renderItem={renderCourseCard}
+        keyExtractor={item => item.id}
+        numColumns={2}
+        contentContainerStyle={styles.coursesList}
+        columnWrapperStyle={styles.courseRow}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
           <View style={styles.emptyState}>
-            <ThemedText style={styles.emptyStateText}>
-              No results found for "{searchQuery}"
-            </ThemedText>
+            <Ionicons name="search-outline" size={64} color={theme.colors.textSecondary} />
+            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
+              No courses found
+            </Text>
+            <Text style={[styles.emptySubtext, { color: theme.colors.textSecondary }]}>
+              Try adjusting your filters
+            </Text>
           </View>
-        )}
-      </ScrollView>
-    </ThemedView>
+        }
+      />
+    </SafeAreaView>
   );
 }
 
@@ -316,187 +280,154 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    padding: 20,
-    paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontWeight: '700',
   },
-  searchContainer: {
-    backgroundColor: '#f5f5f5',
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 12,
     marginBottom: 20,
+    gap: 12,
   },
   searchInput: {
-    padding: 16,
-    fontSize: 16,
+    flex: 1,
+    fontSize: 15,
   },
-  filterContainer: {
-    marginBottom: 10,
+  filterSection: {
+    marginBottom: 16,
   },
-  filterContent: {
-    paddingRight: 20,
+  filterLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginLeft: 20,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  filterButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: '#f0f0f0',
+  filterRow: {
+    paddingLeft: 20,
+    gap: 8,
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
-    marginRight: 12,
   },
-  filterButtonActive: {
-    backgroundColor: '#007AFF',
-  },
-  filterButtonText: {
+  filterChipText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#666',
   },
-  filterButtonTextActive: {
-    color: '#fff',
-  },
-  content: {
-    flex: 1,
-  },
-  section: {
-    marginBottom: 32,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 16,
+  resultsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
-  },
-  skillItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    marginHorizontal: 20,
-    marginBottom: 12,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  skillImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 16,
-  },
-  placeholderImage: {
-    backgroundColor: '#e0e0e0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#666',
-  },
-  skillInfo: {
-    flex: 1,
-  },
-  skillName: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  skillDescription: {
-    fontSize: 14,
-    color: '#666',
-  },
-  creatorItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    marginHorizontal: 20,
-    marginBottom: 12,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  creatorImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 16,
-  },
-  placeholderAvatar: {
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  creatorInfo: {
-    flex: 1,
-  },
-  creatorName: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  creatorBio: {
-    fontSize: 14,
-    color: '#666',
-  },
-  contentItem: {
-    flexDirection: 'row',
-    marginHorizontal: 20,
     marginBottom: 16,
-    backgroundColor: '#fff',
+  },
+  resultsText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  sortButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  sortText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  coursesList: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+  courseRow: {
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  courseCard: {
+    width: CARD_WIDTH,
     borderRadius: 12,
     overflow: 'hidden',
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
   },
-  contentThumbnail: {
-    width: 120,
-    height: 80,
+  courseThumbnail: {
+    width: '100%',
+    height: 120,
+    backgroundColor: '#f0f0f0',
   },
-  placeholderThumbnail: {
-    backgroundColor: '#e0e0e0',
-    justifyContent: 'center',
-    alignItems: 'center',
+  levelBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
   },
-  contentInfo: {
-    flex: 1,
+  levelText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  courseInfo: {
     padding: 12,
   },
-  contentTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+  courseTitle: {
+    fontSize: 14,
+    fontWeight: '700',
     marginBottom: 4,
+    height: 36,
   },
-  contentMeta: {
+  courseInstructor: {
     fontSize: 12,
-    color: '#666',
+    marginBottom: 8,
   },
-  emptyState: {
-    padding: 40,
+  courseFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  emptyStateText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+  rating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  ratingText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  students: {
+    fontSize: 11,
+  },
+  coursePrice: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 80,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    marginTop: 4,
   },
 });

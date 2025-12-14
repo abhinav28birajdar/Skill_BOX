@@ -2,13 +2,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import 'react-native-url-polyfill/auto';
 import { SUPABASE_CONFIG } from '../../config/constants';
-import { Database } from '../types/database';
 
 if (!SUPABASE_CONFIG.url || !SUPABASE_CONFIG.anonKey) {
   throw new Error('Missing Supabase configuration. Please check your .env file.');
 }
 
-export const supabase = createClient<Database>(
+export const supabase = createClient(
   SUPABASE_CONFIG.url,
   SUPABASE_CONFIG.anonKey,
   {
@@ -19,7 +18,7 @@ export const supabase = createClient<Database>(
       detectSessionInUrl: false,
     },
   }
-);
+) as any;
 
 // Export typed version for use in service helpers
 export const typedSupabase = supabase as any;

@@ -16,7 +16,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../../src/components/ui/Card';
 import { useAuth } from '../../src/hooks/useAuth';
-import { useThemeColors } from '../../src/theme';
+import { useTheme } from '@/context/EnhancedThemeContext';
 
 const { width } = Dimensions.get('window');
 

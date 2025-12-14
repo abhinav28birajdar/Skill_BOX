@@ -17,7 +17,7 @@ import { Button } from '../../src/components/ui/Button';
 import { Card } from '../../src/components/ui/Card';
 import { Input } from '../../src/components/ui/Input';
 import { useAuth } from '../../src/hooks/useAuth';
-import { useThemeColors } from '../../src/theme';
+import { useTheme } from '@/context/EnhancedThemeContext';
 
 const skills = [
   'JavaScript', 'React', 'Node.js', 'Python', 'Design',

@@ -24,33 +24,25 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
-        {user ? (
-          // Authenticated routes
-          <>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(creator)" options={{ headerShown: false }} />
-            <Stack.Screen name="(student)" options={{ headerShown: false }} />
-            <Stack.Screen name="skills/[id]" options={{ headerShown: false, presentation: 'modal' }} />
-            <Stack.Screen name="courses/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="lessons/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="profile/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="settings/index" options={{ headerShown: false }} />
-            <Stack.Screen name="notifications" options={{ headerShown: false, presentation: 'modal' }} />
-            <Stack.Screen name="support" options={{ headerShown: false, presentation: 'modal' }} />
-            <Stack.Screen name="feedback" options={{ headerShown: false, presentation: 'modal' }} />
-            <Stack.Screen name="config-setup" options={{ headerShown: false, presentation: 'modal' }} />
-          </>
-        ) : (
-          // Public/Auth routes
-          <>
-            <Stack.Screen name="welcome" options={{ headerShown: false }} />
-            <Stack.Screen name="login" options={{ headerShown: false }} />
-            <Stack.Screen name="signup" options={{ headerShown: false }} />
-            <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
-            <Stack.Screen name="verify-email" options={{ headerShown: false }} />
-            <Stack.Screen name="role-selection" options={{ headerShown: false }} />
-          </>
-        )}
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="welcome" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="signup" options={{ headerShown: false }} />
+        <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
+        <Stack.Screen name="verify-email" options={{ headerShown: false }} />
+        <Stack.Screen name="role-selection" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(creator)" options={{ headerShown: false }} />
+        <Stack.Screen name="(student)" options={{ headerShown: false }} />
+        <Stack.Screen name="skills" options={{ headerShown: false }} />
+        <Stack.Screen name="courses" options={{ headerShown: false }} />
+        <Stack.Screen name="lessons" options={{ headerShown: false }} />
+        <Stack.Screen name="profile" options={{ headerShown: false }} />
+        <Stack.Screen name="settings" options={{ headerShown: false }} />
+        <Stack.Screen name="notifications" options={{ headerShown: false, presentation: 'modal' }} />
+        <Stack.Screen name="support" options={{ headerShown: false, presentation: 'modal' }} />
+        <Stack.Screen name="feedback" options={{ headerShown: false, presentation: 'modal' }} />
+        <Stack.Screen name="config-setup" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="+not-found" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style={isDark ? 'light' : 'dark'} />

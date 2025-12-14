@@ -1,6 +1,7 @@
+import { useTheme } from '@/context/EnhancedThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import Animated, {
     runOnJS,
@@ -9,11 +10,11 @@ import Animated, {
     withSpring,
     withTiming
 } from 'react-native-reanimated';
-import { useThemeColors } from '../src/theme';
 
 export default function SplashScreen() {
   const router = useRouter();
-  const colors = useThemeColors();
+  const { theme } = useTheme();
+  const colors = theme.colors;
   const logoScale = useSharedValue(0.5);
   const logoOpacity = useSharedValue(0);
   const textOpacity = useSharedValue(0);

@@ -1,294 +1,134 @@
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { useAuth } from '@/context/AuthContext';
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { useTheme } from '@/context/EnhancedThemeContext';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import {
-    Alert,
+    Image,
     ScrollView,
     StyleSheet,
-    Switch,
     Text,
-    TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
-  const { user, signOut, updateProfile } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedProfile, setEditedProfile] = useState({
-    full_name: user?.full_name || '',
-    bio: user?.bio || '',
-    username: user?.username || '',
-  });
+  const { theme } = useTheme();
+  const router = useRouter();
 
-  const handleSignOut = async () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Sign Out',
-          style: 'destructive',
-          onPress: async () => {
-            await signOut();
-            router.replace('/(auth)/signin');
-          },
-        },
-      ]
-    );
-  };
+  const menuItems = [
+    { id: '1', icon: 'person-outline', title: 'Edit Profile', route: '/profile/edit' },
+    { id: '2', icon: 'bookmark-outline', title: 'My Courses', count: 12 },
+    { id: '3', icon: 'download-outline', title: 'Downloads', count: 8 },
+    { id: '4', icon: 'heart-outline', title: 'Wishlist', count: 24 },
+    { id: '5', icon: 'trophy-outline', title: 'Achievements', count: 15 },
+    { id: '6', icon: 'card-outline', title: 'Payment Methods' },
+    { id: '7', icon: 'settings-outline', title: 'Settings', route: '/settings' },
+    { id: '8', icon: 'help-circle-outline', title: 'Help & Support', route: '/support' },
+  ];
 
-  const handleSaveProfile = async () => {
-    try {
-      const { error } = await updateProfile(editedProfile);
-      if (error) {
-        Alert.alert('Error', error);
-      } else {
-        setIsEditing(false);
-        Alert.alert('Success', 'Profile updated successfully!');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update profile');
-    }
-  };
-
-  const handleBecomeCreator = () => {
-    Alert.alert(
-      'Become a Creator',
-      'Would you like to apply to become a creator on SkillBox? You can upload and share your educational content with other learners.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Apply',
-          onPress: async () => {
-            try {
-              const { error } = await updateProfile({ 
-                role: 'creator',
-                creator_status: 'pending_review' 
-              });
-              if (error) {
-                Alert.alert('Error', error);
-              } else {
-                Alert.alert(
-                  'Application Submitted',
-                  'Your creator application has been submitted for review. You will be notified once it is approved.'
-                );
-              }
-            } catch (error) {
-              Alert.alert('Error', 'Failed to submit application');
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  if (!user) {
-    return (
-      <ThemedView style={styles.container}>
-        <View style={styles.authPrompt}>
-          <ThemedText type="title" style={styles.authTitle}>
-            Welcome to SkillBox
-          </ThemedText>
-          <ThemedText style={styles.authSubtitle}>
-            Sign in to access your profile and track your learning progress
-          </ThemedText>
-          
-          <TouchableOpacity
-            style={styles.authButton}
-            onPress={() => router.push('/(auth)/signin')}
-          >
-            <Text style={styles.authButtonText}>Sign In</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={styles.authButtonSecondary}
-            onPress={() => router.push('/(auth)/signup')}
-          >
-            <Text style={styles.authButtonSecondaryText}>Create Account</Text>
-          </TouchableOpacity>
-        </View>
-      </ThemedView>
-    );
-  }
+  const stats = [
+    { label: 'Courses', value: '12' },
+    { label: 'Hours', value: '145' },
+    { label: 'Certificates', value: '8' },
+  ];
 
   return (
-    <ThemedView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <ThemedText type="title" style={styles.headerTitle}>
-            Profile
-          </ThemedText>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={[styles.header, { backgroundColor: theme.colors.background }]}>
+          <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Profile</Text>
+          <TouchableOpacity
+            style={[styles.notificationButton, { backgroundColor: theme.colors.card }]}
+            onPress={() => router.push('/notifications')}
+          >
+            <Ionicons name="notifications-outline" size={22} color={theme.colors.text} />
+          </TouchableOpacity>
         </View>
 
+        {/* Profile Info */}
         <View style={styles.profileSection}>
-          {user.profile_image_url ? (
-            <Image source={{ uri: user.profile_image_url }} style={styles.profileImage} />
-          ) : (
-            <View style={[styles.profileImage, styles.placeholderAvatar]}>
-              <Text style={styles.avatarText}>
-                {(user.full_name || user.username || 'U').charAt(0).toUpperCase()}
-              </Text>
-            </View>
-          )}
+          <View style={styles.avatarContainer}>
+            <Image
+              source={{ uri: 'https://i.pravatar.cc/200?img=68' }}
+              style={styles.avatar}
+            />
+            <TouchableOpacity style={[styles.editAvatarButton, { backgroundColor: theme.colors.primary }]}>
+              <Ionicons name="camera" size={18} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          
+          <Text style={[styles.name, { color: theme.colors.text }]}>John Doe</Text>
+          <Text style={[styles.email, { color: theme.colors.textSecondary }]}>john.doe@example.com</Text>
+          
+          <TouchableOpacity
+            style={[styles.premiumBadge, { backgroundColor: theme.colors.primary + '20' }]}
+          >
+            <Ionicons name="star" size={16} color={theme.colors.primary} />
+            <Text style={[styles.premiumText, { color: theme.colors.primary }]}>Premium Member</Text>
+          </TouchableOpacity>
+        </View>
 
-          {isEditing ? (
-            <View style={styles.editForm}>
-              <Text style={styles.label}>Full Name</Text>
-              <TextInput
-                style={styles.input}
-                value={editedProfile.full_name}
-                onChangeText={(text) => setEditedProfile({ ...editedProfile, full_name: text })}
-                placeholder="Enter your full name"
-              />
-
-              <Text style={styles.label}>Username</Text>
-              <TextInput
-                style={styles.input}
-                value={editedProfile.username}
-                onChangeText={(text) => setEditedProfile({ ...editedProfile, username: text })}
-                placeholder="Enter your username"
-              />
-
-              <Text style={styles.label}>Bio</Text>
-              <TextInput
-                style={[styles.input, styles.bioInput]}
-                value={editedProfile.bio}
-                onChangeText={(text) => setEditedProfile({ ...editedProfile, bio: text })}
-                placeholder="Tell us about yourself"
-                multiline
-                numberOfLines={4}
-              />
-
-              <View style={styles.editButtons}>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => {
-                    setIsEditing(false);
-                    setEditedProfile({
-                      full_name: user.full_name || '',
-                      bio: user.bio || '',
-                      username: user.username || '',
-                    });
-                  }}
-                >
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={styles.saveButton}
-                  onPress={handleSaveProfile}
-                >
-                  <Text style={styles.saveButtonText}>Save</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : (
-            <View style={styles.profileInfo}>
-              <ThemedText type="title" style={styles.profileName}>
-                {user.full_name || user.username}
-              </ThemedText>
-              <Text style={styles.profileEmail}>{user.email}</Text>
-              {user.bio && (
-                <Text style={styles.profileBio}>{user.bio}</Text>
+        {/* Stats */}
+        <View style={[styles.statsContainer, { backgroundColor: theme.colors.card }]}>
+          {stats.map((stat, index) => (
+            <View key={stat.label} style={styles.statItem}>
+              <Text style={[styles.statValue, { color: theme.colors.text }]}>{stat.value}</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>{stat.label}</Text>
+              {index < stats.length - 1 && (
+                <View style={[styles.statDivider, { backgroundColor: theme.colors.border }]} />
               )}
-              
-              <View style={styles.roleSection}>
-                <View style={[styles.roleBadge, 
-                  user.role === 'creator' && styles.creatorBadge,
-                  user.role === 'admin_super' && styles.adminBadge
-                ]}>
-                  <Text style={[styles.roleText,
-                    user.role === 'creator' && styles.creatorText,
-                    user.role === 'admin_super' && styles.adminText
-                  ]}>
-                    {user.role === 'learner' ? '🎓 Learner' : 
-                     user.role === 'creator' ? '🎨 Creator' : 
-                     '👑 Admin'}
-                  </Text>
-                </View>
-                
-                {user.role === 'creator' && user.creator_status === 'pending_review' && (
-                  <Text style={styles.pendingText}>Application pending review</Text>
-                )}
-              </View>
-
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={() => setIsEditing(true)}
-              >
-                <Text style={styles.editButtonText}>Edit Profile</Text>
-              </TouchableOpacity>
             </View>
-          )}
+          ))}
         </View>
 
-        <View style={styles.actionsSection}>
-          {user.role === 'learner' && user.creator_status === 'not_creator' && (
+        {/* Menu Items */}
+        <View style={styles.menuSection}>
+          {menuItems.map((item, index) => (
             <TouchableOpacity
-              style={styles.actionButton}
-              onPress={handleBecomeCreator}
+              key={item.id}
+              style={[
+                styles.menuItem,
+                { backgroundColor: theme.colors.card },
+                index === menuItems.length - 1 && styles.menuItemLast
+              ]}
+              onPress={() => item.route && router.push(item.route as any)}
+              activeOpacity={0.7}
             >
-              <Text style={styles.actionButtonText}>🎨 Become a Creator</Text>
+              <View style={styles.menuItemLeft}>
+                <View style={[styles.menuIcon, { backgroundColor: theme.colors.primary + '20' }]}>
+                  <Ionicons name={item.icon as any} size={22} color={theme.colors.primary} />
+                </View>
+                <Text style={[styles.menuTitle, { color: theme.colors.text }]}>{item.title}</Text>
+              </View>
+              <View style={styles.menuItemRight}>
+                {item.count && (
+                  <View style={[styles.countBadge, { backgroundColor: theme.colors.primary + '20' }]}>
+                    <Text style={[styles.countText, { color: theme.colors.primary }]}>{item.count}</Text>
+                  </View>
+                )}
+                <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+              </View>
             </TouchableOpacity>
-          )}
-
-          {user.role === 'creator' && (
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => router.push('/(tabs)/creator')}
-            >
-              <Text style={styles.actionButtonText}>📊 Creator Dashboard</Text>
-            </TouchableOpacity>
-          )}
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => Alert.alert('Saved Content', 'Saved content feature coming soon!')}
-          >
-            <Text style={styles.actionButtonText}>💾 Saved Content</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => Alert.alert('Demo Requests', 'Demo requests feature coming soon!')}
-          >
-            <Text style={styles.actionButtonText}>📅 My Demo Requests</Text>
-          </TouchableOpacity>
+          ))}
         </View>
 
-        <View style={styles.settingsSection}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            Settings
-          </ThemedText>
-          
-          <TouchableOpacity style={styles.settingItem}>
-            <Text style={styles.settingText}>🔔 Notifications</Text>
-            <Switch value={true} />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.settingItem}>
-            <Text style={styles.settingText}>🌙 Dark Mode</Text>
-            <Switch value={false} />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.settingItem}>
-            <Text style={styles.settingText}>📱 App Info</Text>
-          </TouchableOpacity>
-        </View>
-
+        {/* Logout Button */}
         <TouchableOpacity
-          style={styles.signOutButton}
-          onPress={handleSignOut}
+          style={[styles.logoutButton, { backgroundColor: theme.colors.card }]}
+          onPress={() => router.replace('/welcome')}
+          activeOpacity={0.7}
         >
-          <Text style={styles.signOutButtonText}>Sign Out</Text>
+          <Ionicons name="log-out-outline" size={22} color="#FF3B30" />
+          <Text style={[styles.logoutText, { color: '#FF3B30' }]}>Log Out</Text>
         </TouchableOpacity>
+
+        {/* App Version */}
+        <Text style={[styles.version, { color: theme.colors.textSecondary }]}>
+          SkillBox v5.0.0
+        </Text>
       </ScrollView>
-    </ThemedView>
+    </SafeAreaView>
   );
 }
 
@@ -296,264 +136,162 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: 40,
-  },
   header: {
-    padding: 20,
-    paddingTop: 60,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: '700',
+  },
+  notificationButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   profileSection: {
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    paddingVertical: 24,
   },
-  profileImage: {
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 16,
+  },
+  avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    marginBottom: 16,
   },
-  placeholderAvatar: {
-    backgroundColor: '#007AFF',
+  editAvatarButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#fff',
   },
-  avatarText: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  profileInfo: {
-    alignItems: 'center',
-    width: '100%',
-  },
-  profileName: {
+  name: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '700',
     marginBottom: 4,
   },
-  profileEmail: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 8,
-  },
-  profileBio: {
-    fontSize: 16,
-    textAlign: 'center',
+  email: {
+    fontSize: 14,
     marginBottom: 16,
-    paddingHorizontal: 20,
   },
-  roleSection: {
+  premiumBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
-  },
-  roleBadge: {
-    backgroundColor: '#f0f0f0',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    marginBottom: 8,
+    gap: 6,
   },
-  creatorBadge: {
-    backgroundColor: '#e3f2fd',
-  },
-  adminBadge: {
-    backgroundColor: '#fff3e0',
-  },
-  roleText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-  },
-  creatorText: {
-    color: '#1976d2',
-  },
-  adminText: {
-    color: '#f57c00',
-  },
-  pendingText: {
-    fontSize: 12,
-    color: '#ff9800',
-    fontStyle: 'italic',
-  },
-  editButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 24,
-  },
-  editButtonText: {
-    color: '#fff',
-    fontSize: 16,
+  premiumText: {
+    fontSize: 13,
     fontWeight: '600',
   },
-  editForm: {
-    width: '100%',
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    marginBottom: 16,
-    backgroundColor: '#fff',
-  },
-  bioInput: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
-  editButtons: {
+  statsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
+    marginHorizontal: 20,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
   },
-  cancelButton: {
+  statItem: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginRight: 8,
     alignItems: 'center',
+    position: 'relative',
   },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#666',
+  statValue: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 4,
   },
-  saveButton: {
-    flex: 1,
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginLeft: 8,
-    alignItems: 'center',
+  statLabel: {
+    fontSize: 13,
   },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
+  statDivider: {
+    position: 'absolute',
+    right: 0,
+    top: '50%',
+    width: 1,
+    height: 40,
+    marginTop: -20,
   },
-  actionsSection: {
-    margin: 20,
-  },
-  actionButton: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  actionButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  settingsSection: {
-    margin: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+  menuSection: {
+    marginHorizontal: 20,
     marginBottom: 16,
   },
-  settingItem: {
+  menuItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    justifyContent: 'space-between',
     padding: 16,
     borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: 8,
   },
-  settingText: {
+  menuItemLast: {
+    marginBottom: 0,
+  },
+  menuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  menuIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuTitle: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
+    fontWeight: '600',
   },
-  signOutButton: {
-    backgroundColor: '#ff3b30',
+  menuItemRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  countBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    minWidth: 32,
+    alignItems: 'center',
+  },
+  countText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginHorizontal: 20,
     padding: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
   },
-  signOutButtonText: {
-    color: '#fff',
+  logoutText: {
     fontSize: 16,
     fontWeight: '600',
   },
-  authPrompt: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  authTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
+  version: {
     textAlign: 'center',
-    marginBottom: 16,
-  },
-  authSubtitle: {
-    fontSize: 16,
-    textAlign: 'center',
+    fontSize: 12,
     marginBottom: 32,
-    opacity: 0.7,
-  },
-  authButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-    width: '100%',
-    alignItems: 'center',
-  },
-  authButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  authButtonSecondary: {
-    borderWidth: 2,
-    borderColor: '#007AFF',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 12,
-    width: '100%',
-    alignItems: 'center',
-  },
-  authButtonSecondaryText: {
-    color: '#007AFF',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });

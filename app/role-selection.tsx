@@ -16,7 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../src/components/ui/Button';
-import { useThemeColors } from '../src/theme';
+import { useTheme } from '@/context/EnhancedThemeContext';
 
 const roles = [
   {
