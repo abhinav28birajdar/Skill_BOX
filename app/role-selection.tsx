@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Pressable,
-  StatusBar,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
 import { RoleCard } from '@/components/auth/RoleCard';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import {
+    Pressable,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    View,
+} from 'react-native';
 import Animated, {
-  FadeInDown,
-  FadeInUp,
+    FadeInDown,
+    FadeInUp,
 } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type UserRole = 'student' | 'instructor' | 'creator' | 'organization';
 
@@ -45,8 +45,6 @@ const ROLES = [
     icon: 'business' as const,
   },
 ];
-    gradient: ['#f093fb', '#f5576c'],
-    color: '#f093fb'
 
 export default function RoleSelectionScreen() {
   const router = useRouter();
