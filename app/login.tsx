@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     Alert,
     KeyboardAvoidingView,
@@ -14,10 +14,11 @@ import {
 } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../context/AuthContext';
 import { Button } from '../src/components/ui/Button';
 import { Input } from '../src/components/ui/Input';
-import { useAuth } from '../src/hooks/useAuth';
-import { useTheme } from '@/context/EnhancedThemeContext';
+import { useAuth as useAuthHook } from '../src/hooks/useAuth';
+import { useThemeColors } from '../src/theme';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -25,7 +26,8 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn } = useAuthHook();
+  const { enterDemoMode } = useAuth();
   
   const logoScale = useSharedValue(1);
 
@@ -54,6 +56,11 @@ export default function LoginScreen() {
     } else {
       router.replace('/(tabs)');
     }
+  };
+
+  const handleDemoMode = () => {
+    enterDemoMode();
+    router.replace('/(tabs)');
   };
 
   const animatedLogoStyle = useAnimatedStyle(() => ({
@@ -164,6 +171,25 @@ export default function LoginScreen() {
                 style={{ backgroundColor: colors.border }}
               />
             </View>
+
+            {/* Demo Mode Button */}
+            <TouchableOpacity
+              onPress={handleDemoMode}
+              className="flex-row items-center justify-center py-4 px-6 rounded-2xl mb-4"
+              style={{ 
+                backgroundColor: colors.surface,
+                borderWidth: 2,
+                borderColor: colors.primary,
+              }}
+            >
+              <Ionicons name="eye-outline" size={20} color={colors.primary} style={{ marginRight: 8 }} />
+              <Text 
+                className="text-base font-semibold"
+                style={{ color: colors.primary }}
+              >
+                Try Demo Mode
+              </Text>
+            </TouchableOpacity>
 
             {/* Sign Up Link */}
             <View className="flex-row justify-center items-center">

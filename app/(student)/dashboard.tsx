@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import {
     Dimensions,
     FlatList,
@@ -16,7 +16,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../../src/components/ui/Card';
 import { useAuth } from '../../src/hooks/useAuth';
-import { useTheme } from '@/context/EnhancedThemeContext';
+import { useThemeColors } from '../../src/theme';
 
 const { width } = Dimensions.get('window');
 

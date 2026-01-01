@@ -1,3 +1,4 @@
+import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/EnhancedThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -14,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function ProfileScreen() {
   const { theme } = useTheme();
   const router = useRouter();
+  const { user, isDemoMode, signOut, exitDemoMode } = useAuth();
 
   const menuItems = [
     { id: '1', icon: 'person-outline', title: 'Edit Profile', route: '/profile/edit' },
@@ -46,6 +48,14 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Demo Mode Banner */}
+        {isDemoMode && (
+          <View style={[styles.demoBanner, { backgroundColor: '#6366F1' }]}>
+            <Ionicons name="eye-outline" size={20} color="#FFFFFF" />
+            <Text style={styles.demoText}>Demo Mode - Exploring SkillBox</Text>
+          </View>
+        )}
+
         {/* Profile Info */}
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
@@ -58,8 +68,8 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
           
-          <Text style={[styles.name, { color: theme.colors.text }]}>John Doe</Text>
-          <Text style={[styles.email, { color: theme.colors.textSecondary }]}>john.doe@example.com</Text>
+          <Text style={[styles.name, { color: theme.colors.text }]}>{user?.full_name || user?.display_name || 'John Doe'}</Text>
+          <Text style={[styles.email, { color: theme.colors.textSecondary }]}>{user?.email || 'john.doe@example.com'}</Text>
           
           <TouchableOpacity
             style={[styles.premiumBadge, { backgroundColor: theme.colors.primary + '20' }]}
@@ -116,11 +126,20 @@ export default function ProfileScreen() {
         {/* Logout Button */}
         <TouchableOpacity
           style={[styles.logoutButton, { backgroundColor: theme.colors.card }]}
-          onPress={() => router.replace('/welcome')}
+          onPress={async () => {
+            if (isDemoMode) {
+              exitDemoMode();
+            } else {
+              await signOut();
+            }
+            router.replace('/welcome');
+          }}
           activeOpacity={0.7}
         >
           <Ionicons name="log-out-outline" size={22} color="#FF3B30" />
-          <Text style={[styles.logoutText, { color: '#FF3B30' }]}>Log Out</Text>
+          <Text style={[styles.logoutText, { color: '#FF3B30' }]}>
+            {isDemoMode ? 'Exit Demo Mode' : 'Log Out'}
+          </Text>
         </TouchableOpacity>
 
         {/* App Version */}
@@ -153,6 +172,22 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  demoBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    marginBottom: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  demoText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   profileSection: {
     alignItems: 'center',

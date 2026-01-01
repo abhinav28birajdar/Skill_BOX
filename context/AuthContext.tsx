@@ -19,11 +19,14 @@ interface AuthContextType {
   user: User | null;
   isCreator: boolean;
   loading: boolean;
+  isDemoMode: boolean;
   signUp: (data: SignUpData) => Promise<{ error?: string }>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signInWithGoogle: () => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: UserProfileUpdate) => Promise<{ error?: string }>;
+  enterDemoMode: () => void;
+  exitDemoMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,8 +35,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDemoMode, setIsDemoMode] = useState(false);
+
+  // Demo user data
+  const demoUser: User = {
+    id: 'demo-user-id',
+    email: 'demo@skillbox.com',
+    username: 'demo_user',
+    display_name: 'Demo User',
+    first_name: 'Demo',
+    last_name: 'User',
+    full_name: 'Demo User',
+    role: 'student',
+    bio: 'Exploring SkillBox in demo mode',
+    profile_image_url: null,
+    skills: [],
+    interests: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
 
   useEffect(() => {
+    // Skip auth check if in demo mode
+    if (isDemoMode) {
+      setUser(demoUser);
+      setLoading(false);
+      return;
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Auth state changed: INITIAL_SESSION', session?.user?.id);
@@ -60,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [isDemoMode]);
 
   const fetchUserProfile = async (userId: string) => {
     try {
@@ -176,12 +205,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       setLoading(true);
+      if (isDemoMode) {
+        setIsDemoMode(false);
+        setUser(null);
+        return;
+      }
       await supabase.auth.signOut();
     } catch (error) {
       console.error('Sign out error:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const enterDemoMode = () => {
+    setIsDemoMode(true);
+    setUser(demoUser);
+    setLoading(false);
+  };
+
+  const exitDemoMode = () => {
+    setIsDemoMode(false);
+    setUser(null);
   };
 
   const updateProfile = async (updates: UserProfileUpdate) => {
@@ -216,11 +261,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     isCreator,
     loading,
+    isDemoMode,
     signUp,
     signIn,
     signInWithGoogle,
     signOut,
     updateProfile,
+    enterDemoMode,
+    exitDemoMode,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

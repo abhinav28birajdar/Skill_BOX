@@ -18,7 +18,7 @@ interface OnboardingSlide {
   title: string;
   description: string;
   icon: keyof typeof Ionicons.glyphMap;
-  gradient: string[];
+  gradient: [string, string];
 }
 
 const SLIDES: OnboardingSlide[] = [
@@ -59,11 +59,13 @@ const SLIDES: OnboardingSlide[] = [
 interface OnboardingCarouselProps {
   onComplete: () => void;
   onSkip?: () => void;
+  onDemoMode?: () => void;
 }
 
 export const OnboardingCarousel: React.FC<OnboardingCarouselProps> = ({
   onComplete,
   onSkip,
+  onDemoMode,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
@@ -166,6 +168,16 @@ export const OnboardingCarousel: React.FC<OnboardingCarouselProps> = ({
           />
         </LinearGradient>
       </Pressable>
+
+      {/* Demo Mode button */}
+      {onDemoMode && (
+        <Pressable style={styles.demoButton} onPress={onDemoMode}>
+          <View style={styles.demoButtonContent}>
+            <Ionicons name="eye-outline" size={20} color="#6366F1" style={styles.demoIcon} />
+            <Text style={styles.demoButtonText}>Try Demo Mode</Text>
+          </View>
+        </Pressable>
+      )}
     </View>
   );
 };
@@ -263,5 +275,29 @@ const styles = StyleSheet.create({
   },
   buttonIcon: {
     marginLeft: 8,
+  },
+  demoButton: {
+    marginHorizontal: 20,
+    marginBottom: 40,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#6366F1',
+    backgroundColor: '#FFFFFF',
+    overflow: 'hidden',
+  },
+  demoButtonContent: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+  },
+  demoIcon: {
+    marginRight: 8,
+  },
+  demoButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6366F1',
   },
 });
