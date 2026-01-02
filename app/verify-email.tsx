@@ -1,195 +1,294 @@
+import { OTPInput } from '@/components/auth/OTPInput';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Alert,
+    Pressable,
     StatusBar,
+    StyleSheet,
     Text,
-    TextInput,
-    TouchableOpacity,
-    View
+    View,
 } from 'react-native';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function VerifyEmailScreen() {
   const router = useRouter();
-  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
-  const inputRefs = useRef<TextInput[]>([]);
+
+  const email = 'user@example.com'; // This should come from navigation params or context
 
   useEffect(() => {
-    const countdown = setInterval(() => {
-      setTimer((prev) => {
-        if (prev <= 1) {
-          setCanResend(true);
-          clearInterval(countdown);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(countdown);
-  }, []);
-
-  const handleCodeChange = (text: string, index: number) => {
-    const newCode = [...code];
-    newCode[index] = text;
-    setCode(newCode);
-
-    // Auto-focus next input
-    if (text && index < 5) {
-      inputRefs.current[index + 1]?.focus();
+    if (timer > 0) {
+      const interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else {
+      setCanResend(true);
     }
-  };
+  }, [timer]);
 
-  const handleKeyPress = (key: string, index: number) => {
-    if (key === 'Backspace' && !code[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleVerify = async () => {
-    const verificationCode = code.join('');
-    if (verificationCode.length !== 6) {
-      Alert.alert('Error', 'Please enter the complete verification code');
-      return;
-    }
-
+  const handleComplete = async (code: string) => {
+    setOtp(code);
     setLoading(true);
-    // Simulate verification process
+    setError(false);
+
+    // Simulate API call
     setTimeout(() => {
       setLoading(false);
-      Alert.alert('Success', 'Email verified successfully!', [
-        { text: 'OK', onPress: () => router.replace('/(student)' as any) }
-      ]);
+      // Check if code is correct (mock validation)
+      if (code === '123456') {
+        Alert.alert('Success', 'Email verified successfully!', [
+          {
+            text: 'Continue',
+            onPress: () => router.push('/profile-setup'),
+          },
+        ]);
+      } else {
+        setError(true);
+        Alert.alert('Error', 'Invalid verification code. Please try again.');
+      }
     }, 2000);
   };
 
   const handleResend = async () => {
     if (!canResend) return;
-    
+
     setLoading(true);
-    // Simulate resend
+    // Simulate API call
     setTimeout(() => {
       setLoading(false);
       setTimer(60);
       setCanResend(false);
+      Alert.alert('Success', 'Verification code sent to your email');
     }, 1000);
   };
 
+  const handleEditEmail = () => {
+    router.back();
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+    <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      
-      {/* Header */}
-      <View className="px-6 pt-4 pb-8">
-        <TouchableOpacity 
-          onPress={() => router.back()}
-          className="w-10 h-10 rounded-full items-center justify-center mb-6"
-          style={{ backgroundColor: '#f5f5f5' }}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-      </View>
 
-      <View className="flex-1 px-6">
+      {/* Back Button */}
+      <Animated.View entering={FadeInUp.delay(100).springify()}>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+        </Pressable>
+      </Animated.View>
+
+      <View style={styles.content}>
         {/* Icon */}
-        <View className="items-center mb-8">
-          <View 
-            className="w-24 h-24 rounded-full items-center justify-center mb-6"
-            style={{ backgroundColor: '#3b82f620' }}
-          >
-            <Ionicons name="mail-outline" size={40} color="#3b82f6" />
-          </View>
-          
-          <Text 
-            className="text-3xl font-bold text-center mb-4"
-            style={{ color: '#000' }}
-          >
-            Check your email
-          </Text>
-          
-          <Text 
-            className="text-lg text-center leading-6"
-            style={{ color: '#666' }}
-          >
-            We've sent a 6-digit verification code to your email
-          </Text>
-        </View>
-
-        {/* Code Input */}
-        <View className="mb-8">
-          <Text 
-            className="text-base font-semibold mb-4 text-center"
-            style={{ color: '#000' }}
-          >
-            Enter verification code
-          </Text>
-          
-          <View className="flex-row justify-center space-x-3">
-            {code.map((digit, index) => (
-              <TextInput
-                key={index}
-                ref={(ref) => { if (ref) inputRefs.current[index] = ref; }}
-                value={digit}
-                onChangeText={(text) => handleCodeChange(text, index)}
-                onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
-                maxLength={1}
-                keyboardType="numeric"
-                className="w-12 h-12 rounded-xl text-center text-xl font-bold border-2"
-                style={{ 
-                  borderColor: digit ? '#3b82f6' : '#e5e5e5',
-                  backgroundColor: '#f5f5f5',
-                  color: '#000'
-                }}
-              />
-            ))}
-          </View>
-        </View>
-
-        {/* Verify Button */}
-        <TouchableOpacity
-          onPress={handleVerify}
-          disabled={loading}
-          className="bg-blue-600 py-4 rounded-xl items-center mb-6"
-          style={{ opacity: loading ? 0.7 : 1 }}
+        <Animated.View
+          entering={FadeInDown.delay(200).springify()}
+          style={styles.iconContainer}
         >
-          <Text className="text-white text-lg font-semibold">
-            {loading ? 'Verifying...' : 'Verify Email'}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Resend */}
-        <View className="items-center">
-          <Text 
-            className="text-sm mb-2"
-            style={{ color: '#666' }}
+          <LinearGradient
+            colors={['#6366F1', '#8B5CF6']}
+            style={styles.iconGradient}
           >
-            Didn't receive the code?
+            <Ionicons name="mail" size={48} color="#FFFFFF" />
+          </LinearGradient>
+        </Animated.View>
+
+        {/* Title */}
+        <Animated.View
+          entering={FadeInUp.delay(300).springify()}
+          style={styles.textContainer}
+        >
+          <Text style={styles.title}>Verify Your Email</Text>
+          <Text style={styles.subtitle}>
+            We've sent a 6-digit verification code to{'\n'}
+            <Text style={styles.email}>{email}</Text>
           </Text>
-          
+        </Animated.View>
+
+        {/* OTP Input */}
+        <Animated.View
+          entering={FadeInDown.delay(400).springify()}
+          style={styles.otpContainer}
+        >
+          <OTPInput
+            length={6}
+            onComplete={handleComplete}
+            error={error}
+          />
+        </Animated.View>
+
+        {/* Edit Email */}
+        <Animated.View entering={FadeInUp.delay(500).springify()}>
+          <Pressable onPress={handleEditEmail} style={styles.editButton}>
+            <Ionicons name="create-outline" size={16} color="#6366F1" />
+            <Text style={styles.editText}>Edit Email Address</Text>
+          </Pressable>
+        </Animated.View>
+
+        {/* Resend Code */}
+        <Animated.View
+          entering={FadeInUp.delay(600).springify()}
+          style={styles.resendContainer}
+        >
           {canResend ? (
-            <TouchableOpacity onPress={handleResend}>
-              <Text 
-                className="text-base font-semibold"
-                style={{ color: '#3b82f6' }}
-              >
-                Resend Code
-              </Text>
-            </TouchableOpacity>
+            <Pressable onPress={handleResend} disabled={loading}>
+              <Text style={styles.resendLink}>Resend Code</Text>
+            </Pressable>
           ) : (
-            <Text 
-              className="text-sm"
-              style={{ color: '#999' }}
-            >
-              Resend in {timer}s
+            <Text style={styles.timerText}>
+              Resend code in {timer}s
             </Text>
           )}
-        </View>
+        </Animated.View>
+
+        {/* Info */}
+        <Animated.View
+          entering={FadeInUp.delay(700).springify()}
+          style={styles.infoContainer}
+        >
+          <Ionicons name="information-circle-outline" size={20} color="#6B7280" />
+          <Text style={styles.infoText}>
+            Check your spam folder if you don't see the email
+          </Text>
+        </Animated.View>
       </View>
+
+      {/* Loading State */}
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingContent}>
+            <Text style={styles.loadingText}>Verifying...</Text>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  content: {
+    flex: 1,
+    paddingTop: 40,
+  },
+  iconContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  iconGradient: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  textContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  email: {
+    fontWeight: '600',
+    color: '#6366F1',
+  },
+  otpContainer: {
+    marginBottom: 32,
+  },
+  editButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  editText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6366F1',
+    marginLeft: 6,
+  },
+  resendContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  resendLink: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6366F1',
+  },
+  timerText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+  },
+  infoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F9FAFB',
+    padding: 16,
+    borderRadius: 12,
+  },
+  infoText: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginLeft: 8,
+    flex: 1,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingContent: {
+    backgroundColor: '#FFFFFF',
+    padding: 24,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+});

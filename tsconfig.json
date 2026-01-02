@@ -31,7 +31,8 @@
       "@/ai/*": ["./ai/*"],
       "@/store/*": ["./store/*"],
       "@/config/*": ["./config/*"],
-      "@/assets/*": ["./assets/*"]
+      "@/assets/*": ["./assets/*"],
+      "@/src/*": ["./src/*"]
     }
   },
   "include": [

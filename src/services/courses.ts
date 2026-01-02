@@ -91,7 +91,7 @@ class CourseService {
     description?: string;
     cover_url?: string;
     category_id?: number;
-    skill_level?: string;
+    skill_level?: 'beginner' | 'intermediate' | 'advanced';
     language?: string;
     price?: number;
   }): Promise<Course | null> {

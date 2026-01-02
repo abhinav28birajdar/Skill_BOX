@@ -1,12 +1,12 @@
+import { ChatList } from '@/src/components/chat/ChatList';
+import { EmptyState } from '@/src/components/ui/EmptyState';
+import { LoadingSpinner } from '@/src/components/ui/LoadingSpinner';
+import { useAuth } from '@/src/hooks/useAuth';
+import { useChat } from '@/src/hooks/useChat';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChatList } from '../../src/components/chat/ChatList';
-import { EmptyState } from '../../src/components/ui/EmptyState';
-import { LoadingSpinner } from '../../src/components/ui/LoadingSpinner';
-import { useAuth } from '../../src/hooks/useAuth';
-import { useChat } from '../../src/hooks/useChat';
 
 export default function MessagesScreen() {
   const { profile } = useAuth();

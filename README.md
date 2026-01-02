@@ -1,100 +1,149 @@
-<div align="center">
-  <img src="./assets/icon.png" alt="SkillBox" width="120" height="120" />
-  
-  # SkillBox
-  
-  *A complete mobile learning management system powered by AI and built for production*
-</div>
+# SkillBox
+
+**A production-ready, AI-powered Learning Management System built with React Native and Expo**
 
 ---
 
-## ✨ Features
+## 🎯 Purpose
 
-- **📚 Complete Learning Platform** - Courses, lessons, quizzes, live sessions, and certification
-- **🤖 AI-Powered Tutoring** - Intelligent learning assistant with adaptive recommendations
-- **🎮 Gamification** - Achievements, XP, levels, streaks, and leaderboards
-- **👥 Social Learning** - Study groups, forums, messaging, and peer reviews
-- **🎨 Modern UI/UX** - Light/dark themes with smooth 60fps animations
-- **🔐 Enterprise Security** - Supabase auth, RLS policies, encrypted storage
-- **⚡ High Performance** - FlashList, lazy loading, smart caching, offline support
-- **🌍 Multi-role** - Students, instructors, creators, and admin dashboards
-- **💳 Monetization** - Stripe integration for course sales
-- **📱 Cross-platform** - iOS, Android, and web support
+SkillBox is a comprehensive mobile learning platform that connects students with instructors, enabling seamless course creation, enrollment, and interactive learning experiences. Built for scalability and performance, SkillBox delivers a modern, engaging educational experience on iOS, Android, and web platforms.
 
 ---
 
-## 🎯 About
+## ✨ Core Features
 
-SkillBox is a production-ready mobile learning platform that connects students with expert instructors. Built with React Native, Expo, TypeScript, and Supabase, it delivers enterprise-grade performance, security, and user experience across all devices.
+### 📚 **Learning & Courses**
+- Browse and enroll in courses across multiple categories
+- Video lessons, quizzes, assignments, and interactive content
+- Track progress with detailed analytics
+- Continue learning from where you left off
+- Download content for offline learning
 
-Whether you're a student looking to learn new skills, an instructor wanting to share knowledge, or an organization needing a complete LMS solution, SkillBox provides all the tools you need in one beautiful, fast, and secure mobile application.
-- Expo 54.0 SDK
-- TypeScript 5.9
-- NativeWind 4 (Tailwind for React Native)
-- Reanimated 4 (60fps animations)
-- FlashList (Optimized lists)
-- Moti (Declarative animations)
+### 👨‍🏫 **For Instructors**
+- Create and publish courses with rich multimedia content
+- Organize content into modules and lessons
+- Host live sessions with students
+- Track student progress and engagement
+- Manage enrollments and reviews
 
-### **Backend & Infrastructure**
-- Supabase (BaaS)
-- PostgreSQL 15 (Database)
-- Row-Level Security (RLS)
-- Supabase Realtime (WebSocket)
-- Supabase Storage (File uploads)
-- Supabase Edge Functions
+### 💬 **Social & Communication**
+- Real-time messaging between students and instructors
+- Course-specific discussion forums
+- Group study features
+- Peer-to-peer learning opportunities
 
-### **State & Data Management**
-- Zustand (Global state)
-- React Query (Server state)
-- MMKV (Fast encrypted storage)
-- Async Storage (Persistent data)
+### 🎮 **Gamification**
+- XP points and leveling system
+- Achievement badges and milestones
+- Learning streaks to build consistency
+- Global leaderboards for competitive learning
 
-### **Development Tools**
-- ESLint & Prettier (Code quality)
-- TypeScript (Type safety)
-- Expo Router 6 (File-based routing)
-- React Hook Form + Zod (Form validation)
+### 🤖 **AI-Powered Features**
+- Intelligent course recommendations
+- Personalized learning paths
+- AI tutor for instant help
+- Adaptive content difficulty
+
+### 📊 **Progress Tracking**
+- Detailed course completion statistics
+- Time spent analytics
+- Performance insights
+- Certificate generation upon completion
+
+### 🎨 **User Experience**
+- Beautiful, modern interface with light/dark themes
+- Smooth 60fps animations
+- Responsive design for all screen sizes
+- Intuitive navigation and search
+
+### 🔐 **Security & Authentication**
+- Secure email/password authentication
+- Social login options (Google, Apple)
+- Biometric authentication support
+- Role-based access control
+- End-to-end encrypted messaging
+
+### 💳 **Payments & Monetization**
+- Secure payment processing
+- Multiple subscription tiers (Free, Premium, Pro)
+- Course-specific purchases
+- Instructor revenue tracking
+
+### 🌐 **Real-time Features**
+- Live session streaming
+- Instant notifications
+- Real-time chat and messaging
+- Live progress updates
+
+### 📱 **Cross-Platform**
+- iOS and Android native apps
+- Progressive Web App (PWA) support
+- Consistent experience across devices
+- Cloud synchronization
+
+### ⚡ **Performance**
+- Optimized rendering with FlashList
+- Intelligent data caching
+- Lazy loading of content
+- Offline mode support
+- Background sync
 
 ---
 
-## 📱 Platform Support
+## 🛠 Technical Stack
 
-- ✅ iOS 14.0+
-- ✅ Android 6.0+ (API 23+)
-- ✅ Responsive design for tablets
-- ✅ Dark & Light mode
-- ✅ Accessibility features
-
-**Developer Experience:**
-- ESLint (Code Quality)
-- TypeScript (Type Safety)
-- Expo Router (File-based Routing)
+- **Frontend**: React Native, Expo SDK 54
+- **Backend**: Supabase (PostgreSQL, Realtime, Storage, Auth)
+- **UI**: NativeWind (TailwindCSS), Moti Animations, Reanimated
+- **State Management**: Zustand, Context API
+- **Navigation**: Expo Router (file-based routing)
+- **Forms**: React Hook Form + Zod validation
+- **TypeScript**: Full type safety throughout
 
 ---
 
-## 📱 Platform Support
+## 📦 Key Technologies
 
-- ✅ **iOS** - Fully optimized for iPhone and iPad
-- ✅ **Android** - Material Design compliance
-- ✅ **Web** - Progressive Web App support
+- React 19
+- Expo SDK ~54
+- Supabase
+- TypeScript
+- NativeWind
+- React Native Reanimated
+- Expo Router
+- Zustand
 
 ---
 
-## 🚀 Getting Started
+## 🎯 Target Users
 
-### Prerequisites
-- Node.js 18+ installed
-- Expo CLI
-- Supabase account
+- **Students**: Individuals looking to learn new skills and advance their careers
+- **Instructors**: Educators and professionals wanting to share their expertise
+- **Organizations**: Companies seeking to train employees or offer courses
+- **Creators**: Content creators monetizing their knowledge
 
-### Quick Start
+---
 
-1. **Clone & Install**
-   ```bash
-   git clone <repository-url>
-   cd SkillBOx
-   npm install
-   ```
+## 🌟 What Makes SkillBox Special
 
-2. **Configure Supabase**
+✅ **Production-Ready** - Enterprise-grade architecture with proper error handling, security, and scalability
 
+✅ **Modern Tech Stack** - Built with the latest React Native and Expo features
+
+✅ **Beautiful Design** - Carefully crafted UI following modern design principles
+
+✅ **Full-Featured** - Everything you need for a complete LMS in one platform
+
+✅ **Real-time** - Instant updates across devices with Supabase Realtime
+
+✅ **Secure** - Row-level security, encrypted storage, secure authentication
+
+✅ **Performant** - Optimized for smooth 60fps performance on all devices
+
+✅ **Scalable** - Database schema designed for millions of users
+
+---
+
+## 📄 License
+
+Copyright © 2026 SkillBox. All rights reserved.

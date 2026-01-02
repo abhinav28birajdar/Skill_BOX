@@ -1,4 +1,5 @@
 import { ProfilePhotoUpload } from '@/components/auth/ProfilePhotoUpload';
+import { Input } from '@/src/components/ui/Input';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -15,7 +16,6 @@ import {
 } from 'react-native';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Input } from '../src/components/ui/Input';
 
 const SKILLS = [
   'JavaScript', 'Python', 'React', 'Node.js', 'TypeScript', 'Java',
@@ -137,7 +137,7 @@ export default function ProfileSetupScreen() {
               placeholder="Enter your name"
               value={displayName}
               onChangeText={setDisplayName}
-              leftIcon={<Ionicons name="person-outline" size={20} color="#6B7280" />}
+              icon="person-outline"
             />
 
             <View style={styles.inputContainer}>
@@ -160,7 +160,7 @@ export default function ProfileSetupScreen() {
               placeholder="City, Country"
               value={location}
               onChangeText={setLocation}
-              leftIcon={<Ionicons name="location-outline" size={20} color="#6B7280" />}
+              icon="location-outline"
             />
           </Animated.View>
         );

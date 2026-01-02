@@ -1,13 +1,13 @@
+import { CourseCard } from '@/src/components/course/CourseCard';
+import { CourseProgress } from '@/src/components/course/CourseProgress';
+import { EmptyState } from '@/src/components/ui/EmptyState';
+import { LoadingSpinner } from '@/src/components/ui/LoadingSpinner';
+import { useAuth } from '@/src/hooks/useAuth';
+import { useEnrollments } from '@/src/hooks/useCourses';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CourseCard } from '../../src/components/course/CourseCard';
-import { CourseProgress } from '../../src/components/course/CourseProgress';
-import { EmptyState } from '../../src/components/ui/EmptyState';
-import { LoadingSpinner } from '../../src/components/ui/LoadingSpinner';
-import { useAuth } from '../../src/hooks/useAuth';
-import { useEnrollments } from '../../src/hooks/useCourses';
 
 export default function MyCoursesScreen() {
   const { profile } = useAuth();

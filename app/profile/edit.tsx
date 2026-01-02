@@ -1,7 +1,12 @@
+import { Button } from '@/src/components/ui/Button';
+import { Card } from '@/src/components/ui/Card';
+import { Input } from '@/src/components/ui/Input';
+import { useAuth } from '@/src/hooks/useAuth';
+import { useThemeColors } from '@/src/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Alert,
     Image,
@@ -13,11 +18,6 @@ import {
 } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button } from '../../src/components/ui/Button';
-import { Card } from '../../src/components/ui/Card';
-import { Input } from '../../src/components/ui/Input';
-import { useAuth } from '../../src/hooks/useAuth';
-import { useTheme } from '@/context/EnhancedThemeContext';
 
 const skills = [
   'JavaScript', 'React', 'Node.js', 'Python', 'Design',

@@ -1,6 +1,13 @@
+import { CourseCard } from '@/src/components/course/CourseCard';
+import { Avatar } from '@/src/components/ui/Avatar';
+import { Badge } from '@/src/components/ui/Badge';
+import { EmptyState } from '@/src/components/ui/EmptyState';
+import { LoadingSpinner } from '@/src/components/ui/LoadingSpinner';
+import { useAuth } from '@/src/hooks/useAuth';
+import categoryService from '@/src/services/categories';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     FlatList,
     RefreshControl,
@@ -10,13 +17,6 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CourseCard } from '../../src/components/course/CourseCard';
-import { Avatar } from '../../src/components/ui/Avatar';
-import { Badge } from '../../src/components/ui/Badge';
-import { EmptyState } from '../../src/components/ui/EmptyState';
-import { LoadingSpinner } from '../../src/components/ui/LoadingSpinner';
-import { useAuth } from '../../src/hooks/useAuth';
-import categoryService from '../../src/services/categories';
 
 export default function StudentHomeScreen() {
   const { profile } = useAuth();

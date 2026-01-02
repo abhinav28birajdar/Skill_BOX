@@ -1,3 +1,6 @@
+import { Card } from '@/src/components/ui/Card';
+import { useAuth } from '@/src/hooks/useAuth';
+import { useThemeColors } from '@/src/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -13,9 +16,6 @@ import {
 } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Card } from '../../src/components/ui/Card';
-import { useAuth } from '../../src/hooks/useAuth';
-import { useTheme } from '@/context/EnhancedThemeContext';
 
 interface SettingItemProps {
   icon: string;

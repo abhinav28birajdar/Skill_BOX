@@ -1,7 +1,11 @@
+import { Button } from '@/src/components/ui/Button';
+import { Card } from '@/src/components/ui/Card';
+import { useAuth } from '@/src/hooks/useAuth';
+import { useThemeColors } from '@/src/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     Alert,
     Dimensions,
@@ -20,10 +24,6 @@ import Animated, {
     withSpring
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button } from '../../../src/components/ui/Button';
-import { Card } from '../../../src/components/ui/Card';
-import { useAuth } from '../../../src/hooks/useAuth';
-import { useThemeColors } from '../../../src/theme';
 
 const { width, height } = Dimensions.get('window');
 

@@ -1,667 +1,902 @@
--- =======================================
--- SkillBox Complete Database Schema
--- =======================================
--- Complete optimized database schema for SkillBox Learning Platform
--- Version: 5.0.0
--- Last Updated: December 2025
---
--- Run this script in your Supabase SQL Editor to set up the complete database
--- =======================================
+-- =====================================================
+-- SKILLBOX - PRODUCTION-READY SUPABASE SQL SCHEMA
+-- =====================================================
+-- Version: 1.0.0
+-- Description: Complete database schema for SkillBox LMS
+-- Features: Tables, Relations, RLS, Policies, Indexes, Triggers
+-- =====================================================
 
--- ----------------------------------------
--- Enable Required Extensions
--- ----------------------------------------
+-- =====================================================
+-- EXTENSIONS
+-- =====================================================
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-CREATE EXTENSION IF NOT EXISTS "pg_trgm"; -- For full-text search
 
--- ----------------------------------------
--- Custom Types (Enums)
--- ----------------------------------------
-DO $$ BEGIN
-    CREATE TYPE user_role AS ENUM ('student', 'teacher', 'creator', 'admin_content', 'admin_teacher_ops', 'admin_super');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+-- =====================================================
+-- CUSTOM TYPES (ENUMS)
+-- =====================================================
 
-DO $$ BEGIN
-    CREATE TYPE content_type AS ENUM ('video', 'audio', 'document', 'quiz', 'assignment', 'live_stream', 'article', 'workshop', 'project_resource', 'documentation');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+CREATE TYPE user_role AS ENUM ('student', 'teacher', 'admin');
+CREATE TYPE skill_level AS ENUM ('beginner', 'intermediate', 'advanced');
+CREATE TYPE content_type AS ENUM ('video', 'article', 'quiz', 'assignment', 'live', 'document');
+CREATE TYPE progress_status AS ENUM ('not_started', 'in_progress', 'completed');
+CREATE TYPE notification_type AS ENUM ('class_reminder', 'new_message', 'course_update', 'achievement', 'payment', 'system', 'booking_update', 'review_received', 'assignment_graded');
+CREATE TYPE payment_status AS ENUM ('pending', 'completed', 'failed', 'refunded');
+CREATE TYPE subscription_type AS ENUM ('free', 'premium', 'pro', 'enterprise');
 
-DO $$ BEGIN
-    CREATE TYPE skill_level AS ENUM ('beginner', 'intermediate', 'advanced', 'expert');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+-- =====================================================
+-- CORE TABLES
+-- =====================================================
 
-DO $$ BEGIN
-    CREATE TYPE payment_status AS ENUM ('pending', 'completed', 'failed', 'refunded', 'cancelled');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
-
-DO $$ BEGIN
-    CREATE TYPE notification_type AS ENUM ('class_reminder', 'new_message', 'course_update', 'achievement', 'payment', 'system', 'social', 'assignment_due');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
-
-DO $$ BEGIN
-    CREATE TYPE progress_status AS ENUM ('not_started', 'in_progress', 'completed', 'paused');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
-
-DO $$ BEGIN
-    CREATE TYPE content_status AS ENUM ('draft', 'pending_review', 'approved', 'rejected');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
-
--- ----------------------------------------
--- Core User Tables
--- ----------------------------------------
-
--- User Profiles (extends Supabase auth.users)
-CREATE TABLE IF NOT EXISTS public.user_profiles (
-    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    email TEXT UNIQUE NOT NULL,
-    first_name TEXT,
-    last_name TEXT,
-    display_name TEXT,
-    username TEXT UNIQUE,
-    avatar_url TEXT,
-    bio TEXT,
-    location TEXT,
-    website TEXT,
-    social_links JSONB DEFAULT '{}',
-    role user_role DEFAULT 'student',
-    is_verified BOOLEAN DEFAULT FALSE,
-    is_active BOOLEAN DEFAULT TRUE,
-    onboarding_completed BOOLEAN DEFAULT FALSE,
-    preferences JSONB DEFAULT '{"theme": "system", "notifications": true, "language": "en"}',
-    total_xp INTEGER DEFAULT 0,
-    level INTEGER DEFAULT 1,
-    streak_days INTEGER DEFAULT 0,
-    last_active_date DATE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Users Table (extends auth.users)
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT UNIQUE NOT NULL,
+  role user_role DEFAULT 'student' NOT NULL,
+  is_active BOOLEAN DEFAULT true NOT NULL,
+  is_verified BOOLEAN DEFAULT false NOT NULL,
+  last_login_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- ----------------------------------------
--- Learning Content Structure
--- ----------------------------------------
-
--- Skill Categories
-CREATE TABLE IF NOT EXISTS public.skill_categories (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT UNIQUE NOT NULL,
-    description TEXT,
-    icon TEXT,
-    color TEXT DEFAULT '#3B82F6',
-    parent_id UUID REFERENCES skill_categories(id),
-    sort_order INTEGER DEFAULT 0,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- User Profiles Table
+CREATE TABLE IF NOT EXISTS profiles (
+  id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  display_name TEXT,
+  avatar_url TEXT,
+  bio TEXT,
+  phone TEXT,
+  location TEXT,
+  website TEXT,
+  social_links JSONB DEFAULT '{}'::jsonb,
+  preferences JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- Skills
-CREATE TABLE IF NOT EXISTS public.skills (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT UNIQUE NOT NULL,
-    description TEXT,
-    category_id UUID REFERENCES skill_categories(id),
-    level skill_level DEFAULT 'beginner',
-    icon TEXT,
-    prerequisites UUID[] DEFAULT '{}',
-    estimated_hours INTEGER DEFAULT 0,
-    is_trending BOOLEAN DEFAULT FALSE,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- User Profiles (Legacy compatibility - maps to profiles table)
+CREATE TABLE IF NOT EXISTS user_profiles (
+  id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  username TEXT UNIQUE,
+  display_name TEXT,
+  first_name TEXT,
+  last_name TEXT,
+  email TEXT,
+  profile_image_url TEXT,
+  bio TEXT,
+  role user_role DEFAULT 'student',
+  skills TEXT[] DEFAULT ARRAY[]::TEXT[],
+  interests TEXT[] DEFAULT ARRAY[]::TEXT[],
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- Courses
-CREATE TABLE IF NOT EXISTS public.courses (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    title TEXT NOT NULL,
-    description TEXT,
-    short_description TEXT,
-    thumbnail_url TEXT,
-    trailer_url TEXT,
-    instructor_id UUID REFERENCES user_profiles(id),
-    skill_id UUID REFERENCES skills(id),
-    level skill_level DEFAULT 'beginner',
-    duration_hours INTEGER DEFAULT 0,
-    price DECIMAL(10,2) DEFAULT 0,
-    currency TEXT DEFAULT 'USD',
-    language TEXT DEFAULT 'en',
-    prerequisites TEXT[],
-    learning_outcomes TEXT[],
-    tags TEXT[],
-    is_published BOOLEAN DEFAULT FALSE,
-    is_featured BOOLEAN DEFAULT FALSE,
-    rating DECIMAL(3,2) DEFAULT 0,
-    total_ratings INTEGER DEFAULT 0,
-    total_students INTEGER DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Categories Table
+CREATE TABLE IF NOT EXISTS categories (
+  id SERIAL PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  description TEXT,
+  icon TEXT,
+  color TEXT,
+  parent_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+  sort_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- Course Modules (sections within a course)
-CREATE TABLE IF NOT EXISTS public.course_modules (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-    title TEXT NOT NULL,
-    description TEXT,
-    sort_order INTEGER DEFAULT 0,
-    is_published BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Skills Table
+CREATE TABLE IF NOT EXISTS skills (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT UNIQUE NOT NULL,
+  description TEXT,
+  category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+  icon TEXT,
+  color TEXT,
+  difficulty_level skill_level DEFAULT 'beginner',
+  total_courses INTEGER DEFAULT 0,
+  is_trending BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- Course Lessons
-CREATE TABLE IF NOT EXISTS public.course_lessons (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    module_id UUID REFERENCES course_modules(id) ON DELETE CASCADE,
-    title TEXT NOT NULL,
-    description TEXT,
-    content_type content_type,
-    content_url TEXT,
-    content_text TEXT,
-    duration_minutes INTEGER DEFAULT 0,
-    sort_order INTEGER DEFAULT 0,
-    is_preview BOOLEAN DEFAULT FALSE,
-    is_published BOOLEAN DEFAULT FALSE,
-    resources JSONB DEFAULT '[]',
-    quiz_data JSONB,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- =====================================================
+-- COURSE MANAGEMENT
+-- =====================================================
+
+-- Courses Table
+CREATE TABLE IF NOT EXISTS courses (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  teacher_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  cover_url TEXT,
+  category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+  skill_id UUID REFERENCES skills(id) ON DELETE SET NULL,
+  is_published BOOLEAN DEFAULT false NOT NULL,
+  skill_level skill_level DEFAULT 'beginner' NOT NULL,
+  language TEXT DEFAULT 'en' NOT NULL,
+  price NUMERIC(10, 2) DEFAULT 0 NOT NULL,
+  currency TEXT DEFAULT 'USD' NOT NULL,
+  rating NUMERIC(3, 2) DEFAULT 0 CHECK (rating >= 0 AND rating <= 5),
+  total_students INTEGER DEFAULT 0,
+  total_reviews INTEGER DEFAULT 0,
+  estimated_duration_hours INTEGER,
+  enrollment_count INTEGER DEFAULT 0,
+  completion_rate NUMERIC(5, 2) DEFAULT 0,
+  average_rating NUMERIC(3, 2) DEFAULT 0,
+  published_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- Learning Content (Creator-submitted content)
-CREATE TABLE IF NOT EXISTS public.learning_content (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    creator_id UUID REFERENCES user_profiles(id),
-    title TEXT NOT NULL,
-    description TEXT,
-    type content_type NOT NULL,
-    content_url TEXT,
-    thumbnail_url TEXT,
-    skill_id UUID REFERENCES skills(id),
-    skill_level skill_level DEFAULT 'beginner',
-    tags TEXT[],
-    status content_status DEFAULT 'draft',
-    rejection_reason TEXT,
-    view_count INTEGER DEFAULT 0,
-    like_count INTEGER DEFAULT 0,
-    download_count INTEGER DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Course Modules Table
+CREATE TABLE IF NOT EXISTS course_modules (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  sort_order INTEGER NOT NULL,
+  is_published BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- ----------------------------------------
--- User Progress & Enrollment
--- ----------------------------------------
-
--- Course Enrollments
-CREATE TABLE IF NOT EXISTS public.course_enrollments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-    enrolled_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    completed_at TIMESTAMP WITH TIME ZONE,
-    progress_percentage INTEGER DEFAULT 0,
-    status progress_status DEFAULT 'not_started',
-    is_active BOOLEAN DEFAULT TRUE,
-    certificate_url TEXT,
-    UNIQUE(user_id, course_id)
+-- Lessons Table
+CREATE TABLE IF NOT EXISTS lessons (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  module_id UUID REFERENCES course_modules(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  content_type content_type DEFAULT 'video' NOT NULL,
+  video_url TEXT,
+  document_url TEXT,
+  text_content TEXT,
+  order_index INTEGER NOT NULL,
+  duration INTEGER DEFAULT 0, -- in seconds
+  is_preview BOOLEAN DEFAULT false,
+  is_published BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- Lesson Progress
-CREATE TABLE IF NOT EXISTS public.lesson_progress (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    lesson_id UUID REFERENCES course_lessons(id) ON DELETE CASCADE,
-    enrollment_id UUID REFERENCES course_enrollments(id) ON DELETE CASCADE,
-    status progress_status DEFAULT 'not_started',
-    progress_percentage INTEGER DEFAULT 0,
-    time_spent_minutes INTEGER DEFAULT 0,
-    completed_at TIMESTAMP WITH TIME ZONE,
-    last_accessed TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(user_id, lesson_id)
+-- Course Enrollments Table
+CREATE TABLE IF NOT EXISTS enrollments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  student_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  progress JSONB DEFAULT '{}'::jsonb,
+  completed_lessons INTEGER DEFAULT 0,
+  total_lessons INTEGER DEFAULT 0,
+  progress_percentage NUMERIC(5, 2) DEFAULT 0,
+  enrolled_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  last_accessed TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  completed_at TIMESTAMPTZ,
+  UNIQUE(course_id, student_id)
 );
 
--- User Skills (tracking user progress in skills)
-CREATE TABLE IF NOT EXISTS public.user_skills (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    skill_id UUID REFERENCES skills(id) ON DELETE CASCADE,
-    level skill_level DEFAULT 'beginner',
-    progress_percentage INTEGER DEFAULT 0,
-    experience_points INTEGER DEFAULT 0,
-    started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    last_practiced TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(user_id, skill_id)
+-- User Progress Tracking
+CREATE TABLE IF NOT EXISTS user_progress (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  lesson_id UUID REFERENCES lessons(id) ON DELETE CASCADE,
+  progress_status progress_status DEFAULT 'not_started' NOT NULL,
+  progress_percentage NUMERIC(5, 2) DEFAULT 0,
+  time_spent_seconds INTEGER DEFAULT 0,
+  last_position_seconds INTEGER DEFAULT 0,
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  UNIQUE(user_id, lesson_id)
 );
 
--- ----------------------------------------
--- Reviews & Ratings
--- ----------------------------------------
+-- =====================================================
+-- MESSAGING & COMMUNICATION
+-- =====================================================
 
--- Reviews
-CREATE TABLE IF NOT EXISTS public.reviews (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-    rating INTEGER CHECK (rating >= 1 AND rating <= 5),
-    title TEXT,
-    comment TEXT,
-    is_public BOOLEAN DEFAULT TRUE,
-    helpful_count INTEGER DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(user_id, course_id)
+-- Message Threads Table
+CREATE TABLE IF NOT EXISTS threads (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT,
+  type TEXT DEFAULT 'direct', -- 'direct', 'group', 'course'
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  last_message_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- ----------------------------------------
--- Payments & Transactions
--- ----------------------------------------
-
--- Payments
-CREATE TABLE IF NOT EXISTS public.payments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    course_id UUID REFERENCES courses(id),
-    amount DECIMAL(10,2) NOT NULL,
-    currency TEXT DEFAULT 'USD',
-    payment_method TEXT,
-    payment_provider TEXT,
-    provider_payment_id TEXT UNIQUE,
-    status payment_status DEFAULT 'pending',
-    metadata JSONB DEFAULT '{}',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Thread Participants Table
+CREATE TABLE IF NOT EXISTS thread_participants (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  thread_id UUID NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  joined_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  last_read_at TIMESTAMPTZ DEFAULT NOW(),
+  is_muted BOOLEAN DEFAULT false,
+  UNIQUE(thread_id, user_id)
 );
 
--- ----------------------------------------
--- Notifications
--- ----------------------------------------
-
--- Notifications
-CREATE TABLE IF NOT EXISTS public.notifications (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    title TEXT NOT NULL,
-    message TEXT NOT NULL,
-    type notification_type DEFAULT 'system',
-    data JSONB DEFAULT '{}',
-    action_url TEXT,
-    is_read BOOLEAN DEFAULT FALSE,
-    is_deleted BOOLEAN DEFAULT FALSE,
-    expires_at TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Messages Table
+CREATE TABLE IF NOT EXISTS messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  thread_id UUID NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+  sender_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  body TEXT NOT NULL,
+  attachment_url TEXT,
+  attachment_type TEXT,
+  is_read BOOLEAN DEFAULT false,
+  is_edited BOOLEAN DEFAULT false,
+  edited_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- ----------------------------------------
--- Study Sessions & Analytics
--- ----------------------------------------
+-- =====================================================
+-- NOTIFICATIONS
+-- =====================================================
 
--- Study Sessions
-CREATE TABLE IF NOT EXISTS public.study_sessions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    course_id UUID REFERENCES courses(id),
-    lesson_id UUID REFERENCES course_lessons(id),
-    session_type TEXT DEFAULT 'lesson',
-    duration_minutes INTEGER DEFAULT 0,
-    completed BOOLEAN DEFAULT FALSE,
-    started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    ended_at TIMESTAMP WITH TIME ZONE,
-    notes TEXT,
-    focus_score INTEGER CHECK (focus_score >= 1 AND focus_score <= 10)
+-- Notifications Table
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type notification_type NOT NULL,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  data JSONB DEFAULT '{}'::jsonb,
+  is_read BOOLEAN DEFAULT false,
+  read_at TIMESTAMPTZ,
+  action_url TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- ----------------------------------------
--- Gamification
--- ----------------------------------------
+-- =====================================================
+-- LIVE SESSIONS
+-- =====================================================
 
--- Achievements
-CREATE TABLE IF NOT EXISTS public.achievements (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT UNIQUE NOT NULL,
-    description TEXT,
-    icon TEXT,
-    badge_color TEXT DEFAULT '#3B82F6',
-    points INTEGER DEFAULT 0,
-    rarity TEXT DEFAULT 'common',
-    criteria JSONB DEFAULT '{}',
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Live Sessions Table
+CREATE TABLE IF NOT EXISTS live_sessions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  teacher_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  scheduled_at TIMESTAMPTZ NOT NULL,
+  duration_minutes INTEGER DEFAULT 60,
+  meeting_url TEXT,
+  meeting_id TEXT,
+  meeting_password TEXT,
+  max_participants INTEGER,
+  current_participants INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT false,
+  is_recorded BOOLEAN DEFAULT false,
+  recording_url TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- User Achievements
-CREATE TABLE IF NOT EXISTS public.user_achievements (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    achievement_id UUID REFERENCES achievements(id) ON DELETE CASCADE,
-    earned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    progress_percentage INTEGER DEFAULT 100,
-    UNIQUE(user_id, achievement_id)
+-- Live Session Participants Table
+CREATE TABLE IF NOT EXISTS live_session_participants (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id UUID NOT NULL REFERENCES live_sessions(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  joined_at TIMESTAMPTZ DEFAULT NOW(),
+  left_at TIMESTAMPTZ,
+  duration_minutes INTEGER DEFAULT 0,
+  UNIQUE(session_id, user_id)
 );
 
--- ----------------------------------------
--- Social Features
--- ----------------------------------------
+-- =====================================================
+-- REVIEWS & RATINGS
+-- =====================================================
 
--- Discussion Forums
-CREATE TABLE IF NOT EXISTS public.forum_topics (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-    lesson_id UUID REFERENCES course_lessons(id),
-    user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    title TEXT NOT NULL,
-    content TEXT,
-    is_pinned BOOLEAN DEFAULT FALSE,
-    is_locked BOOLEAN DEFAULT FALSE,
-    view_count INTEGER DEFAULT 0,
-    reply_count INTEGER DEFAULT 0,
-    like_count INTEGER DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Reviews Table
+CREATE TABLE IF NOT EXISTS reviews (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  teacher_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  student_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  title TEXT,
+  comment TEXT,
+  is_approved BOOLEAN DEFAULT true,
+  helpful_count INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- Forum Replies
-CREATE TABLE IF NOT EXISTS public.forum_replies (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    topic_id UUID REFERENCES forum_topics(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
-    parent_reply_id UUID REFERENCES forum_replies(id),
-    is_solution BOOLEAN DEFAULT FALSE,
-    like_count INTEGER DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- =====================================================
+-- GAMIFICATION
+-- =====================================================
+
+-- User Achievements Table
+CREATE TABLE IF NOT EXISTS user_achievements (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  achievement_type TEXT NOT NULL,
+  achievement_name TEXT NOT NULL,
+  achievement_description TEXT,
+  achievement_icon TEXT,
+  points INTEGER DEFAULT 0,
+  metadata JSONB DEFAULT '{}'::jsonb,
+  achieved_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- Notes (User personal notes)
-CREATE TABLE IF NOT EXISTS public.notes (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    course_id UUID REFERENCES courses(id),
-    lesson_id UUID REFERENCES course_lessons(id),
-    title TEXT NOT NULL,
-    content TEXT NOT NULL,
-    tags TEXT[] DEFAULT '{}',
-    is_highlighted BOOLEAN DEFAULT FALSE,
-    is_shared BOOLEAN DEFAULT FALSE,
-    timestamp_seconds INTEGER,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- User Points Table
+CREATE TABLE IF NOT EXISTS user_points (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  total_points INTEGER DEFAULT 0,
+  level INTEGER DEFAULT 1,
+  streak_days INTEGER DEFAULT 0,
+  last_activity_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  UNIQUE(user_id)
 );
 
--- Study Groups
-CREATE TABLE IF NOT EXISTS public.study_groups (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT NOT NULL,
-    description TEXT,
-    course_id UUID REFERENCES courses(id),
-    skill_id UUID REFERENCES skills(id),
-    created_by UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    member_limit INTEGER DEFAULT 50,
-    is_public BOOLEAN DEFAULT TRUE,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- =====================================================
+-- PAYMENTS & SUBSCRIPTIONS
+-- =====================================================
+
+-- Payments Table
+CREATE TABLE IF NOT EXISTS payments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_id UUID REFERENCES courses(id) ON DELETE SET NULL,
+  amount NUMERIC(10, 2) NOT NULL,
+  currency TEXT DEFAULT 'USD' NOT NULL,
+  status payment_status DEFAULT 'pending' NOT NULL,
+  payment_method TEXT,
+  transaction_id TEXT UNIQUE,
+  metadata JSONB DEFAULT '{}'::jsonb,
+  paid_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- Study Group Members
-CREATE TABLE IF NOT EXISTS public.study_group_members (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    group_id UUID REFERENCES study_groups(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    role TEXT DEFAULT 'member',
-    joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(group_id, user_id)
+-- Subscriptions Table
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  subscription_type subscription_type DEFAULT 'free' NOT NULL,
+  status TEXT DEFAULT 'active' NOT NULL,
+  started_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  ends_at TIMESTAMPTZ,
+  auto_renew BOOLEAN DEFAULT true,
+  stripe_subscription_id TEXT UNIQUE,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- ----------------------------------------
--- Live Sessions & Virtual Classrooms
--- ----------------------------------------
+-- =====================================================
+-- INDEXES FOR PERFORMANCE
+-- =====================================================
 
--- Live Sessions
-CREATE TABLE IF NOT EXISTS public.live_sessions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    course_id UUID REFERENCES courses(id),
-    instructor_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    title TEXT NOT NULL,
-    description TEXT,
-    scheduled_start TIMESTAMP WITH TIME ZONE NOT NULL,
-    scheduled_end TIMESTAMP WITH TIME ZONE NOT NULL,
-    actual_start TIMESTAMP WITH TIME ZONE,
-    actual_end TIMESTAMP WITH TIME ZONE,
-    max_participants INTEGER DEFAULT 100,
-    meeting_url TEXT,
-    is_recorded BOOLEAN DEFAULT FALSE,
-    recording_url TEXT,
-    status TEXT DEFAULT 'scheduled',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+-- Users indexes
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at DESC);
 
--- Live Session Attendees
-CREATE TABLE IF NOT EXISTS public.live_session_attendees (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    session_id UUID REFERENCES live_sessions(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-    joined_at TIMESTAMP WITH TIME ZONE,
-    left_at TIMESTAMP WITH TIME ZONE,
-    attendance_duration_minutes INTEGER DEFAULT 0,
-    UNIQUE(session_id, user_id)
-);
+-- Profiles indexes
+CREATE INDEX IF NOT EXISTS idx_profiles_name ON profiles(name);
 
--- ----------------------------------------
--- Performance Indexes
--- ----------------------------------------
-CREATE INDEX IF NOT EXISTS idx_user_profiles_email ON user_profiles(email);
+-- User profiles indexes
 CREATE INDEX IF NOT EXISTS idx_user_profiles_username ON user_profiles(username);
-CREATE INDEX IF NOT EXISTS idx_user_profiles_role ON user_profiles(role);
-CREATE INDEX IF NOT EXISTS idx_courses_instructor_id ON courses(instructor_id);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_email ON user_profiles(email);
+
+-- Categories indexes
+CREATE INDEX IF NOT EXISTS idx_categories_slug ON categories(slug);
+CREATE INDEX IF NOT EXISTS idx_categories_parent_id ON categories(parent_id);
+
+-- Courses indexes
+CREATE INDEX IF NOT EXISTS idx_courses_teacher_id ON courses(teacher_id);
+CREATE INDEX IF NOT EXISTS idx_courses_category_id ON courses(category_id);
 CREATE INDEX IF NOT EXISTS idx_courses_skill_id ON courses(skill_id);
 CREATE INDEX IF NOT EXISTS idx_courses_is_published ON courses(is_published);
-CREATE INDEX IF NOT EXISTS idx_course_enrollments_user_id ON course_enrollments(user_id);
-CREATE INDEX IF NOT EXISTS idx_course_enrollments_course_id ON course_enrollments(course_id);
-CREATE INDEX IF NOT EXISTS idx_lesson_progress_user_id ON lesson_progress(user_id);
-CREATE INDEX IF NOT EXISTS idx_lesson_progress_lesson_id ON lesson_progress(lesson_id);
+CREATE INDEX IF NOT EXISTS idx_courses_created_at ON courses(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_courses_rating ON courses(rating DESC);
+CREATE INDEX IF NOT EXISTS idx_courses_title_search ON courses USING gin(to_tsvector('english', title));
+
+-- Lessons indexes
+CREATE INDEX IF NOT EXISTS idx_lessons_course_id ON lessons(course_id);
+CREATE INDEX IF NOT EXISTS idx_lessons_module_id ON lessons(module_id);
+CREATE INDEX IF NOT EXISTS idx_lessons_order_index ON lessons(order_index);
+
+-- Enrollments indexes
+CREATE INDEX IF NOT EXISTS idx_enrollments_student_id ON enrollments(student_id);
+CREATE INDEX IF NOT EXISTS idx_enrollments_course_id ON enrollments(course_id);
+CREATE INDEX IF NOT EXISTS idx_enrollments_enrolled_at ON enrollments(enrolled_at DESC);
+
+-- User progress indexes
+CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_progress_course_id ON user_progress(course_id);
+CREATE INDEX IF NOT EXISTS idx_user_progress_lesson_id ON user_progress(lesson_id);
+
+-- Messages indexes
+CREATE INDEX IF NOT EXISTS idx_messages_thread_id ON messages(thread_id);
+CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at DESC);
+
+-- Notifications indexes
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON notifications(is_read);
-CREATE INDEX IF NOT EXISTS idx_study_sessions_user_id ON study_sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_notes_user_id ON notes(user_id);
-CREATE INDEX IF NOT EXISTS idx_forum_topics_course_id ON forum_topics(course_id);
-CREATE INDEX IF NOT EXISTS idx_forum_replies_topic_id ON forum_replies(topic_id);
-CREATE INDEX IF NOT EXISTS idx_learning_content_creator_id ON learning_content(creator_id);
-CREATE INDEX IF NOT EXISTS idx_learning_content_status ON learning_content(status);
+CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at DESC);
 
--- Full-text search indexes
-CREATE INDEX IF NOT EXISTS idx_courses_title_trgm ON courses USING gin (title gin_trgm_ops);
-CREATE INDEX IF NOT EXISTS idx_courses_description_trgm ON courses USING gin (description gin_trgm_ops);
+-- Reviews indexes
+CREATE INDEX IF NOT EXISTS idx_reviews_course_id ON reviews(course_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_student_id ON reviews(student_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_created_at ON reviews(created_at DESC);
 
--- ----------------------------------------
--- Automatic Timestamp Update Function
--- ----------------------------------------
+-- Payments indexes
+CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
+CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
+CREATE INDEX IF NOT EXISTS idx_payments_created_at ON payments(created_at DESC);
+
+-- =====================================================
+-- FUNCTIONS & TRIGGERS
+-- =====================================================
+
+-- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
+  NEW.updated_at = NOW();
+  RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
--- ----------------------------------------
--- Triggers for Automatic Timestamps
--- ----------------------------------------
+-- Apply updated_at trigger to all relevant tables
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
+CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 DROP TRIGGER IF EXISTS update_user_profiles_updated_at ON user_profiles;
-CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_categories_updated_at ON categories;
+CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_skills_updated_at ON skills;
+CREATE TRIGGER update_skills_updated_at BEFORE UPDATE ON skills
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 DROP TRIGGER IF EXISTS update_courses_updated_at ON courses;
-CREATE TRIGGER update_courses_updated_at BEFORE UPDATE ON courses FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_courses_updated_at BEFORE UPDATE ON courses
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-DROP TRIGGER IF EXISTS update_course_lessons_updated_at ON course_lessons;
-CREATE TRIGGER update_course_lessons_updated_at BEFORE UPDATE ON course_lessons FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_lessons_updated_at ON lessons;
+CREATE TRIGGER update_lessons_updated_at BEFORE UPDATE ON lessons
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-DROP TRIGGER IF EXISTS update_learning_content_updated_at ON learning_content;
-CREATE TRIGGER update_learning_content_updated_at BEFORE UPDATE ON learning_content FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_user_progress_updated_at ON user_progress;
+CREATE TRIGGER update_user_progress_updated_at BEFORE UPDATE ON user_progress
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-DROP TRIGGER IF EXISTS update_reviews_updated_at ON reviews;
-CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Function to automatically create profile when user is created
+CREATE OR REPLACE FUNCTION create_profile_for_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO profiles (id, name, display_name)
+  VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'name', NEW.email), COALESCE(NEW.raw_user_meta_data->>'name', NEW.email))
+  ON CONFLICT (id) DO NOTHING;
+  
+  INSERT INTO user_profiles (id, email, display_name, role)
+  VALUES (NEW.id, NEW.email, COALESCE(NEW.raw_user_meta_data->>'name', NEW.email), 'student')
+  ON CONFLICT (id) DO NOTHING;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP TRIGGER IF EXISTS update_payments_updated_at ON payments;
-CREATE TRIGGER update_payments_updated_at BEFORE UPDATE ON payments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Trigger to create profile on user creation
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION create_profile_for_user();
 
-DROP TRIGGER IF EXISTS update_forum_topics_updated_at ON forum_topics;
-CREATE TRIGGER update_forum_topics_updated_at BEFORE UPDATE ON forum_topics FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Function to update course statistics
+CREATE OR REPLACE FUNCTION update_course_stats()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Update total students
+  UPDATE courses
+  SET total_students = (SELECT COUNT(*) FROM enrollments WHERE course_id = NEW.course_id),
+      updated_at = NOW()
+  WHERE id = NEW.course_id;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS update_forum_replies_updated_at ON forum_replies;
-CREATE TRIGGER update_forum_replies_updated_at BEFORE UPDATE ON forum_replies FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_course_enrollment_stats ON enrollments;
+CREATE TRIGGER update_course_enrollment_stats
+  AFTER INSERT ON enrollments
+  FOR EACH ROW EXECUTE FUNCTION update_course_stats();
 
-DROP TRIGGER IF EXISTS update_notes_updated_at ON notes;
-CREATE TRIGGER update_notes_updated_at BEFORE UPDATE ON notes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Function to update course ratings
+CREATE OR REPLACE FUNCTION update_course_rating()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE courses
+  SET 
+    average_rating = (SELECT AVG(rating)::NUMERIC(3,2) FROM reviews WHERE course_id = NEW.course_id),
+    total_reviews = (SELECT COUNT(*) FROM reviews WHERE course_id = NEW.course_id),
+    updated_at = NOW()
+  WHERE id = NEW.course_id;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- ----------------------------------------
--- Row Level Security (RLS) Policies
--- ----------------------------------------
+DROP TRIGGER IF EXISTS update_course_rating_on_review ON reviews;
+CREATE TRIGGER update_course_rating_on_review
+  AFTER INSERT OR UPDATE ON reviews
+  FOR EACH ROW EXECUTE FUNCTION update_course_rating();
+
+-- =====================================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- =====================================================
 
 -- Enable RLS on all tables
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
 ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
-ALTER TABLE course_enrollments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE lesson_progress ENABLE ROW LEVEL SECURITY;
-ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
-ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE course_modules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lessons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE enrollments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE threads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE thread_participants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
-ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE study_sessions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE learning_content ENABLE ROW LEVEL SECURITY;
+ALTER TABLE live_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE live_session_participants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_achievements ENABLE ROW LEVEL SECURITY;
-ALTER TABLE forum_topics ENABLE ROW LEVEL SECURITY;
-ALTER TABLE forum_replies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_points ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 
--- User Profiles Policies
-CREATE POLICY "Users can view their own profile" ON user_profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Users can update their own profile" ON user_profiles FOR UPDATE USING (auth.uid() = id);
-CREATE POLICY "Public profiles are viewable" ON user_profiles FOR SELECT USING (is_active = true);
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view their own data" ON users;
+DROP POLICY IF EXISTS "Users can update their own data" ON users;
+DROP POLICY IF EXISTS "Profiles are viewable by everyone" ON profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON profiles;
+DROP POLICY IF EXISTS "User profiles are viewable by everyone" ON user_profiles;
+DROP POLICY IF EXISTS "Users can update their own user profile" ON user_profiles;
+DROP POLICY IF EXISTS "Users can insert their own user profile" ON user_profiles;
+DROP POLICY IF EXISTS "Categories are viewable by everyone" ON categories;
+DROP POLICY IF EXISTS "Skills are viewable by everyone" ON skills;
+DROP POLICY IF EXISTS "Published courses are viewable by everyone" ON courses;
+DROP POLICY IF EXISTS "Teachers can create courses" ON courses;
+DROP POLICY IF EXISTS "Teachers can update their own courses" ON courses;
+DROP POLICY IF EXISTS "Teachers can delete their own courses" ON courses;
 
--- Course Policies
-CREATE POLICY "Published courses are viewable by everyone" ON courses FOR SELECT USING (is_published = true OR instructor_id = auth.uid());
-CREATE POLICY "Instructors can manage their own courses" ON courses FOR ALL USING (auth.uid() = instructor_id);
+-- =====================================================
+-- USERS POLICIES
+-- =====================================================
 
--- Enrollment Policies
-CREATE POLICY "Users can view their own enrollments" ON course_enrollments FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can enroll in courses" ON course_enrollments FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update their own enrollments" ON course_enrollments FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can view their own data"
+  ON users FOR SELECT
+  USING (auth.uid() = id);
 
--- Lesson Progress Policies
-CREATE POLICY "Users can view their own progress" ON lesson_progress FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage their own progress" ON lesson_progress FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can update their own data"
+  ON users FOR UPDATE
+  USING (auth.uid() = id);
 
--- Review Policies
-CREATE POLICY "Anyone can view public reviews" ON reviews FOR SELECT USING (is_public = true);
-CREATE POLICY "Users can manage their own reviews" ON reviews FOR ALL USING (auth.uid() = user_id);
+-- =====================================================
+-- PROFILES POLICIES
+-- =====================================================
 
--- Payment Policies
-CREATE POLICY "Users can view their own payments" ON payments FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Profiles are viewable by everyone"
+  ON profiles FOR SELECT
+  USING (true);
 
--- Notification Policies
-CREATE POLICY "Users can view their own notifications" ON notifications FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can update their own notifications" ON notifications FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can update their own profile"
+  ON profiles FOR UPDATE
+  USING (auth.uid() = id);
 
--- Notes Policies
-CREATE POLICY "Users can manage their own notes" ON notes FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can view shared notes" ON notes FOR SELECT USING (is_shared = true);
+CREATE POLICY "Users can insert their own profile"
+  ON profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
 
--- Study Sessions Policies
-CREATE POLICY "Users can manage their own study sessions" ON study_sessions FOR ALL USING (auth.uid() = user_id);
+-- =====================================================
+-- USER PROFILES POLICIES (Legacy)
+-- =====================================================
 
--- Learning Content Policies
-CREATE POLICY "Creators can manage their own content" ON learning_content FOR ALL USING (auth.uid() = creator_id);
-CREATE POLICY "Approved content is viewable by everyone" ON learning_content FOR SELECT USING (status = 'approved');
+CREATE POLICY "User profiles are viewable by everyone"
+  ON user_profiles FOR SELECT
+  USING (true);
 
--- User Achievements Policies
-CREATE POLICY "Users can view their own achievements" ON user_achievements FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can update their own user profile"
+  ON user_profiles FOR UPDATE
+  USING (auth.uid() = id);
 
--- Forum Policies
-CREATE POLICY "Anyone can view forum topics" ON forum_topics FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can create topics" ON forum_topics FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can edit their own topics" ON forum_topics FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "Anyone can view forum replies" ON forum_replies FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can create replies" ON forum_replies FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can edit their own replies" ON forum_replies FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert their own user profile"
+  ON user_profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
 
--- ----------------------------------------
--- Sample Data (Optional - for development)
--- ----------------------------------------
+-- =====================================================
+-- CATEGORIES & SKILLS POLICIES
+-- =====================================================
 
--- Skill Categories
-INSERT INTO skill_categories (name, description, icon, color, sort_order) VALUES
-('Programming', 'Software development and coding skills', '💻', '#3B82F6', 1),
-('Design', 'UI/UX design and creative skills', '🎨', '#8B5CF6', 2),
-('Business', 'Business and entrepreneurship skills', '💼', '#10B981', 3),
-('Data Science', 'Data analysis and machine learning', '📊', '#F59E0B', 4),
-('Marketing', 'Digital marketing and growth', '📣', '#EF4444', 5),
-('Personal Development', 'Soft skills and productivity', '🌟', '#6B7280', 6)
-ON CONFLICT (name) DO NOTHING;
+CREATE POLICY "Categories are viewable by everyone"
+  ON categories FOR SELECT
+  USING (true);
 
--- Skills
-INSERT INTO skills (name, description, category_id, level, estimated_hours) VALUES
-('JavaScript', 'Modern JavaScript programming language', (SELECT id FROM skill_categories WHERE name = 'Programming' LIMIT 1), 'beginner', 40),
-('React Native', 'Cross-platform mobile development', (SELECT id FROM skill_categories WHERE name = 'Programming' LIMIT 1), 'intermediate', 60),
-('TypeScript', 'Typed superset of JavaScript', (SELECT id FROM skill_categories WHERE name = 'Programming' LIMIT 1), 'intermediate', 30),
-('UI/UX Design', 'User interface and experience design', (SELECT id FROM skill_categories WHERE name = 'Design' LIMIT 1), 'beginner', 50),
-('Figma', 'Collaborative design tool', (SELECT id FROM skill_categories WHERE name = 'Design' LIMIT 1), 'beginner', 20),
-('Data Analysis', 'Analyzing and interpreting data', (SELECT id FROM skill_categories WHERE name = 'Data Science' LIMIT 1), 'intermediate', 45),
-('Python', 'General-purpose programming language', (SELECT id FROM skill_categories WHERE name = 'Programming' LIMIT 1), 'beginner', 40),
-('Digital Marketing', 'Online marketing strategies', (SELECT id FROM skill_categories WHERE name = 'Marketing' LIMIT 1), 'beginner', 35),
-('Leadership', 'Team management and leadership', (SELECT id FROM skill_categories WHERE name = 'Personal Development' LIMIT 1), 'advanced', 50),
-('Time Management', 'Productivity and time optimization', (SELECT id FROM skill_categories WHERE name = 'Personal Development' LIMIT 1), 'beginner', 15)
-ON CONFLICT (name) DO NOTHING;
+CREATE POLICY "Skills are viewable by everyone"
+  ON skills FOR SELECT
+  USING (true);
 
--- Achievements
-INSERT INTO achievements (name, description, icon, points, rarity, criteria) VALUES
-('First Steps', 'Complete your first lesson', '👣', 50, 'common', '{"type": "lesson_complete", "count": 1}'),
-('Knowledge Seeker', 'Complete 10 lessons', '📚', 100, 'common', '{"type": "lesson_complete", "count": 10}'),
-('Quiz Master', 'Score 100% on 5 quizzes', '🏆', 200, 'rare', '{"type": "quiz_perfect", "count": 5}'),
-('Streak Warrior', 'Maintain a 7-day learning streak', '🔥', 300, 'rare', '{"type": "streak", "days": 7}'),
-('Course Conqueror', 'Complete 5 entire courses', '🎓', 500, 'epic', '{"type": "course_complete", "count": 5}'),
-('Learning Legend', 'Reach level 20', '⭐', 1000, 'legendary', '{"type": "level", "value": 20}'),
-('Social Butterfly', 'Help 10 peers in forums', '🦋', 250, 'rare', '{"type": "forum_help", "count": 10}'),
-('Early Bird', 'Study for 7 consecutive days before 9 AM', '🌅', 400, 'epic', '{"type": "early_study", "days": 7}')
-ON CONFLICT (name) DO NOTHING;
+-- =====================================================
+-- COURSES POLICIES
+-- =====================================================
 
--- ----------------------------------------
--- Permissions
--- ----------------------------------------
+CREATE POLICY "Published courses are viewable by everyone"
+  ON courses FOR SELECT
+  USING (is_published = true OR auth.uid() = teacher_id);
+
+CREATE POLICY "Teachers can create courses"
+  ON courses FOR INSERT
+  WITH CHECK (auth.uid() = teacher_id);
+
+CREATE POLICY "Teachers can update their own courses"
+  ON courses FOR UPDATE
+  USING (auth.uid() = teacher_id);
+
+CREATE POLICY "Teachers can delete their own courses"
+  ON courses FOR DELETE
+  USING (auth.uid() = teacher_id);
+
+-- =====================================================
+-- LESSONS POLICIES
+-- =====================================================
+
+DROP POLICY IF EXISTS "Published lessons viewable by enrolled and teachers" ON lessons;
+DROP POLICY IF EXISTS "Teachers can manage lessons for their courses" ON lessons;
+
+CREATE POLICY "Published lessons viewable by enrolled and teachers"
+  ON lessons FOR SELECT
+  USING (
+    is_published = true 
+    OR EXISTS (
+      SELECT 1 FROM courses 
+      WHERE courses.id = lessons.course_id 
+      AND courses.teacher_id = auth.uid()
+    )
+    OR EXISTS (
+      SELECT 1 FROM enrollments 
+      WHERE enrollments.course_id = lessons.course_id 
+      AND enrollments.student_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Teachers can manage lessons for their courses"
+  ON lessons FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM courses 
+      WHERE courses.id = lessons.course_id 
+      AND courses.teacher_id = auth.uid()
+    )
+  );
+
+-- =====================================================
+-- ENROLLMENTS POLICIES
+-- =====================================================
+
+DROP POLICY IF EXISTS "Students can view their own enrollments" ON enrollments;
+DROP POLICY IF EXISTS "Students can enroll in courses" ON enrollments;
+DROP POLICY IF EXISTS "Students can update their own enrollment progress" ON enrollments;
+DROP POLICY IF EXISTS "Teachers can view enrollments for their courses" ON enrollments;
+
+CREATE POLICY "Students can view their own enrollments"
+  ON enrollments FOR SELECT
+  USING (auth.uid() = student_id);
+
+CREATE POLICY "Students can enroll in courses"
+  ON enrollments FOR INSERT
+  WITH CHECK (auth.uid() = student_id);
+
+CREATE POLICY "Students can update their own enrollment progress"
+  ON enrollments FOR UPDATE
+  USING (auth.uid() = student_id);
+
+CREATE POLICY "Teachers can view enrollments for their courses"
+  ON enrollments FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM courses 
+      WHERE courses.id = enrollments.course_id 
+      AND courses.teacher_id = auth.uid()
+    )
+  );
+
+-- =====================================================
+-- USER PROGRESS POLICIES
+-- =====================================================
+
+DROP POLICY IF EXISTS "Users can view their own progress" ON user_progress;
+DROP POLICY IF EXISTS "Users can create their own progress" ON user_progress;
+DROP POLICY IF EXISTS "Users can update their own progress" ON user_progress;
+
+CREATE POLICY "Users can view their own progress"
+  ON user_progress FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own progress"
+  ON user_progress FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own progress"
+  ON user_progress FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- =====================================================
+-- MESSAGES POLICIES
+-- =====================================================
+
+DROP POLICY IF EXISTS "Users can view messages in their threads" ON messages;
+DROP POLICY IF EXISTS "Users can send messages to their threads" ON messages;
+
+CREATE POLICY "Users can view messages in their threads"
+  ON messages FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM thread_participants 
+      WHERE thread_participants.thread_id = messages.thread_id 
+      AND thread_participants.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can send messages to their threads"
+  ON messages FOR INSERT
+  WITH CHECK (
+    auth.uid() = sender_id
+    AND EXISTS (
+      SELECT 1 FROM thread_participants 
+      WHERE thread_participants.thread_id = messages.thread_id 
+      AND thread_participants.user_id = auth.uid()
+    )
+  );
+
+-- =====================================================
+-- NOTIFICATIONS POLICIES
+-- =====================================================
+
+DROP POLICY IF EXISTS "Users can view their own notifications" ON notifications;
+DROP POLICY IF EXISTS "Users can update their own notifications" ON notifications;
+
+CREATE POLICY "Users can view their own notifications"
+  ON notifications FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own notifications"
+  ON notifications FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- =====================================================
+-- REVIEWS POLICIES
+-- =====================================================
+
+DROP POLICY IF EXISTS "Reviews are viewable by everyone" ON reviews;
+DROP POLICY IF EXISTS "Students can create reviews for enrolled courses" ON reviews;
+DROP POLICY IF EXISTS "Students can update their own reviews" ON reviews;
+DROP POLICY IF EXISTS "Students can delete their own reviews" ON reviews;
+
+CREATE POLICY "Reviews are viewable by everyone"
+  ON reviews FOR SELECT
+  USING (true);
+
+CREATE POLICY "Students can create reviews for enrolled courses"
+  ON reviews FOR INSERT
+  WITH CHECK (
+    auth.uid() = student_id
+    AND EXISTS (
+      SELECT 1 FROM enrollments 
+      WHERE enrollments.course_id = reviews.course_id 
+      AND enrollments.student_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Students can update their own reviews"
+  ON reviews FOR UPDATE
+  USING (auth.uid() = student_id);
+
+CREATE POLICY "Students can delete their own reviews"
+  ON reviews FOR DELETE
+  USING (auth.uid() = student_id);
+
+-- =====================================================
+-- LIVE SESSIONS POLICIES
+-- =====================================================
+
+DROP POLICY IF EXISTS "Live sessions viewable by enrolled and teachers" ON live_sessions;
+DROP POLICY IF EXISTS "Teachers can manage their live sessions" ON live_sessions;
+
+CREATE POLICY "Live sessions viewable by enrolled and teachers"
+  ON live_sessions FOR SELECT
+  USING (
+    auth.uid() = teacher_id
+    OR EXISTS (
+      SELECT 1 FROM enrollments 
+      WHERE enrollments.course_id = live_sessions.course_id 
+      AND enrollments.student_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Teachers can manage their live sessions"
+  ON live_sessions FOR ALL
+  USING (auth.uid() = teacher_id);
+
+-- =====================================================
+-- GAMIFICATION POLICIES
+-- =====================================================
+
+DROP POLICY IF EXISTS "Users can view their own achievements" ON user_achievements;
+DROP POLICY IF EXISTS "Public can view user points for leaderboards" ON user_points;
+DROP POLICY IF EXISTS "Users can update their own points" ON user_points;
+
+CREATE POLICY "Users can view their own achievements"
+  ON user_achievements FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Public can view user points for leaderboards"
+  ON user_points FOR SELECT
+  USING (true);
+
+CREATE POLICY "Users can update their own points"
+  ON user_points FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- =====================================================
+-- PAYMENTS & SUBSCRIPTIONS POLICIES
+-- =====================================================
+
+DROP POLICY IF EXISTS "Users can view their own payments" ON payments;
+DROP POLICY IF EXISTS "Users can view their own subscriptions" ON subscriptions;
+
+CREATE POLICY "Users can view their own payments"
+  ON payments FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view their own subscriptions"
+  ON subscriptions FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- =====================================================
+-- INITIAL DATA (OPTIONAL)
+-- =====================================================
+
+-- Insert default categories
+INSERT INTO categories (name, slug, description, icon, color, sort_order) VALUES
+  ('Web Development', 'web-development', 'Learn modern web technologies', 'code', '#3B82F6', 1),
+  ('Mobile Development', 'mobile-development', 'Build native and cross-platform apps', 'phone-portrait', '#10B981', 2),
+  ('Data Science', 'data-science', 'Master data analysis and ML', 'analytics', '#8B5CF6', 3),
+  ('Design', 'design', 'UI/UX and graphic design', 'color-palette', '#EC4899', 4),
+  ('Business', 'business', 'Entrepreneurship and management', 'briefcase', '#F59E0B', 5),
+  ('Marketing', 'marketing', 'Digital marketing strategies', 'megaphone', '#EF4444', 6)
+ON CONFLICT (slug) DO NOTHING;
+
+-- Grant necessary permissions
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
-GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO anon, authenticated;
 
--- ----------------------------------------
--- Schema Version Tracking
--- ----------------------------------------
-CREATE TABLE IF NOT EXISTS public.schema_version (
-    version TEXT PRIMARY KEY,
-    applied_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    description TEXT
-);
-
-INSERT INTO schema_version (version, description) VALUES
-('5.0.0', 'Complete unified schema for SkillBox with RLS, indexes, and sample data')
-ON CONFLICT (version) DO NOTHING;
-
--- =======================================
--- Setup Complete
--- =======================================
--- Your SkillBox database is now ready!
--- Next steps:
--- 1. Configure storage buckets in Supabase dashboard
--- 2. Set up authentication providers
--- 3. Configure email templates
--- =======================================
+-- =====================================================
+-- END OF SCHEMA
+-- =====================================================

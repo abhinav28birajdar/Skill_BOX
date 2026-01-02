@@ -1,12 +1,12 @@
+import { Avatar } from '@/src/components/ui/Avatar';
+import { Button } from '@/src/components/ui/Button';
+import { Card } from '@/src/components/ui/Card';
+import { useAuth } from '@/src/hooks/useAuth';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Avatar } from '../../src/components/ui/Avatar';
-import { Button } from '../../src/components/ui/Button';
-import { Card } from '../../src/components/ui/Card';
-import { useAuth } from '../../src/hooks/useAuth';
 
 export default function ProfileScreen() {
   const { profile, signOut } = useAuth();
